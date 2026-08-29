@@ -74,7 +74,9 @@ function addRow(category, probe, index, match) {
   const r = rectOf(match);
   const mx = r.x + r.width / 2;
   const my = r.y + r.height / 2;
-  const distance = Math.round(Math.hypot(mx - cx, my - cy));
+  const dx = mx - cx;
+  const dy = my - cy;
+  const distance = Math.round(Math.sqrt(dx * dx + dy * dy));
   const attrs = attrsOf(match);
   rows.push([
     category,probe,index,clean(match.tag || match.tagName),clean(match.text).slice(0,180),clean(match.value).slice(0,180),
