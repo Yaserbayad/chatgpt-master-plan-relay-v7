@@ -21,6 +21,11 @@ function normalizeText(value) {
   return String(value == null ? '' : value).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
 }
 
+function normalizeEditorClipboard(value) {
+  // Chrome/contenteditable copy may append terminal NBSP markers. Preserve all internal whitespace.
+  return normalizeText(value).replace(/\u00A0+$/, '');
+}
+
 function getAttr(match, name) {
   try {
     const value = match.getAttribute(name);
@@ -132,8 +137,8 @@ try {
   if (copiedBack === copySentinel) {
     throw new Error('Q08 copy-back did not replace sentinel; trusted paste/copy is not proven');
   }
-  if (normalizeText(copiedBack) !== normalizeText(PAYLOAD)) {
-    throw new Error('Q08 copy-back content does not exactly match multiline/Unicode payload');
+  if (normalizeEditorClipboard(copiedBack) !== normalizeEditorClipboard(PAYLOAD)) {
+    throw new Error('Q08 copy-back content differs beyond terminal editor NBSP serialization');
   }
   uiv.browser.click(composerAfter);
 
@@ -176,4 +181,4 @@ uiv.csv.write(file, rows);
 uiv.files.exportToDownloads(file);
 
 if (failureReason) throw new Error(`${failureReason}; evidence exported as ${file}`);
-uiv.log(`Q08 PASS: sentinel-overwrite copy-back exact; enabled Send state proven; draft left unsent; ${file}`, 'green');
+uiv.log(`Q08 PASS: sentinel-overwrite copy-back exact after terminal-NBSP normalization; enabled Send state proven; draft left unsent; ${file}`, 'green');
