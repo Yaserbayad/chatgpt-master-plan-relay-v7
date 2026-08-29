@@ -33,7 +33,8 @@
     "Q06": "qualification/Q06_UIVISION_CANDIDATE.md",
     "Q07": "qualification/Q07_EVIDENCE.md",
     "Q08": "qualification/Q08_EVIDENCE.md",
-    "Q09": "qualification/Q09_EVIDENCE.md"
+    "Q09": "qualification/Q09_EVIDENCE.md",
+    "Q10": "qualification/Q10_ATTEMPT1_PROJECT_ROOT_READINESS_FAILURE.md"
   },
   "note": "Qualification-time compact state only. Final production schema is intentionally deferred to C01."
 }
