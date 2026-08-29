@@ -1,9 +1,9 @@
 # Q10 — Same-Project Fresh-Chat / SPA Qualification Runbook
 
-Status: TARGET EVIDENCE PARTIAL — PROJECT-ROOT CONTROL DISCOVERY REQUIRED
+Status: TARGET EVIDENCE PARTIAL — CORRECTED MATERIAL PROBE READY
 Date: 2026-08-29
 Candidate: UI.Vision 10.0.178 / Chrome 152.0.7977.65
-Target Project: https://chatgpt.com/g/g-p-6a9323b61110819182dba0224678aa8b/project
+Target Project token: `g-p-6a9323b61110819182dba0224678aa8b`
 Qualification probe: `qualification/Q10_FRESH_CHAT_SPA_PROBE.js`
 Root discovery probe: `qualification/Q10_PROJECT_ROOT_DISCOVERY.js`
 Depends on: Q09 PASS
@@ -11,18 +11,23 @@ Depends on: Q09 PASS
 Evidence history:
 - `qualification/Q10_ATTEMPT1_PROJECT_ROOT_READINESS_FAILURE.md`
 - `qualification/Q10_ATTEMPT2_ROOT_NO_COMPOSER.md`
+- `qualification/Q10_PROJECT_ROOT_DISCOVERY_EVIDENCE.md`
 
 ## Objective
 
 Prove:
 - fresh entry stays in the configured Project;
-- a new conversation ID appears after the one trusted qualification Send;
-- transitional SPA URL states are handled without false wrong-Project classification;
+- the fresh-chat entry path is deterministic;
+- exactly one trusted qualification Send occurs;
+- a new conversation ID appears and differs from the previous conversation ID;
+- transitional SPA URL states do not cause false wrong-Project classification;
 - no resend occurs after the single Send.
 
-## Current target evidence
+## Prior target evidence
 
-Attempt 1 safely failed before Send after reaching the configured Project root but finding no immediately mounted composer.
+### Attempts 1–2
+
+Attempt 1 safely failed before Send after reaching the previously assumed Project root but finding no immediately mounted composer.
 
 Attempt 2 added a bounded readiness wait. Its CSV is `Q10_fresh_chat_spa_2026-08-29T22-38-49-879Z.csv`, SHA-256 `5080d3e06e88ee59ae75b19bcc784f5b93e1a75aa6ded1c9c48599f58429ef40`.
 
@@ -30,50 +35,71 @@ Attempt 2 proves:
 - `send_action_count = 0`;
 - `fresh_root_observed = 1`;
 - the URL remained `https://chatgpt.com/g/g-p-6a9323b61110819182dba0224678aa8b/project`;
-- all 12 observations from `2026-08-29T22:38:20.842Z` through `2026-08-29T22:38:47.516Z` classified the page as `SAME_PROJECT_TRANSITIONAL`;
+- all 12 observations classified the page as `SAME_PROJECT_TRANSITIONAL`;
 - no conversation ID appeared;
-- the qualified chat composer never mounted.
+- the old qualified composer selector never mounted.
 
-Therefore the Project root is not merely a delayed version of the conversation composer surface in this target UI. Increasing the wait again would be a materially equivalent retry and is not authorized.
+No qualification message was sent and no resend ambiguity exists.
 
-## Exact next action — read-only discovery
+### Read-only Project-root discovery
 
-Run `Q10_PROJECT_ROOT_DISCOVERY.js` once while the browser is still on the configured Project root.
+`Q10_PROJECT_ROOT_DISCOVERY.js` was then run once. The resulting CSV is `Q10_project_root_discovery_2026-08-29T22-44-07-113Z.csv`, SHA-256 `5b4f838f44b66d9ab3e521d60cbec8a5bd881044f3f6df40da4c3078fd12f683`.
 
-The diagnostic is read-only. It performs no:
-- click;
-- typing;
-- clipboard mutation;
-- navigation;
-- refresh;
-- Send/Submit.
+Durable analysis: `qualification/Q10_PROJECT_ROOT_DISCOVERY_EVIDENCE.md`.
 
-It exports `Q10_project_root_discovery_*.csv` containing:
-- every `button`, link, `role=button`, and `role=link` snapshot;
-- all input/textarea/contenteditable surfaces;
-- headings;
-- forms;
-- main-page text snapshot;
-- href, id, name, type, role, data-testid, aria-label, title, disabled state, class, geometry, and captured attributes.
+The target discovery proves:
+- actual Project-home URL in that run: `https://chatgpt.com/g/g-p-6a9323b61110819182dba0224678aa8b-t/project`;
+- exactly one visible active Project sidebar row (`data-active`, `data-sidebar-item`, `data-sidebar-keep-open`, `role=button`);
+- 10 visible `Open project home` buttons overall, but exactly one geometrically associated with that active Project row;
+- exactly one visible Project-home editor `#prompt-textarea[role="textbox"][contenteditable="true"]`;
+- its target accessible label is Project-scoped (`New chat in t`), not `Chat with ChatGPT`;
+- the discovery itself performed no click, typing, clipboard mutation, navigation, refresh or Send.
 
-The purpose is to identify the actual target-proven control/surface that starts a new chat inside this Project. The production Q10 route must be based on that evidence rather than guessed selectors or longer waits.
+Therefore the prior direct-root URL and title-independent old composer label were incorrect target assumptions. Increasing the previous wait would remain a materially equivalent retry and is not authorized.
 
-## Discovery verification
+## Corrected target-proven route
 
-`Q10_PROJECT_ROOT_DISCOVERY.js`:
+The corrected qualification probe now:
+1. requires an existing completed conversation in the configured Project and captures its conversation ID;
+2. locates the unique visible active Project sidebar row;
+3. locates the unique visible `Open project home` control geometrically associated with that row;
+4. trusted-clicks that control once;
+5. accepts generic ChatGPT SPA states as `UNKNOWN_TRANSITIONAL`, but positively classifies another explicit Project route as different;
+6. waits for a same-Project `/project` surface with no conversation ID;
+7. requires exactly one visible `#prompt-textarea[role="textbox"][contenteditable="true"]` composer;
+8. stages `Q10_FRESH_CHAT_SPA_PROBE`;
+9. reacquires exactly one enabled Send;
+10. performs exactly one trusted Send;
+11. observes only until a different same-Project conversation ID appears or the run ends without resend.
+
+The Project title and target-route suffix are not hard-coded.
+
+## Corrected probe verification
+
+`qualification/Q10_FRESH_CHAT_SPA_PROBE.js`:
 - JavaScript syntax check: PASS (`node --check`);
-- read-only static guard: PASS;
-- no `uiv.browser.click`;
-- no `uiv.browser.type`;
-- no clipboard write;
-- no `uiv.open` navigation;
-- no Send action;
-- GitHub blob SHA: `f44957d2b7b249ba92c943046a017a421e0ad14c`;
-- SHA-256: `5508c3788719d718db6a8032ea96e51dfe8d3c051b205a3100dedb5e019da1ff`.
+- exactly one material Send click site: PASS;
+- no `uiv.open` direct navigation;
+- no `uiv.eval`;
+- no clipboard path;
+- GitHub blob SHA: `80fde836a991627a0a526a92c3788c9d852d3b9f`;
+- SHA-256: `73d3d994f290eb73778c2290b4591181bcae761ba48840725327b9b53192264d`.
+
+Discovery evidence GitHub blob SHA: `9bb9c1443e00d2fbf5f90f881fc80a1891e6ed2f`.
+
+## Exact next action — one material target run
+
+1. In the target Chrome/UI.Vision environment, open any completed existing conversation inside the configured Project; do not start from Project home because Q10 must capture a previous conversation ID.
+2. Confirm ChatGPT is idle/completed.
+3. Run the current canonical `qualification/Q10_FRESH_CHAT_SPA_PROBE.js` exactly once.
+4. Do not manually click/type during the run.
+5. After execution, supply the exported `Q10_fresh_chat_spa_*.csv`.
+6. If the probe reports `AMBIGUOUS_AFTER_SINGLE_SEND`, do not rerun it. Preserve the CSV for reconciliation.
+7. If it reports `PRE_SEND_FAILURE`, do not repeat materially equivalent execution; analyze the evidence first.
 
 ## Q10 acceptance remains unchanged
 
-Q10 can PASS only after target evidence proves:
+Q10 can PASS only after target evidence proves all six conditions:
 1. fresh entry remains in the configured Project;
 2. the fresh-chat entry path is deterministic;
 3. exactly one trusted qualification Send occurs;
