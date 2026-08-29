@@ -93,7 +93,7 @@ for (const item of [...messages, ...controls, ...composers]) {
 const stamp = new Date().toISOString().replace(/[:.]/g, '-');
 const file = `Q07_observation_${stamp}.csv`;
 uiv.csv.write(file, rows);
-uiv.exportToDownloads(file);
+uiv.files.exportToDownloads(file);
 uiv.log(
   `Q07 exported ${file}; user=${userCount}; assistant=${assistantCount}; composers=${composers.length}; controls=${controls.length}; generationSignals=${generationSignals.length}`,
   'green'
