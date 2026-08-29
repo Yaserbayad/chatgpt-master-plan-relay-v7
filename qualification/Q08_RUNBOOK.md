@@ -8,6 +8,7 @@ Input probe: `qualification/Q08_INPUT_PROBE.js`
 Send diagnostic: `qualification/Q08_SEND_DISCOVERY.js`
 Attempt-1 evidence: `qualification/Q08_ATTEMPT1_SNAPSHOT_FALSE_NEGATIVE.md`
 Attempt-2 evidence: `qualification/Q08_ATTEMPT2_SEND_DISCOVERY_FAILURE.md`
+Attempt-3 evidence: `qualification/Q08_ATTEMPT3_DISCOVERY_RUNTIME_FAILURE.md`
 
 ## Objective
 
@@ -33,11 +34,21 @@ Attempt 2 reached the Send-discovery block only after the corrected probe had al
 
 Therefore the trusted composer/input path is target-proven. Q08 remains TODO only because the generic metadata rule found zero Send candidates.
 
+## Attempt-3 diagnostic runtime correction
+
+The first read-only Send discovery run failed before CSV export because the UI.Vision target JavaScript runtime does not implement `Math.hypot`.
+
+The diagnostic used that function only to rank controls by geometric distance from the composer. It is now replaced by the equivalent conservative arithmetic:
+
+`Math.sqrt(dx * dx + dy * dy)`
+
+This changes no Q08 acceptance criterion, selector assumption, architecture, or target behavior. The diagnostic remains read-only.
+
 ## Remaining target action
 
 If the Q08 draft from Attempt 2 is still present, do not clear it and do not repeat the paste test.
 
-Run `Q08_SEND_DISCOVERY.js` exactly once while ChatGPT is idle/completed with that draft still staged.
+Run the current corrected `Q08_SEND_DISCOVERY.js` exactly once while ChatGPT is idle/completed with that draft still staged.
 
 The diagnostic is read-only. It performs no click, typing, clipboard mutation, Submit, navigation, or refresh. It exports `Q08_send_discovery_*.csv` containing:
 - every current `button` / `role=button` snapshot;
@@ -49,7 +60,7 @@ Upload that one CSV for analysis. The production Send locator must be frozen fro
 
 ## If the draft is no longer present
 
-Rerun the current `Q08_INPUT_PROBE.js` with an empty composer and the background-switch procedure. If it reaches the same Send-discovery error, leave the staged draft in place and then run `Q08_SEND_DISCOVERY.js`.
+Rerun the current `Q08_INPUT_PROBE.js` with an empty composer and the background-switch procedure. If it reaches the same Send-discovery error, leave the staged draft in place and then run the corrected `Q08_SEND_DISCOVERY.js`.
 
 ## PASS criteria
 
@@ -65,9 +76,12 @@ No Submit is part of Q08.
 
 ## Diagnostic verification
 
-`Q08_SEND_DISCOVERY.js`:
+Current `Q08_SEND_DISCOVERY.js`:
 - JavaScript syntax check: PASS (`node --check`);
-- current packaged SHA-256: `67709b1b2812ed219b4a9eef855e440ca008fb8c17b2001a63dbe7c8c0e0b394`;
+- unsupported `Math.hypot` absent: PASS;
+- conservative `Math.sqrt(dx * dx + dy * dy)` replacement present: PASS;
+- current Git blob SHA: `9168917d52ece445168fcf6effa1251f9bc53835`;
+- packaged SHA-256: `d0926fb30a80dccb4512853c490709caba34c33ad3256a674fac4ea33defc514`;
 - observation-only by source inspection: no `uiv.browser.click/type`, clipboard mutation, Submit, navigation, or refresh.
 
 ## Official UI.Vision basis
