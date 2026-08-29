@@ -18,6 +18,7 @@ const PASTE_PAYLOAD = [
 
 function clean(v) { return v == null ? '' : String(v).replace(/\s+/g, ' ').trim(); }
 function normalize(v) { return String(v == null ? '' : v).replace(/\r\n/g, '\n').replace(/\r/g, '\n'); }
+function normalizeEditorClipboard(v) { return normalize(v).replace(/\u00A0+$/, ''); }
 function getAttr(m, n) {
   try { const v = m.getAttribute(n); return v == null ? '' : String(v); }
   catch (_) { const a = m && m.attributes ? m.attributes : {}; return Object.prototype.hasOwnProperty.call(a, n) ? String(a[n] == null ? '' : a[n]) : ''; }
@@ -62,10 +63,10 @@ if (!isVoice(baseline)) throw new Error(`Q08 path diagnostic requires empty comp
 
 const originalClipboard = uiv.clipboard.read();
 const copySentinel = `Q08_COPY_SENTINEL_${new Date().toISOString()}`;
-let copiedBack = '';
 let direct = {count:0, aria:'', testid:'', disabled:'', ariaDisabled:''};
 let cleared = {count:0, aria:'', testid:'', disabled:'', ariaDisabled:''};
 let pasted = {count:0, aria:'', testid:'', disabled:'', ariaDisabled:''};
+let copiedBack = '';
 let directTypeSuccess = false;
 let comboClearSuccess = false;
 let pasteStateSuccess = false;
@@ -77,6 +78,7 @@ try {
   uiv.log(`Q08 path diagnostic: switch to a non-Chrome app now; trusted input begins in ${BACKGROUND_SWITCH_DELAY_MS} ms`, 'blue');
   uiv.sleep(BACKGROUND_SWITCH_DELAY_MS);
 
+  // Stage 1: prove trusted click + ordinary trusted keystrokes to the rich editor.
   uiv.browser.click(COMPOSER);
   uiv.browser.type(DIRECT_MARKER);
   uiv.sleep(400);
@@ -84,6 +86,7 @@ try {
   directTypeSuccess = isEnabledNonVoice(direct);
   if (!directTypeSuccess) failureStage = 'direct_trusted_type';
 
+  // Stage 2: if direct typing worked, prove Ctrl+A + Backspace can clear the editor.
   if (directTypeSuccess) {
     uiv.browser.click(COMPOSER);
     uiv.browser.type('${KEY_CTRL+KEY_A}');
@@ -94,6 +97,7 @@ try {
     if (!comboClearSuccess) failureStage = 'ctrl_a_backspace';
   }
 
+  // Stage 3: if combos can clear, isolate Ctrl+V clipboard paste.
   if (comboClearSuccess) {
     uiv.clipboard.write(PASTE_PAYLOAD);
     if (normalize(uiv.clipboard.read()) !== normalize(PASTE_PAYLOAD)) throw new Error('Q08 path diagnostic clipboard pre-paste round-trip failed');
@@ -105,6 +109,7 @@ try {
     if (!pasteStateSuccess) failureStage = 'ctrl_v_paste';
   }
 
+  // Stage 4: only if paste visibly activated the submit surface, prove Ctrl+C copied editor contents.
   if (pasteStateSuccess) {
     uiv.clipboard.write(copySentinel);
     if (uiv.clipboard.read() !== copySentinel) throw new Error('Q08 path diagnostic could not seed copy sentinel');
@@ -114,7 +119,7 @@ try {
     uiv.sleep(250);
     copiedBack = uiv.clipboard.read();
     copyChangedSentinel = copiedBack !== copySentinel;
-    copyExact = copyChangedSentinel && normalize(copiedBack) === normalize(PASTE_PAYLOAD);
+    copyExact = copyChangedSentinel && normalizeEditorClipboard(copiedBack) === normalizeEditorClipboard(PASTE_PAYLOAD);
     if (!copyChangedSentinel) failureStage = 'ctrl_c_copy';
     else if (!copyExact) failureStage = 'copy_content_mismatch';
   }
@@ -140,4 +145,4 @@ const file = `Q08_input_path_${stamp}.csv`;
 uiv.csv.write(file, rows);
 uiv.files.exportToDownloads(file);
 if (!allPass) throw new Error(`Q08 input-path diagnostic failed at ${failureStage || 'unknown'}; evidence exported as ${file}`);
-uiv.log(`Q08 input-path diagnostic PASS; ${file}; no Submit performed`, 'green');
+uiv.log(`Q08 input-path diagnostic PASS after terminal-NBSP normalization; ${file}; no Submit performed`, 'green');
