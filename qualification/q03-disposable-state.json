@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
   "qualification": "Q03",
-  "probe_value": 0,
+  "probe_value": 1,
   "purpose": "Disposable GitHub autonomous read/write qualification state"
 }
