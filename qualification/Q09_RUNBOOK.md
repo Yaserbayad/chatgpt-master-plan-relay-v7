@@ -1,60 +1,55 @@
 # Q09 — V10 Trusted Submit Qualification Runbook
 
-Status: READY FOR ONE TARGET SEND
+Status: PASS — TARGET QUALIFICATION COMPLETE
 Date: 2026-08-29
 Candidate: UI.Vision 10.0.178 / Chrome 152.0.7977.65
 Target Project: https://chatgpt.com/g/g-p-6a9323b61110819182dba0224678aa8b/project
 Probe: `qualification/Q09_TRUSTED_SEND_PROBE.js`
+Final evidence: `qualification/Q09_EVIDENCE.md`
 Depends on: Q08 PASS
 
 ## Objective
 
 Prove exactly one trusted Send action creates exactly one new ChatGPT user turn.
 
-## Preconditions
+## Final target result
 
-- ChatGPT is idle/completed.
-- The same Relay v7 test Project conversation is open.
-- The Q08 qualification payload remains staged as an unsent draft.
-- Exactly one enabled composer submit surface has `aria-label="Send prompt"`.
+CSV:
+`Q09_trusted_send_2026-08-29T22-22-14-549Z.csv`
 
-## Probe behavior
+SHA-256:
+`43c5fb63ff5b1028313bcbfd14bb6029ccd70e4863c029e7c97e41c6d5bce9bb`
 
-1. validate Project/conversation identity and idle state;
-2. require one target composer;
-3. reconstruct the complete pre-send user-message-ID set using the Q07-qualified visible/includeHidden + Home/End scan;
-4. restore bottom view and reacquire exactly one enabled `Send prompt` surface;
-5. execute exactly one `uiv.browser.click(send)`;
-6. never retry or resend after that click;
-7. observe message IDs only for up to ~6 seconds;
-8. PASS only if exactly one previously unseen user message ID appears in the same Project/conversation;
-9. export `Q09_trusted_send_*.csv` whether the post-send result is PASS or ambiguous.
-
-If post-send proof is ambiguous, the macro reports `AMBIGUOUS_AFTER_SINGLE_SEND` and explicitly performs no resend.
+Observed result:
+- `result = PASS`
+- `send_performed = 1`
+- `send_action_count = 1`
+- same Project URL before/after
+- same conversation ID before/after: `6a932926-c750-83ed-9e99-d3addc14f456`
+- pre-send unique user count = 3
+- new user count = 1
+- new user message ID = `38eb6d48-0578-4f73-8ade-33055a2bf1a6`
+- generation observed = 1
 
 ## PASS criteria
 
-PASS only if the exported CSV proves:
-- `send_performed = true`;
-- `send_action_count = 1`;
-- same Project and conversation before/after;
-- `new_user_count = 1`;
-- one stable new user message ID is recorded.
+PASS is satisfied because the target evidence proves:
+- exactly one trusted Send action occurred;
+- exactly one previously unseen user message ID appeared;
+- Project identity remained stable;
+- conversation identity remained stable;
+- no retry/resend occurred;
+- normal response generation began after the new user turn.
 
-The assistant response does not need to finish for Q09 PASS.
+The assistant response did not need to finish for Q09 PASS.
 
-## Verification before target run
+## Safety property retained
 
-- JavaScript syntax check: PASS (`node --check`).
-- mock exactly-one-new-user path: PASS.
-- mock zero-new-user ambiguity: PASS, no resend.
-- mock two-new-user ambiguity: PASS, no resend.
-- source contains exactly one Send click expression and no Enter-key submission path.
-- local SHA-256: `d9cbeda60427d3deaf2e68e665e76eae2cd1903ed49bf5c1c5e2f7372581e555`.
+The Q09 probe contains exactly one material Send click and no Enter-key submit path. After that click, it only observes. Any future ambiguity after a Send must remain non-replayable without separate positive reconciliation; never auto-resend.
 
 ## Official UI.Vision basis
 
 - https://ui.vision/rpa/docs/uiv
 - https://ui.vision/ai/ai-system-prompt
 
-`uiv.browser.click` is the trusted Chrome/Edge browser input tier used for the single Send action.
+`uiv.browser.click` is the trusted Chrome/Edge browser input tier used for the qualified one-Send action.
