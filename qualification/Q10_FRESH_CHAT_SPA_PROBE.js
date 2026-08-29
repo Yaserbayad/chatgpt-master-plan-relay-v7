@@ -77,19 +77,26 @@ try {
   // Deterministic fresh entry to this exact Project in the current tab.
   uiv.open(PROJECT_ROOT);
 
-  for (let i = 0; i < 20; i += 1) {
+  let composerReady = false;
+  for (let i = 0; i < 12; i += 1) {
     const o = observe(`fresh-entry-${i + 1}`, oldConversationId);
     if (o.state === 'DIFFERENT_PROJECT_OR_ORIGIN') throw new Error(`Q10 left ChatGPT/Project during fresh entry: ${o.url}`);
     if (o.state === 'SAME_PROJECT_OLD_CONVERSATION') throw new Error(`Q10 fresh entry retained old conversation ID ${oldConversationId}`);
     if (o.state === 'SAME_PROJECT_NEW_CONVERSATION') throw new Error(`Q10 new conversation ID appeared before qualification Send: ${o.cid}`);
-    if (o.state === 'SAME_PROJECT_TRANSITIONAL') { freshRootObserved = true; break; }
+    if (o.state === 'SAME_PROJECT_TRANSITIONAL') {
+      freshRootObserved = true;
+      if (findAll('css=[data-testid="stop-button"]', 1).length) throw new Error('Q10 unexpected generation at fresh Project root');
+      const mounted = findAll(COMPOSER, 1);
+      if (mounted.length > 1) throw new Error(`Q10 fresh Project root has multiple composers; found ${mounted.length}`);
+      if (mounted.length === 1) { composerReady = true; break; }
+    }
     uiv.sleep(250);
   }
   if (!freshRootObserved) throw new Error('Q10 did not resolve fresh entry to the configured Project root before Send');
+  if (!composerReady) throw new Error('Q10 configured Project root was reached but fresh-chat composer did not become ready within the SPA readiness window');
 
-  if (findAll('css=[data-testid="stop-button"]', 1).length) throw new Error('Q10 unexpected generation at fresh Project root');
-  const composers = findAll(COMPOSER, 3);
-  if (composers.length !== 1) throw new Error(`Q10 fresh Project root requires exactly one composer; found ${composers.length}`);
+  const composers = findAll(COMPOSER, 1);
+  if (composers.length !== 1) throw new Error(`Q10 fresh Project root lost its ready composer; found ${composers.length}`);
 
   uiv.browser.click(composers[0]);
   uiv.browser.type(MARKER);
