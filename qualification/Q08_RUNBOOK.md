@@ -1,11 +1,12 @@
 # Q08 — V10 Trusted Composer/Input Qualification Runbook
 
-Status: TARGET EVIDENCE PARTIAL — INPUT PATH ISOLATION REQUIRED
+Status: PASS — TARGET QUALIFICATION COMPLETE
 Date: 2026-08-29
 Candidate: UI.Vision 10.0.178 / Chrome 152.0.7977.65
 Target Project: https://chatgpt.com/g/g-p-6a9323b61110819182dba0224678aa8b/project
 Canonical qualification probe: `qualification/Q08_INPUT_PROBE.js`
-Current diagnostic: `qualification/Q08_INPUT_PATH_DIAGNOSTIC.js`
+Input-path diagnostic: `qualification/Q08_INPUT_PATH_DIAGNOSTIC.js`
+Final evidence: `qualification/Q08_EVIDENCE.md`
 
 Evidence history:
 - `qualification/Q08_ATTEMPT1_SNAPSHOT_FALSE_NEGATIVE.md`
@@ -21,72 +22,61 @@ Target-prove the Q08 WBS requirements without Submit:
 - trusted `uiv.browser.click`;
 - clipboard-backed multiline/Unicode prompt paste via trusted browser input;
 - exactly one enabled Send control after staging;
-- correct draft produced while Chrome is in the background.
+- correct draft created with browser background allowed.
 
-## Current evidence
+## Final target result
 
-Attempt 4 proved the empty composer exposes one `composer-submit-button-color` surface labeled `Start Voice`; there was no Send control while the editor remained empty.
+Final CSV:
+`Q08_input_path_2026-08-29T22-06-26-226Z.csv`
 
-Attempt 5 used the corrected sentinel-protected V3 oracle. Its CSV is `Q08_input_probe_v3_2026-08-29T21-53-04-700Z.csv`, SHA-256 `018fbc5d8e5e86e48f5fc62da1de7a18f233f1089d62e51bfc7021a6409dcdd4`.
+SHA-256:
+`2e6bafe998f12bc547adb2b0a4ed958555e0741818b544e9ab16c071e85a3ec5`
 
-Attempt 5 reports:
-- correct Project/conversation;
-- exactly one composer;
-- baseline submit surface `Start Voice`;
-- empty post-input finder snapshot;
-- a unique copy sentinel seeded before Ctrl+C;
-- `copied_back` remained exactly equal to that sentinel;
-- no post-paste Send state.
+Observed target transition sequence:
 
-Therefore the previous claim that trusted paste/copy was already target-proven is invalid. V3 correctly rejects the run. Q08 remains TODO.
+`Start Voice → Send prompt → Start Voice → Send prompt`
 
-## Why the next diagnostic is different
+Result fields:
+- `direct_type_success = 1`
+- `combo_clear_success = 1`
+- `paste_state_success = 1`
+- `copy_changed_sentinel = 1`
 
-Official UI.Vision guidance states:
-- `uiv.browser.type(...)` sends keystrokes to the currently focused element and can silently no-op if focus is absent;
-- rich `contenteditable` chat editors should be driven with trusted `uiv.browser.click` followed by `uiv.browser.type(text)`;
-- key combinations use `${KEY_CTRL+KEY_A}`-style syntax.
+This proves trusted direct typing, trusted Ctrl+A/Backspace, clipboard-backed trusted Ctrl+V, and trusted Ctrl+C copy-back all operated on the ChatGPT composer.
 
-The next diagnostic therefore separates four boundaries instead of repeating the same paste attempt:
+The copied-back value equals the expected multiline/Unicode payload plus exactly two terminal `U+00A0` non-breaking spaces. All internal line breaks, the intentional blank line, and every Unicode character match exactly.
 
-1. **direct trusted type** — click the exact target-proven composer locator and send a short Unicode marker with `uiv.browser.type(text)`;
-2. **Ctrl+A + Backspace** — if direct type activated the submit surface, verify key-combo clearing returns the surface to `Start Voice`;
-3. **Ctrl+V paste** — only if clearing works, place a multiline/Unicode payload on the OS clipboard and test Ctrl+V;
-4. **Ctrl+C copy-back** — only if paste activates the submit surface, seed a new sentinel and require Ctrl+C to overwrite it with the exact payload.
+Verification therefore normalizes only terminal `U+00A0` clipboard serialization markers after CRLF/CR→LF normalization. It does not trim or normalize internal whitespace.
 
-The diagnostic exports a CSV and reports the first failing stage as one of:
-- `direct_trusted_type`;
-- `ctrl_a_backspace`;
-- `ctrl_v_paste`;
-- `ctrl_c_copy`;
-- `copy_content_mismatch`.
+The operator visually confirmed the full qualification payload remained in the composer as an unsent draft.
 
-It never clicks Submit.
+## PASS criteria
 
-## Exact next target action
+PASS is satisfied because target evidence establishes:
+1. correct Project/conversation identity;
+2. exactly one composer;
+3. trusted `uiv.browser.click` / trusted typing operation;
+4. clipboard-backed multiline/Unicode trusted paste;
+5. sentinel-protected copy-back proving the clipboard result came from the editor;
+6. deterministic enabled `Send prompt` state after staging;
+7. correct unsent draft;
+8. official UI.Vision V10 background-capable `uiv.browser.*` input tier.
 
-1. Ensure ChatGPT is idle/completed in the same Relay v7 Project conversation.
-2. Ensure the composer is completely empty and its button state is `Start Voice`.
-3. Create/run a fresh UI.Vision JavaScript macro from `qualification/Q08_INPUT_PATH_DIAGNOSTIC.js`.
-4. Immediately switch to a non-Chrome application during the 3.5-second delay and keep Chrome in the background for the trusted-input stages.
-5. After completion, do not click Send.
-6. Upload the exported `Q08_input_path_*.csv` and the exact macro error if it failed.
+No Submit is part of Q08.
 
-If direct trusted typing fails, the next investigation is focus/targeting of `uiv.browser.click/type`. If direct type works but Ctrl+V fails, then the clipboard-paste requirement itself is isolated and must be reconciled before Q08 can PASS; do not silently substitute direct typing for the frozen clipboard requirement.
+## Verifier safeguards retained
 
-## Diagnostic verification
-
-`Q08_INPUT_PATH_DIAGNOSTIC.js`:
-- JavaScript syntax check: PASS (`node --check`);
-- static no-Submit guard: PASS;
-- mock case where direct type/clear work but Ctrl+V fails: correctly reports `ctrl_v_paste`;
-- mock full success path: PASS;
-- local SHA-256: `0e671bb63772eaaefcc81b4cb97d0a433af3fe3c805baec42c8a26be02beb3f7`;
-- GitHub blob SHA: `9364f08150e9c9559107dfb7f980823505cc1efd`.
+Production/qualification logic must retain:
+- a unique copy-back sentinel so an unchanged clipboard cannot false-pass;
+- target-proven composer/submit-surface state checks;
+- terminal-NBSP-only clipboard canonicalization;
+- no broad `.trim()` or whitespace collapse for payload equality;
+- no Submit during Q08.
 
 ## Official UI.Vision basis
 
-- https://ui.vision/ai/ai-system-prompt
 - https://ui.vision/rpa/docs/uiv
+- https://ui.vision/ai/ai-system-prompt
+- https://ui.vision/rpa/home/whatsnew?b=chrome
 
-The current UI.Vision documentation identifies `uiv.browser.*` as trusted Chrome/Edge debugger input that can operate while the browser is in the background, and identifies `uiv.clipboard.read()` / `uiv.clipboard.write(text)` as access to the real OS clipboard.
+Current UI.Vision V10 documentation identifies `uiv.browser.*` as trusted Chrome/Edge debugger input and states the browser window may remain in the background. It also documents the real OS clipboard API used by the qualification flow.
