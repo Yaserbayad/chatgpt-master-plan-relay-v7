@@ -1,59 +1,82 @@
 # Q07 — V10 Browser Observation Qualification Runbook
 
-Status: READY FOR TARGET RETRY — CSP-SAFE PROBE V2
+Status: TARGET EVIDENCE PARTIAL — ONE TURN-SCAN CHECK REMAINS
 Date: 2026-08-29
 Candidate: UI.Vision 10.0.178 / Chrome 152.0.7977.65
 Target Project: https://chatgpt.com/g/g-p-6a9323b61110819182dba0224678aa8b/project
-Current probe: qualification/Q07_OBSERVE_CSP_SAFE.js
-Failed superseded probe: qualification/Q07_OBSERVE.js
+Observation probe: `qualification/Q07_OBSERVE_CSP_SAFE.js`
+Turn-scan diagnostic: `qualification/Q07_TURN_SCAN_DIAGNOSTIC.js`
+Partial target evidence: `qualification/Q07_TARGET_EVIDENCE_PARTIAL.md`
+Failed superseded probe: `qualification/Q07_OBSERVE.js`
 Failure evidence:
-- qualification/Q07_ATTEMPT1_CSP_FAILURE.md
-- qualification/Q07_ATTEMPT2_EXPORT_API_FAILURE.md
+- `qualification/Q07_ATTEMPT1_CSP_FAILURE.md`
+- `qualification/Q07_ATTEMPT2_EXPORT_API_FAILURE.md`
 
-## Attempt-1 correction
+## Completed target evidence
 
-The first probe used page-world string evaluation and was blocked by ChatGPT Content Security Policy (`unsafe-eval`). This is preserved as target evidence and is not an architectural Q07 failure. UI.Vision's current guidance explicitly directs CSP-blocked scripts to read the page through finder snapshots instead of retrying the page-world eval.
+The required idle → generating → completed three-snapshot observation was executed on the real target and analyzed.
 
-The replacement probe uses only finder snapshots plus current-tab metadata. It performs no page-world JavaScript execution.
+Target-proven from those CSVs:
+- correct configured Project token in the live URL;
+- stable conversation ID `6a932926-c750-83ed-9e99-d3addc14f456`;
+- stable per-message IDs/author metadata for currently returned turns;
+- new user turn `be8d5f4e-d9b8-4cff-b7a8-c69474814783` correlates to completed assistant turn `d185f1ae-c05f-4b8a-8875-19f25091e2a9`;
+- generating state exposes `data-testid="stop-button"` / `aria-label="Stop answering"`;
+- that live Stop control is absent from the idle/completed snapshots;
+- exactly one composer candidate was observed in all three snapshots.
 
-## Attempt-2 correction
+## Remaining Q07 issue
 
-The first CSP-safe revision reached CSV export but used the removed spelling `uiv.exportToDownloads(file)`. UI.Vision 10.0.178 reported that export-by-name has moved to `uiv.files.exportToDownloads(name)`. The probe was corrected only at that API call; the observation design and acceptance criteria are unchanged.
+A raw current `[data-message-author-role]` finder count is not sufficient as a conversation-total oracle.
 
-## Safety
+The first target snapshot returned user message ID:
+`48830c2a-759d-461e-9d83-30773d17926e`
 
-The probe is observation-only. It performs no click, typing, navigation, refresh, or Submit. It reads current tab metadata and DOM finder snapshots, then exports a CSV.
+After the new Q07 prompt, that earlier user turn was no longer returned by the current finder result even though the same-conversation evidence proves it existed. The current DOM count therefore reported two user turns although at least three user turns existed in that conversation.
 
-## Target executions required
+Q07 must not PASS until a deterministic UI.Vision-only enumeration method accounts for this render-window change.
 
-1. Open a conversation inside the configured test Project while ChatGPT is idle/completed.
-2. Run `Q07_OBSERVE_CSP_SAFE.js`; retain the exported `Q07_observation_*.csv`.
-3. Manually submit one harmless prompt that produces a non-trivial response, for example: `Count slowly from 1 to 50, one number per line.`
-4. While that response is visibly generating, run `Q07_OBSERVE_CSP_SAFE.js` again; retain the second CSV.
-5. After generation fully completes, run `Q07_OBSERVE_CSP_SAFE.js` once more; retain the third CSV.
+## One remaining target execution
 
-## Evidence required for PASS
+Run `Q07_TURN_SCAN_DIAGNOSTIC.js` exactly once while ChatGPT is fully completed/idle in the same test conversation.
 
-From the three target CSVs, Q07 must establish deterministic, reacquirable evidence for:
-- configured Project identity/root;
-- current conversation identity from current-tab URL/state;
-- rendered user-turn enumeration;
-- rendered assistant-turn enumeration and ordering/correlation;
-- an observable distinction between generating and completed response state.
+The diagnostic:
+1. captures the current message set;
+2. also asks the DOM finder for hidden matches;
+3. clicks the last rendered message only to move keyboard focus away from the composer;
+4. sends trusted browser `Home`;
+5. captures the top render window;
+6. sends trusted browser `End` to restore the recent/bottom view;
+7. accumulates unique `data-message-id` values across the overlapping snapshots;
+8. exports `Q07_turn_scan_*.csv`.
 
-No production selector is frozen from a single snapshot. If the CSP-safe finder route still cannot expose a stable deterministic observation boundary, Q07 fails and the affected architecture must be reviewed rather than inferred.
+It refuses to start if a live `stop-button` is present. It does not enter prompt text, Submit, navigate, refresh, or invoke page-world JavaScript.
 
-## Verification of current probe
+## PASS criteria for the remaining boundary
 
-Static/package verification after the export API correction:
+The returned turn-scan CSV must:
+- report the same configured Project token and a valid conversation ID;
+- successfully produce distinct/overlapping message snapshots across the scan if the page changes render windows;
+- accumulate all relevant known user turns from the qualification conversation, including:
+  - `48830c2a-759d-461e-9d83-30773d17926e`
+  - `2a96f980-4ff7-4d31-b522-4d129f1b980d`
+  - `be8d5f4e-d9b8-4cff-b7a8-c69474814783`
+- therefore establish a deterministic unique-user-turn count despite the raw current DOM undercount;
+- make no project, conversation, or GitHub state mutation.
+
+If the scan does not reacquire the missing older turn, Q07 remains TODO and the next resolution must use a materially different UI.Vision-only observation method; do not infer PASS.
+
+## Diagnostic verification before target run
+
+`Q07_TURN_SCAN_DIAGNOSTIC.js`:
 - JavaScript syntax check: PASS (`node --check`);
-- no obsolete `uiv.exportToDownloads` call: PASS;
-- current export call is exactly `uiv.files.exportToDownloads(file)`: PASS;
-- packaged file Git blob SHA matches GitHub current blob SHA: `9cc5a8760d4f2e0c0a61672bb27e20d2132956c9`;
-- packaged-file SHA-256: `eadd44986a126a94991e9faf26f8d07ec2c50865de59b1b7c839fd2552753a40`.
+- mocked render-window scan: PASS;
+- mocked unique count reconstructs 3 user / 2 assistant IDs from overlapping windows;
+- current Git blob SHA: `d281fd8645cbfae081667b61c4dbb09c467cb1e8`;
+- packaged-file SHA-256: `0201ceb4f9f88886d2d2af948651c7c146b1c19c25941464f5e4d56255404162`.
 
 ## Official API basis
 
 - https://ui.vision/ai/ai-system-prompt
 - https://ui.vision/rpa/docs/uiv
-- https://forum.ui.vision/t/ui-vision-10-beta-ai-javascript-uiv-macros-and-new-real-user-browser-clicks-that-need-no-focus/29839/33
+- https://ui.vision/rpa/docs/xtype
