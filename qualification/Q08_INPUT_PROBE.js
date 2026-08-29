@@ -108,10 +108,9 @@ try {
   const composersAfter = findAll('css=[contenteditable="true"],textarea');
   if (composersAfter.length !== 1) throw new Error(`Q08 composer lost uniqueness after paste; found ${composersAfter.length}`);
   const composerAfter = composersAfter[0];
+  // Finder results are snapshots, not live DOM handles. Keep snapshot text only as diagnostic evidence.
+  // Acceptance is the stronger trusted copy-back check below.
   observedDraft = composerText(composerAfter);
-  for (const token of ['Q08_INPUT_PROBE', 'café naïve', 'Ελληνικά', '日本語', '🙂', 'BLANK-LINE-BEFORE-THIS']) {
-    if (!normalizeText(observedDraft).includes(token)) throw new Error(`Q08 draft observation missing token: ${token}`);
-  }
 
   uiv.browser.click(composerAfter);
   uiv.browser.type('${KEY_CTRL+KEY_A}');
