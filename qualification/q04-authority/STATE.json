@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "project_id": "relay-v7-q04-fresh-chat-qualification",
+  "plan_revision": 4,
+  "project_status": "PAUSED",
+  "work_statuses": {
+    "Q04-T01": "TODO"
+  },
+  "gate_resolutions": {},
+  "acceptance_evidence": {},
+  "last_confirmed_change": "2026-08-29T18:29:14Z"
+}
