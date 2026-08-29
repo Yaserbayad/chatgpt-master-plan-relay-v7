@@ -13,7 +13,7 @@
     "Q04": "PASS",
     "Q05": "PASS",
     "Q06": "PASS",
-    "Q07": "TODO",
+    "Q07": "PASS",
     "Q08": "TODO",
     "Q09": "TODO",
     "Q10": "TODO",
@@ -31,7 +31,7 @@
     "Q04": "qualification/Q04_EVIDENCE.md",
     "Q05": "qualification/Q05_EVIDENCE.md",
     "Q06": "qualification/Q06_UIVISION_CANDIDATE.md",
-    "Q07": "qualification/Q07_TARGET_EVIDENCE_PARTIAL.md"
+    "Q07": "qualification/Q07_EVIDENCE.md"
   },
   "note": "Qualification-time compact state only. Final production schema is intentionally deferred to C01."
 }
