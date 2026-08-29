@@ -1,108 +1,78 @@
 # Q08 — V10 Trusted Composer/Input Qualification Runbook
 
-Status: READY FOR TARGET RETRY — SNAPSHOT-SAFE PROBE
+Status: TARGET EVIDENCE PARTIAL — SEND CONTROL DISCOVERY REMAINS
 Date: 2026-08-29
 Candidate: UI.Vision 10.0.178 / Chrome 152.0.7977.65
 Target Project: https://chatgpt.com/g/g-p-6a9323b61110819182dba0224678aa8b/project
-Probe: `qualification/Q08_INPUT_PROBE.js`
+Input probe: `qualification/Q08_INPUT_PROBE.js`
+Send diagnostic: `qualification/Q08_SEND_DISCOVERY.js`
 Attempt-1 evidence: `qualification/Q08_ATTEMPT1_SNAPSHOT_FALSE_NEGATIVE.md`
+Attempt-2 evidence: `qualification/Q08_ATTEMPT2_SEND_DISCOVERY_FAILURE.md`
 
 ## Objective
 
 Target-prove the exact Q08 WBS requirements without Submit:
-
 - exactly one eligible composer;
 - trusted `uiv.browser.click`;
-- clipboard-backed multiline/Unicode paste through trusted browser input;
+- clipboard-backed multiline/Unicode prompt paste through trusted browser input;
 - exactly one enabled Send control after staging;
 - correct draft produced while Chrome is in the background.
 
-## Attempt-1 correction
+## Target-proven after Attempt 2
 
-The first target run stopped on `Q08 draft observation missing token: Q08_INPUT_PROBE` before the stronger copy-back verification ran.
+Attempt 2 reached the Send-discovery block only after the corrected probe had already passed:
+- correct Project/conversation checks;
+- idle-state check;
+- exactly one empty composer before staging;
+- OS clipboard write/read round-trip;
+- trusted `uiv.browser.click`;
+- trusted Ctrl+V staging;
+- exactly one composer after staging;
+- trusted Ctrl+A / Ctrl+C copy-back;
+- exact multiline/Unicode payload equality after line-ending normalization.
 
-UI.Vision V10 DOM finder results are snapshots rather than live DOM handles. Therefore finder `.text` / `.value` after trusted input is diagnostic only and is not an acceptance oracle for staged editor content.
+Therefore the trusted composer/input path is target-proven. Q08 remains TODO only because the generic metadata rule found zero Send candidates.
 
-The corrected probe keeps post-paste snapshot text only as evidence, then verifies the actual staged draft with trusted Ctrl+A / Ctrl+C and exact OS-clipboard copy-back. A focused regression test reproducing an empty/stale finder snapshot failed against the old probe and passes after this correction. The normal mocked Q08 target test also remains PASS.
+## Remaining target action
 
-## Safety
+If the Q08 draft from Attempt 2 is still present, do not clear it and do not repeat the paste test.
 
-The probe contains no Send/Submit action.
+Run `Q08_SEND_DISCOVERY.js` exactly once while ChatGPT is idle/completed with that draft still staged.
 
-It:
-- refuses to run while ChatGPT is generating;
-- refuses to run if the composer is not empty;
-- never clears an existing draft;
-- writes the qualification payload to the real OS clipboard, then restores the operator's original clipboard before completion;
-- leaves the verified draft in the composer unsent.
+The diagnostic is read-only. It performs no click, typing, clipboard mutation, Submit, navigation, or refresh. It exports `Q08_send_discovery_*.csv` containing:
+- every current `button` / `role=button` snapshot;
+- full captured attribute maps;
+- geometry relative to the composer;
+- results for `button[type=submit]`, send-related `data-testid` / `aria-label`, and form-button probes.
 
-## Target execution
+Upload that one CSV for analysis. The production Send locator must be frozen from target evidence rather than guessed.
 
-1. Open the same Relay v7 test Project conversation and ensure ChatGPT is fully idle/completed.
-2. Ensure the composer is empty. If the failed prior attempt left a visible Q08 draft, clear it manually before retrying.
-3. Run the current `Q08_INPUT_PROBE.js`.
-4. Immediately after pressing Run, switch to a non-Chrome application and keep Chrome in the background while the 3.5-second qualification delay expires and the probe performs its trusted click/paste.
-5. Return to Chrome after the macro finishes.
-6. Confirm visually that the Q08 qualification draft is present and was NOT submitted.
-7. Retain/upload the exported `Q08_input_probe_*.csv`.
+## If the draft is no longer present
 
-For operational clarity, use a UI.Vision JavaScript macro named `Q08_INPUT_PROBE`; do not reuse the old Q07 diagnostic macro name.
-
-## Qualification payload
-
-```text
-Q08_INPUT_PROBE
-ASCII: trusted browser clipboard paste
-Unicode: café naïve Ελληνικά 日本語 🙂
-
-BLANK-LINE-BEFORE-THIS
-```
-
-## Automatic checks
-
-The corrected probe must independently prove:
-
-- correct Project URL and a valid conversation ID;
-- no live `stop-button`;
-- exactly one composer before and after paste;
-- empty composer before qualification;
-- real OS clipboard write/read round-trip equals the payload;
-- trusted browser click targets the composer;
-- trusted Ctrl+V stages the multiline/Unicode payload;
-- trusted Ctrl+A / Ctrl+C copy-back reproduces the exact payload after CRLF→LF normalization;
-- exactly one enabled Send control exists after staging;
-- original OS clipboard is restored;
-- no Submit is executed.
-
-The reacquired finder's `.text` / `.value` is retained in `observed_draft` for diagnosis only and does not determine PASS.
+Rerun the current `Q08_INPUT_PROBE.js` with an empty composer and the background-switch procedure. If it reaches the same Send-discovery error, leave the staged draft in place and then run `Q08_SEND_DISCOVERY.js`.
 
 ## PASS criteria
 
-PASS only if:
+Q08 can PASS only after target evidence establishes all of:
+1. correct Project/conversation identity;
+2. exactly one composer;
+3. exact multiline/Unicode trusted paste and copy-back;
+4. Chrome background operation during trusted input;
+5. exactly one deterministic enabled Send control after staging;
+6. draft remains unsent.
 
-1. the exported CSV reports `result=PASS`;
-2. Project/conversation identity is correct;
-3. `composer_count=1`;
-4. `payload` and `copied_back` are exact after line-ending normalization;
-5. the Send evidence identifies exactly one enabled Send control;
-6. the operator confirms Chrome was switched to the background before trusted input occurred;
-7. the draft remained unsent.
+No Submit is part of Q08.
 
-Any macro error, wrong/multiple composer, copy-back mismatch, missing/ambiguous Send, or accidental Submit is FAIL/TODO evidence, not PASS.
+## Diagnostic verification
 
-## Verification before target retry
+`Q08_SEND_DISCOVERY.js`:
+- JavaScript syntax check: PASS (`node --check`);
+- current packaged SHA-256: `67709b1b2812ed219b4a9eef855e440ca008fb8c17b2001a63dbe7c8c0e0b394`;
+- observation-only by source inspection: no `uiv.browser.click/type`, clipboard mutation, Submit, navigation, or refresh.
 
-- JavaScript syntax check: PASS (`node --check`)
-- focused stale-snapshot regression: RED against old probe, GREEN after correction
-- normal isolated mocked target behavior: PASS
-- current probe Git blob SHA: `55fc235fe20e11f6efe0470be5de9f31d77f325f`
-- current probe SHA-256: `44df3a2abb9bb2524b6ea0747ca486272ae17dd296587574f6ee12e3becdf63a`
-
-## Official API basis
+## Official UI.Vision basis
 
 - https://ui.vision/rpa/docs/uiv
-- https://ui.vision/ai/ai-system-prompt
-- https://ui.vision/rpa/home/whatsnew?b=chrome
 - https://forum.ui.vision/t/ui-vision-10-beta-ai-javascript-uiv-macros-and-new-real-user-browser-clicks-that-need-no-focus/29839/33
 
-UI.Vision V10 documents `uiv.browser.*` as trusted browser-debugger input for Chrome/Edge that can operate with the browser in the background, `uiv.clipboard.read()` / `uiv.clipboard.write(text)` as the real OS clipboard API, and DOM finder results as snapshots rather than live DOM handles.
+UI.Vision V10 finder matches expose captured attributes through `.attributes` / `getAttribute()` and carry geometry such as coordinates/rect data. These snapshots are suitable for target selector discovery without page-world JavaScript.
