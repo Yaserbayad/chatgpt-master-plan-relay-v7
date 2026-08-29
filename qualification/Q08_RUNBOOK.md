@@ -1,92 +1,106 @@
 # Q08 — V10 Trusted Composer/Input Qualification Runbook
 
-Status: TARGET EVIDENCE PARTIAL — SEND CONTROL DISCOVERY REMAINS
+Status: READY FOR TARGET RETRY — SENTINEL-PROTECTED V3
 Date: 2026-08-29
 Candidate: UI.Vision 10.0.178 / Chrome 152.0.7977.65
 Target Project: https://chatgpt.com/g/g-p-6a9323b61110819182dba0224678aa8b/project
-Input probe: `qualification/Q08_INPUT_PROBE.js`
-Send diagnostic: `qualification/Q08_SEND_DISCOVERY.js`
-Attempt-1 evidence: `qualification/Q08_ATTEMPT1_SNAPSHOT_FALSE_NEGATIVE.md`
-Attempt-2 evidence: `qualification/Q08_ATTEMPT2_SEND_DISCOVERY_FAILURE.md`
-Attempt-3 evidence: `qualification/Q08_ATTEMPT3_DISCOVERY_RUNTIME_FAILURE.md`
+Canonical probe: `qualification/Q08_INPUT_PROBE.js`
+
+Evidence history:
+- `qualification/Q08_ATTEMPT1_SNAPSHOT_FALSE_NEGATIVE.md`
+- `qualification/Q08_ATTEMPT2_SEND_DISCOVERY_FAILURE.md`
+- `qualification/Q08_ATTEMPT3_DISCOVERY_RUNTIME_FAILURE.md`
+- `qualification/Q08_ATTEMPT4_SEND_DISCOVERY_EVIDENCE.md`
 
 ## Objective
 
-Target-prove the exact Q08 WBS requirements without Submit:
+Target-prove the Q08 WBS requirements without Submit:
 - exactly one eligible composer;
 - trusted `uiv.browser.click`;
 - clipboard-backed multiline/Unicode prompt paste through trusted browser input;
 - exactly one enabled Send control after staging;
 - correct draft produced while Chrome is in the background.
 
-## Target-proven after Attempt 2
+## Evidence correction after live Send discovery
 
-Attempt 2 reached the Send-discovery block only after the corrected probe had already passed:
-- correct Project/conversation checks;
-- idle-state check;
-- exactly one empty composer before staging;
-- OS clipboard write/read round-trip;
-- trusted `uiv.browser.click`;
-- trusted Ctrl+V staging;
-- exactly one composer after staging;
-- trusted Ctrl+A / Ctrl+C copy-back;
-- exact multiline/Unicode payload equality after line-ending normalization.
+The Attempt-4 live discovery CSV showed no Send control. The composer form exposed four controls, including a `composer-submit-button-color` surface still labeled `Start Voice`.
 
-Therefore the trusted composer/input path is target-proven. Q08 remains TODO only because the generic metadata rule found zero Send candidates.
+This revealed a flaw in the previous copy-back oracle. The old probe put the qualification payload on the clipboard before Ctrl+V and later compared the clipboard to that same payload after Ctrl+C. If paste/copy failed, an unchanged clipboard could still equal the expected payload and false-pass.
 
-## Attempt-3 diagnostic runtime correction
+Therefore the prior claim that Attempt 2 target-proved trusted paste is withdrawn. Q08 remains TODO.
 
-The first read-only Send discovery run failed before CSV export because the UI.Vision target JavaScript runtime does not implement `Math.hypot`.
+## Current V3 proof design
 
-The diagnostic used that function only to rank controls by geometric distance from the composer. It is now replaced by the equivalent conservative arithmetic:
+The current canonical `Q08_INPUT_PROBE.js` fixes the oracle:
 
-`Math.sqrt(dx * dx + dy * dy)`
+1. require the correct Project/conversation, idle state, exactly one empty composer;
+2. snapshot the baseline composer submit surface;
+3. place the multiline/Unicode payload on the real OS clipboard;
+4. give the operator 3.5 seconds to switch Chrome into the background;
+5. trusted `uiv.browser.click` the composer and trusted Ctrl+V;
+6. reacquire the composer;
+7. overwrite the OS clipboard with a unique `Q08_COPYBACK_SENTINEL_<timestamp>` value;
+8. trusted Ctrl+A / Ctrl+C;
+9. require Ctrl+C to replace the sentinel;
+10. require the resulting clipboard to exactly equal the qualification payload after CRLF→LF normalization;
+11. require exactly one enabled composer submit surface after the proven paste;
+12. require that surface to be explicitly Send/Submit or to transition away from the baseline `Start Voice` state;
+13. restore the operator's original clipboard;
+14. export `Q08_input_probe_v3_*.csv` whether PASS or FAIL;
+15. never click Submit.
 
-This changes no Q08 acceptance criterion, selector assumption, architecture, or target behavior. The diagnostic remains read-only.
+The finder snapshot's `.text` / `.value` remains diagnostic only.
 
-## Remaining target action
+## Target execution
 
-If the Q08 draft from Attempt 2 is still present, do not clear it and do not repeat the paste test.
+1. Open the Relay v7 test Project conversation and ensure ChatGPT is fully idle/completed.
+2. Ensure the composer is completely empty. Clear any leftover qualification draft manually before the run.
+3. Run the current canonical `Q08_INPUT_PROBE.js`.
+4. Immediately switch to a non-Chrome application and keep Chrome in the background during the 3.5-second delay and trusted input.
+5. Return after the macro completes.
+6. Do not click Send.
+7. Leave any successfully staged Q08 draft unsent.
+8. Upload the exported `Q08_input_probe_v3_*.csv`.
 
-Run the current corrected `Q08_SEND_DISCOVERY.js` exactly once while ChatGPT is idle/completed with that draft still staged.
+If the macro fails, it now exports the CSV before raising the final error; upload that CSV as well as the exact error.
 
-The diagnostic is read-only. It performs no click, typing, clipboard mutation, Submit, navigation, or refresh. It exports `Q08_send_discovery_*.csv` containing:
-- every current `button` / `role=button` snapshot;
-- full captured attribute maps;
-- geometry relative to the composer;
-- results for `button[type=submit]`, send-related `data-testid` / `aria-label`, and form-button probes.
+## Qualification payload
 
-Upload that one CSV for analysis. The production Send locator must be frozen from target evidence rather than guessed.
+```text
+Q08_INPUT_PROBE
+ASCII: trusted browser clipboard paste
+Unicode: café naïve Ελληνικά 日本語 🙂
 
-## If the draft is no longer present
-
-Rerun the current `Q08_INPUT_PROBE.js` with an empty composer and the background-switch procedure. If it reaches the same Send-discovery error, leave the staged draft in place and then run the corrected `Q08_SEND_DISCOVERY.js`.
+BLANK-LINE-BEFORE-THIS
+```
 
 ## PASS criteria
 
-Q08 can PASS only after target evidence establishes all of:
+PASS only if target evidence establishes all of:
 1. correct Project/conversation identity;
 2. exactly one composer;
-3. exact multiline/Unicode trusted paste and copy-back;
-4. Chrome background operation during trusted input;
-5. exactly one deterministic enabled Send control after staging;
-6. draft remains unsent.
+3. Chrome was switched to the background before trusted input;
+4. copy-back replaced the unique sentinel;
+5. copied-back text exactly equals the multiline/Unicode payload after line-ending normalization;
+6. exactly one enabled composer submit surface exists after staging;
+7. that surface is explicitly Send/Submit or deterministically transitions from the baseline `Start Voice` state;
+8. the draft remains unsent.
 
 No Submit is part of Q08.
 
-## Diagnostic verification
+## Verification of current V3 probe
 
-Current `Q08_SEND_DISCOVERY.js`:
-- JavaScript syntax check: PASS (`node --check`);
-- unsupported `Math.hypot` absent: PASS;
-- conservative `Math.sqrt(dx * dx + dy * dy)` replacement present: PASS;
-- current Git blob SHA: `9168917d52ece445168fcf6effa1251f9bc53835`;
-- packaged SHA-256: `d0926fb30a80dccb4512853c490709caba34c33ad3256a674fac4ea33defc514`;
-- observation-only by source inspection: no `uiv.browser.click/type`, clipboard mutation, Submit, navigation, or refresh.
+- JavaScript syntax check: PASS (`node --check`).
+- false-paste regression: PASS — unchanged clipboard is rejected because the sentinel remains.
+- success-path mock: PASS — trusted paste/copy overwrites the sentinel and the submit surface transitions to Send.
+- clipboard restoration on PASS and FAIL: PASS in mock verification.
+- current Git blob SHA: `8e5eff07dc71101629cb4b5ed1d522c1ccf833f5`.
+- current SHA-256: `2a8f7e86579b1b056483124fb15f4014e504a7755f472fa144b84045712dc785`.
 
 ## Official UI.Vision basis
 
 - https://ui.vision/rpa/docs/uiv
-- https://forum.ui.vision/t/ui-vision-10-beta-ai-javascript-uiv-macros-and-new-real-user-browser-clicks-that-need-no-focus/29839/33
+- https://ui.vision/ai/ai-system-prompt
+- https://ui.vision/rpa/home/whatsnew?b=chrome
 
-UI.Vision V10 finder matches expose captured attributes through `.attributes` / `getAttribute()` and carry geometry such as coordinates/rect data. These snapshots are suitable for target selector discovery without page-world JavaScript.
+UI.Vision V10 documents `uiv.browser.*` as trusted browser-debugger input for Chrome/Edge that can operate while the browser is in the background, and `uiv.clipboard.read()` / `uiv.clipboard.write(text)` as the real OS clipboard API.
