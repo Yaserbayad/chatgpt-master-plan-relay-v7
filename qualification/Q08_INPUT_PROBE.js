@@ -1,8 +1,6 @@
 // Q08 trusted composer/input qualification probe for ChatGPT Master Plan Relay v7.
-// No Submit. It leaves the verified draft in the composer and restores the original OS clipboard.
-// Official API basis:
-// https://ui.vision/rpa/docs/uiv
-// https://ui.vision/ai/ai-system-prompt
+// No Submit. Exact copy-back uses a sentinel so an unchanged clipboard cannot false-pass.
+// Official API basis: https://ui.vision/rpa/docs/uiv and https://ui.vision/ai/ai-system-prompt
 
 const TARGET_PROJECT_TOKEN = 'g-p-6a9323b61110819182dba0224678aa8b';
 const EXPECTED_UIVISION = '10.0.178';
@@ -61,9 +59,18 @@ function controlSnapshot(match) {
     aria: clean(getAttr(match, 'aria-label')),
     title: clean(getAttr(match, 'title')),
     text: clean(match.text).slice(0, 160),
+    className: clean(getAttr(match, 'class')).slice(0, 300),
     disabled: hasAttr(match, 'disabled'),
     ariaDisabled: clean(getAttr(match, 'aria-disabled'))
   };
+}
+
+function enabled(control) {
+  return control && !control.disabled && control.ariaDisabled.toLowerCase() !== 'true';
+}
+
+function submitSurfaces() {
+  return findAll('css=form button').map(controlSnapshot).filter(c => c.className.includes('composer-submit-button-color'));
 }
 
 const tabs = uiv.tabs.list();
@@ -86,11 +93,15 @@ if (normalizeText(composerText(composerBefore)).trim() !== '') {
   throw new Error('Q08 requires an empty composer; existing draft detected and was not modified');
 }
 
+const baselineSurfaces = submitSurfaces();
+const baselineSubmit = baselineSurfaces.length === 1 ? baselineSurfaces[0] : null;
 const originalClipboard = uiv.clipboard.read();
+const copySentinel = `Q08_COPYBACK_SENTINEL_${new Date().toISOString()}`;
 let copiedBack = '';
-let send = null;
 let observedDraft = '';
+let postSubmit = null;
 let result = 'FAIL';
+let failureReason = '';
 
 try {
   uiv.clipboard.write(PAYLOAD);
@@ -103,49 +114,66 @@ try {
 
   uiv.browser.click(composerBefore);
   uiv.browser.type('${KEY_CTRL+KEY_V}');
-  uiv.sleep(350);
+  uiv.sleep(500);
 
   const composersAfter = findAll('css=[contenteditable="true"],textarea');
   if (composersAfter.length !== 1) throw new Error(`Q08 composer lost uniqueness after paste; found ${composersAfter.length}`);
   const composerAfter = composersAfter[0];
-  // Finder results are snapshots, not live DOM handles. Keep snapshot text only as diagnostic evidence.
-  // Acceptance is the stronger trusted copy-back check below.
-  observedDraft = composerText(composerAfter);
+  observedDraft = composerText(composerAfter); // diagnostic only; finder matches are snapshots.
+
+  uiv.clipboard.write(copySentinel);
+  if (uiv.clipboard.read() !== copySentinel) throw new Error('Q08 could not seed copy-back sentinel');
 
   uiv.browser.click(composerAfter);
   uiv.browser.type('${KEY_CTRL+KEY_A}');
   uiv.browser.type('${KEY_CTRL+KEY_C}');
-  uiv.sleep(200);
+  uiv.sleep(250);
   copiedBack = uiv.clipboard.read();
+  if (copiedBack === copySentinel) {
+    throw new Error('Q08 copy-back did not replace sentinel; trusted paste/copy is not proven');
+  }
   if (normalizeText(copiedBack) !== normalizeText(PAYLOAD)) {
-    throw new Error('Q08 copy-back verification did not exactly preserve multiline/Unicode payload');
+    throw new Error('Q08 copy-back content does not exactly match multiline/Unicode payload');
   }
   uiv.browser.click(composerAfter);
 
-  const controls = findAll('css=button,[role="button"]').map(controlSnapshot);
-  let sendCandidates = controls.filter(c => c.testid.toLowerCase() === 'send-button');
-  if (!sendCandidates.length) {
-    sendCandidates = controls.filter(c => /(^|\s)(send|submit)(\s|$)/i.test(`${c.testid} ${c.aria} ${c.title} ${c.text}`));
+  const postSurfaces = submitSurfaces();
+  const enabledPost = postSurfaces.filter(enabled);
+  if (enabledPost.length !== 1) {
+    throw new Error(`Q08 requires exactly one enabled composer submit surface after proven paste; found ${enabledPost.length} enabled of ${postSurfaces.length}`);
   }
-  const enabledSend = sendCandidates.filter(c => !c.disabled && c.ariaDisabled.toLowerCase() !== 'true');
-  if (enabledSend.length !== 1) {
-    throw new Error(`Q08 requires exactly one enabled Send control after paste; found ${enabledSend.length} enabled of ${sendCandidates.length} candidates`);
+  postSubmit = enabledPost[0];
+  const semantic = `${postSubmit.testid} ${postSubmit.aria} ${postSubmit.title} ${postSubmit.text}`.toLowerCase();
+  const explicitlySend = /send|submit/.test(semantic);
+  const transitionedFromVoice = postSubmit.aria.toLowerCase() !== 'start voice' && (!baselineSubmit || baselineSubmit.aria.toLowerCase() === 'start voice');
+  if (!explicitlySend && !transitionedFromVoice) {
+    throw new Error(`Q08 submit surface did not transition to Send state; aria=${postSubmit.aria || '(empty)'}`);
   }
-  send = enabledSend[0];
+
   result = 'PASS';
+} catch (error) {
+  failureReason = clean(error && error.message ? error.message : error);
 } finally {
   uiv.clipboard.write(originalClipboard);
 }
 
+const b = baselineSubmit || {tag:'',testid:'',aria:'',title:'',text:'',className:'',disabled:false,ariaDisabled:''};
+const s = postSubmit || {tag:'',testid:'',aria:'',title:'',text:'',className:'',disabled:false,ariaDisabled:''};
 const rows = [[
-  'result','url','conversation_id','composer_count','payload','observed_draft','copied_back','send_tag','send_testid','send_aria','send_title','send_text','send_aria_disabled','background_switch_delay_ms','expected_uivision'
+  'result','failure_reason','url','conversation_id','composer_count','payload','observed_draft','copy_sentinel','copied_back',
+  'baseline_submit_testid','baseline_submit_aria','baseline_submit_class','post_submit_testid','post_submit_aria','post_submit_title','post_submit_text','post_submit_class','post_submit_aria_disabled',
+  'background_switch_delay_ms','expected_uivision'
 ]];
 rows.push([
-  result,currentUrl,conversationId,1,PAYLOAD,observedDraft,copiedBack,send.tag,send.testid,send.aria,send.title,send.text,send.ariaDisabled,BACKGROUND_SWITCH_DELAY_MS,EXPECTED_UIVISION
+  result,failureReason,currentUrl,conversationId,1,PAYLOAD,observedDraft,copySentinel,copiedBack,
+  b.testid,b.aria,b.className,s.testid,s.aria,s.title,s.text,s.className,s.ariaDisabled,
+  BACKGROUND_SWITCH_DELAY_MS,EXPECTED_UIVISION
 ]);
 
 const stamp = new Date().toISOString().replace(/[:.]/g, '-');
-const file = `Q08_input_probe_${stamp}.csv`;
+const file = `Q08_input_probe_v3_${stamp}.csv`;
 uiv.csv.write(file, rows);
 uiv.files.exportToDownloads(file);
-uiv.log(`Q08 ${result}: verified trusted clipboard paste and exactly one enabled Send; draft left unsent`, 'green');
+
+if (failureReason) throw new Error(`${failureReason}; evidence exported as ${file}`);
+uiv.log(`Q08 PASS: sentinel-overwrite copy-back exact; enabled Send state proven; draft left unsent; ${file}`, 'green');
