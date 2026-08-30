@@ -1,0 +1,19 @@
+Status=OK
+###
+[status] Q10_FRESH_CHAT_SPA_PROBE.js started
+[info] Executing: uiv.tabs.select {"index":1}
+[info] script tab → #1 "t - Reconstruct Relay v7 State"
+[info] Executing: uiv.$ {"locator":"css=body","required":false,"timeout":2,"includeHidden":true}
+[info] Executing: uiv.$ {"locator":"css=#prompt-textarea","required":false,"timeout":2,"includeHidden":true}
+[info] Executing: uiv.$ {"locator":"css=[data-sidebar-item]","required":false,"timeout":2,"includeHidden":true}
+[info] Executing: uiv.$ {"locator":"css=[data-active]","required":false,"timeout":2,"includeHidden":true}
+[info] Executing: uiv.$ {"locator":"css=[data-sidebar-item][href*=\"g-p-6a9323b61110819182dba0224678aa8b\"]","required":false,"timeout":2,"includeHidden":true}
+[info] Executing: uiv.$ {"locator":"css=a[data-sidebar-item][data-active][href*=\"g-p-6a9323b61110819182dba0224678aa8b\"][href*=\"/c/\"]","required":false,"timeout":2,"includ…
+[info] Executing: uiv.$ {"locator":"css=button[aria-label=\"Open sidebar\"]","required":false,"timeout":2,"includeHidden":true}
+[info] Executing: uiv.$ {"locator":"css=button[aria-label=\"Open project home\"]","required":false,"timeout":2,"includeHidden":true}
+[info] Executing: uiv.csv.write {"file":"Q10_tab_binding_diagnostic_2026-08-30T06-15-00-058Z.csv","rows":[["category","name","locator","raw_count","visible_count","error","tag","href…
+[info] Executing:  | localStorageExport | Q10_tab_binding_diagnostic_2026-08-30T06-15-00-058Z.csv |  | 
+[info] 'Q10_tab_binding_diagnostic_2026-08-30T06-15-00-058Z.csv' exported to the browser's Downloads folder
+[echo] Q10 read-only diagnostic: ACTIVE_SELECTOR_RESOLVED_AFTER_EXPLICIT_TAB_SELECT; Q10_tab_binding_diagnostic_2026-08-30T06-15-00-058Z.csv
+[info] perf: 1 commands, avg 773ms each (tab 1, dispatch 2, wait-start 111, run 659) — first 773ms, slowest localStorageExport 773ms
+[info] Q10_FRESH_CHAT_SPA_PROBE.js completed (Runtime 1.86s)

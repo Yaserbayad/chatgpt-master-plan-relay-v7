@@ -37,6 +37,33 @@ marker_user_count=0
 
 The observation-only post-run record independently confirms the same configured Project and old conversation remained active and idle, with no marker text and no new conversation.
 
+## Read-only explicit tab-binding diagnostic
+
+The governed diagnostic at commit `790683adff5ea0abca916ba2d2a2d224a114bd2a` was verified at SHA-256 `d3e04c0abbda8633c23393b103472288080d1f1eacec1cace24ab1ecdeab3f20`, synchronized as the only changed xfile macro, and launched exactly once through the official UI.Vision Command Line API.
+
+Its sole browser-state action was one `uiv.tabs.select(1)`, selecting:
+
+```text
+https://chatgpt.com/g/g-p-6a9323b61110819182dba0224678aa8b/c/6a932926-c750-83ed-9e99-d3addc14f456
+```
+
+After explicit selection, UI.Vision's read-only finders returned:
+
+| Probe | Raw | Visible |
+|---|---:|---:|
+| `body` | 1 | 1 |
+| `composer` | 1 | 1 |
+| `any_sidebar_item` | 91 | 91 |
+| `any_active` | 1 | 1 |
+| `target_project_sidebar_items` | 3 | 3 |
+| `active_target_conversation` | 1 | 1 |
+| `open_sidebar` | 1 | 1 |
+| `open_project_home` | 10 | 10 |
+
+The diagnostic classification is `ACTIVE_SELECTOR_RESOLVED_AFTER_EXPLICIT_TAB_SELECT`. This confirms the previous zero-count result was caused by finder context not being explicitly bound to the target tab, rather than active-attribute selector drift or visibility geometry.
+
+The saved log has `Status=OK` and the unique diagnostic action/output trace, but its start/completion display lines retain the prior macro label `Q10_FRESH_CHAT_SPA_PROBE.js`. Evidence attribution therefore uses the exact diagnostic hash, CLI query, one `uiv.tabs.select` trace, unique CSV filename, classification, and matching probe rows rather than that stale display label alone.
+
 ## Finding and safety
 
-Q10 does not satisfy the PASS criteria. The hard blocker is now specific to UI.Vision's browser DOM visibility: the observer can see the configured Project link and Open-sidebar control, but the canonical UI.Vision finder cannot resolve them. The single authorized corrected target run has been consumed. No Send was possible, no resend occurred, and no material action remains ambiguous; nevertheless, no further run is authorized.
+Q10 remains `FAIL` because the prior authorized material run did not satisfy the PASS criteria. The read-only diagnostic isolates explicit tab binding as the missing precondition for UI.Vision DOM finders. No ChatGPT page control was clicked, no Project-home navigation occurred, no text was typed or staged, no Send was attempted, and no conversation was created. No further material Q10 run was executed or authorized, and no material action remains ambiguous.

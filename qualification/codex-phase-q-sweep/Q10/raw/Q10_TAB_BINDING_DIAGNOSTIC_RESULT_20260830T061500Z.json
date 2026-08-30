@@ -1,0 +1,65 @@
+{
+  "schema_version": "q10-tab-binding-diagnostic-result-1",
+  "executed_at_utc": "2026-08-30T06:14:55.5691588Z",
+  "completed_at_utc": "2026-08-30T06:15:00.058Z",
+  "source": {
+    "relative_path": "qualification/Q10_TAB_BINDING_DIAGNOSTIC.js",
+    "commit": "790683adff5ea0abca916ba2d2a2d224a114bd2a",
+    "sha256": "d3e04c0abbda8633c23393b103472288080d1f1eacec1cace24ab1ecdeab3f20",
+    "active_xfile_path": "C:\\Users\\usr\\Desktop\\uivision\\macros\\Q10_TAB_BINDING_DIAGNOSTIC.js"
+  },
+  "launch": {
+    "api_page": "C:\\Users\\usr\\Documents\\Codex\\ui.vision.html",
+    "direct": 1,
+    "macro": "Q10_TAB_BINDING_DIAGNOSTIC.js",
+    "storage": "xfile",
+    "launch_count": 1,
+    "uiv_tabs_select_call_count": 1
+  },
+  "result": {
+    "classification": "ACTIVE_SELECTOR_RESOLVED_AFTER_EXPLICIT_TAB_SELECT",
+    "selected_tab_index": 1,
+    "selected_url": "https://chatgpt.com/g/g-p-6a9323b61110819182dba0224678aa8b/c/6a932926-c750-83ed-9e99-d3addc14f456",
+    "probes": {
+      "body": {"raw_count": 1, "visible_count": 1},
+      "composer": {"raw_count": 1, "visible_count": 1},
+      "any_sidebar_item": {"raw_count": 91, "visible_count": 91},
+      "any_active": {"raw_count": 1, "visible_count": 1},
+      "target_project_sidebar_items": {"raw_count": 3, "visible_count": 3},
+      "active_target_conversation": {"raw_count": 1, "visible_count": 1},
+      "open_sidebar": {"raw_count": 1, "visible_count": 1},
+      "open_project_home": {"raw_count": 10, "visible_count": 10}
+    }
+  },
+  "authorized_browser_state_action": {
+    "action": "uiv.tabs.select",
+    "selected_tab_index": 1,
+    "count": 1
+  },
+  "prohibited_actions": {
+    "chatgpt_page_control_clicked": false,
+    "project_home_clicked": false,
+    "navigation_performed": false,
+    "typed_into_chatgpt": false,
+    "prompt_staged": false,
+    "send_attempted": false,
+    "send_action_count": 0,
+    "new_conversation_created": false
+  },
+  "evidence": {
+    "csv": {
+      "relative_path": "qualification/codex-phase-q-sweep/Q10/raw/Q10_tab_binding_diagnostic_2026-08-30T06-15-00-058Z.csv",
+      "sha256": "06d9873cd1a4de597308e7af720fb5aef7c3afb58b52799124828be0fde7ceb9"
+    },
+    "savelog": {
+      "relative_path": "qualification/codex-phase-q-sweep/Q10/raw/Q10_tab_binding_uivision_cli_20260830T061455Z.log",
+      "sha256": "7ea78b1437276f9ec3d831f2106a7459d2b2ab4ee8e8eceb741393cf60019ccf",
+      "status": "OK",
+      "display_label_mismatch": true,
+      "display_label_observed": "Q10_FRESH_CHAT_SPA_PROBE.js",
+      "attribution_basis": "exact source hash, CLI query, one uiv.tabs.select action, unique CSV filename, diagnostic classification, and matching probe rows"
+    }
+  },
+  "material_action_ambiguous": false,
+  "sensitive_or_redacted": false
+}
