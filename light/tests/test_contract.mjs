@@ -7,8 +7,9 @@ const probePath = path.join(root, 'probe', 'Q15B_LIGHT_PROBE.js');
 const bridgePath = path.join(root, 'probe', 'RelayCodexLightBridge.ps1');
 const schemaPath = path.join(root, 'probe', 'Q15B_LIGHT_OUTPUT.schema.json');
 const runnerPath = path.join(root, 'probe', 'RUN_Q15B_LIGHT.ps1');
+const directPath = path.join(root, 'probe', 'TEST_CODEX_DIRECT.ps1');
 
-for (const p of [probePath, bridgePath, schemaPath, runnerPath]) {
+for (const p of [probePath, bridgePath, schemaPath, runnerPath, directPath]) {
   assert.ok(fs.existsSync(p), `missing required file: ${path.basename(p)}`);
 }
 
@@ -16,6 +17,7 @@ const probe = fs.readFileSync(probePath, 'utf8');
 const bridge = fs.readFileSync(bridgePath, 'utf8');
 const schema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
 const runner = fs.readFileSync(runnerPath, 'utf8');
+const direct = fs.readFileSync(directPath, 'utf8');
 
 for (const forbidden of [
   'uiv.browser.click(', 'uiv.browser.type(', 'uiv.page.click(', 'uiv.page.type(',
@@ -27,7 +29,8 @@ assert.equal((probe.match(/XRunAndWait/g) || []).length, 1, 'probe must invoke X
 for (const required of [
   'stop-button', 'data-message-author-role', 'data-message-id', 'assistant_text',
   'nonce', 'assistant_message_id', 'assistant_probe', 'uiv.clipboard.write',
-  'uiv.clipboard.read', '!xrun_exitcode', 'LIGHT_PROBE_OK'
+  'uiv.clipboard.read', '!xrun_exitcode', 'LIGHT_PROBE_OK', 'failure_class',
+  'CODEX_CREDITS_REQUIRED'
 ]) {
   assert.ok(probe.includes(required), `probe missing required contract token: ${required}`);
 }
@@ -54,8 +57,15 @@ for (const key of ['protocol','nonce','assistant_message_id','assistant_text_len
 }
 assert.deepEqual(schema.properties.action.enum, ['LIGHT_PROBE_OK']);
 
-for (const required of ['Q15B_LIGHT_PROBE.js','RelayCodexLightBridge.ps1','Q15B_LIGHT_OUTPUT.schema.json','storage=xfile','Q15B_light_*.csv']) {
+for (const required of ['Q15B_LIGHT_PROBE.js','RelayCodexLightBridge.ps1','Q15B_LIGHT_OUTPUT.schema.json','storage=xfile','Q15B_light_*.csv','failure_class','CODEX_CREDITS_REQUIRED','TEST_CODEX_DIRECT.ps1']) {
   assert.ok(runner.includes(required), `runner missing required token: ${required}`);
+}
+
+for (const required of ["'exec'", "'--ephemeral'", "'--skip-git-repo-check'", "'--sandbox'", "'read-only'", "'--output-schema'", 'WaitForExit(120000)', 'CODEX_DIRECT_PASS', 'CODEX_CREDITS_REQUIRED']) {
+  assert.ok(direct.includes(required), `direct preflight missing required token: ${required}`);
+}
+for (const forbidden of ['--dangerously-bypass-approvals-and-sandbox','--full-auto','Invoke-WebRequest','Start-Process chrome','XRunAndWait']) {
+  assert.ok(!direct.includes(forbidden), `direct preflight contains forbidden token: ${forbidden}`);
 }
 
 console.log('LIGHT CONTRACT TESTS: PASS');
