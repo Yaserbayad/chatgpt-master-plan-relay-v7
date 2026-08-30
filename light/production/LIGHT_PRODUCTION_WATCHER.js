@@ -8,7 +8,7 @@ const OUTPUT_PROTOCOL = 'relay-light-production-action-v1';
 const MESSAGE = 'css=[data-message-author-role]';
 const STOP = 'css=[data-testid="stop-button"]';
 const COMPOSERS = ['css=#prompt-textarea','css=[contenteditable="true"][data-virtualkeyboard="true"]'];
-const SENDS = ['css=button[data-testid="send-button"]','css=button[aria-label="Send prompt"]'];
+const SENDS = ['css=button[class*="composer-submit-button-color"][aria-label="Send prompt"]','css=button[data-testid="send-button"]','css=button[aria-label="Send prompt"]'];
 const STATE_FILE = 'LIGHT_PRODUCTION_STATE.csv';
 const LIGHT_MAX_SENDS = 1;
 const POLL_MS = 3000;
@@ -22,6 +22,9 @@ function raw(v) { return v == null ? '' : String(v); }
 function attr(m,n) { try { const v=m.getAttribute(n); return v==null?'':String(v); } catch (_) { return m&&m.attributes&&m.attributes[n]!=null?String(m.attributes[n]):''; } }
 function all(locator, timeout=2, includeHidden=false) { const o={required:false,timeout}; if(includeHidden)o.includeHidden=true; const r=uiv.findElements(locator,o); return Array.isArray(r)?r:[]; }
 function first(locators, timeout=2) { for (const l of locators) { const xs=all(l,timeout,false); if(xs.length) return xs[0]; } return null; }
+function hasAttr(m,n) { const a=m&&m.attributes?m.attributes:{}; if(Object.prototype.hasOwnProperty.call(a,n)) return true; try{return m.getAttribute(n)!==null;}catch(_){return false;} }
+function enabled(m) { return !!m&&!hasAttr(m,'disabled')&&clean(attr(m,'aria-disabled')).toLowerCase()!=='true'; }
+function firstEnabled(locators,timeout=2) { for(const l of locators){ const xs=all(l,timeout,true).filter(enabled); if(xs.length===1)return xs[0]; if(xs.length>1)throw new Error(`SEND_CONTROL_MISSING: ambiguous enabled Send controls for ${l}: ${xs.length}`); } return null; }
 function conversationId(url) { const m=String(url||'').match(/\/c\/([^/?#]+)/); return m?m[1]:''; }
 function makeNonce() { return `LIGHT_PROD_${new Date().toISOString().replace(/[^0-9A-Za-z]/g,'')}_${Math.random().toString(36).slice(2,14)}`; }
 function messageText(m) { const t=raw(m&&m.text); return t || raw(m&&m.value); }
@@ -99,7 +102,7 @@ try {
     const copied=raw(uiv.clipboard.read()); if(copied.replace(/\r/g,'')!==prompt.replace(/\r/g,''))throw new Error('STAGE_VERIFY_FAILED: staged prompt copy-back does not match');
     uiv.clipboard.write(originalClipboard);
     assertSourceIdentity(boundIndex,source);
-    const send=first(SENDS,2); if(!send)throw new Error('SEND_CONTROL_MISSING: semantic Send control not found');
+    const send=firstEnabled(SENDS,2); if(!send)throw new Error('SEND_CONTROL_MISSING: semantic Send control not found');
     if(sendClickCount>=LIGHT_MAX_SENDS) throw new Error('INVALID_ACTION: material send bound exceeded');
     writeState(source.assistant.id,'SEND_AMBIGUOUS');
     uiv.browser.click(send); sendClickCount+=1;
