@@ -20,7 +20,7 @@
     "Q11": "PASS",
     "Q12": "PASS",
     "Q13": "PASS",
-    "Q14": "TODO",
+    "Q14": "PASS",
     "Q15": "TODO",
     "Q16": "TODO"
   },
@@ -37,7 +37,8 @@
     "Q10": "qualification/Q10_POST_LIMIT_RECONCILIATION_EVIDENCE.md",
     "Q11": "qualification/Q11_EVIDENCE.md",
     "Q12": "qualification/Q12_FINAL_EVIDENCE.md",
-    "Q13": "qualification/Q13_EVIDENCE.md"
+    "Q13": "qualification/Q13_EVIDENCE.md",
+    "Q14": "qualification/Q14_FINAL_EVIDENCE.md"
   },
   "note": "Qualification-time compact state only. Final production schema is intentionally deferred to C01. Human-authorized Q12 Phase-Q scope amendment: master-plan/Q12_SCOPE_AMENDMENT_2026-08-30.md; external Chrome crash/restart handling is optional and not required for current Q12 acceptance."
 }
