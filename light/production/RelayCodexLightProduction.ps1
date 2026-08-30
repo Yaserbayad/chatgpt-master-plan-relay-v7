@@ -69,11 +69,31 @@ try {
   $AssistantTextSha256 = Get-Sha256Hex $AssistantText
 
   $QualificationMode = $false
+  $MasterQualificationMode = $false
   $TargetPrompt = 'Reply exactly LIGHT_PRODUCTION_TARGET_OK.'
+  $ExpectedConversationId = ''
+  $ExpectedUserMessageId = ''
+  $ExpectedAssistantMessageId = ''
+  $ExpectedAssistantTextSha256 = ''
+  $ExpectedAction = ''
+  $ExpectedPromptSha256 = ''
   if (Test-Path -LiteralPath $ConfigPath) {
     $Config = (Get-Content -LiteralPath $ConfigPath -Raw) | ConvertFrom-Json
     $QualificationMode = [System.Convert]::ToBoolean($Config.qualification_mode)
+    if ($null -ne $Config.PSObject.Properties['master_qualification_mode']) { $MasterQualificationMode = [System.Convert]::ToBoolean($Config.master_qualification_mode) }
     if (-not [string]::IsNullOrWhiteSpace([string]$Config.target_prompt)) { $TargetPrompt = [string]$Config.target_prompt }
+    $Prop = $Config.PSObject.Properties['expected_conversation_id']; if ($null -ne $Prop) { $ExpectedConversationId = [string]$Prop.Value }
+    $Prop = $Config.PSObject.Properties['expected_user_message_id']; if ($null -ne $Prop) { $ExpectedUserMessageId = [string]$Prop.Value }
+    $Prop = $Config.PSObject.Properties['expected_assistant_message_id']; if ($null -ne $Prop) { $ExpectedAssistantMessageId = [string]$Prop.Value }
+    $Prop = $Config.PSObject.Properties['expected_assistant_text_sha256']; if ($null -ne $Prop) { $ExpectedAssistantTextSha256 = [string]$Prop.Value }
+    $Prop = $Config.PSObject.Properties['expected_action']; if ($null -ne $Prop) { $ExpectedAction = [string]$Prop.Value }
+    $Prop = $Config.PSObject.Properties['expected_prompt_sha256']; if ($null -ne $Prop) { $ExpectedPromptSha256 = [string]$Prop.Value }
+    if ($MasterQualificationMode) {
+      if (-not [string]::IsNullOrWhiteSpace($ExpectedConversationId) -and $ConversationId -ne $ExpectedConversationId) { throw 'master qualification conversation id mismatch' }
+      if (-not [string]::IsNullOrWhiteSpace($ExpectedUserMessageId) -and [string]$Event.user_message_id -ne $ExpectedUserMessageId) { throw 'master qualification user message id mismatch' }
+      if (-not [string]::IsNullOrWhiteSpace($ExpectedAssistantMessageId) -and $AssistantMessageId -ne $ExpectedAssistantMessageId) { throw 'master qualification assistant message id mismatch' }
+      if (-not [string]::IsNullOrWhiteSpace($ExpectedAssistantTextSha256) -and $AssistantTextSha256 -ne $ExpectedAssistantTextSha256.ToLowerInvariant()) { throw 'master qualification assistant text sha256 mismatch' }
+    }
   }
   $env:LIGHT_PRODUCTION_TARGET_PROMPT = $TargetPrompt
 
@@ -178,6 +198,11 @@ exit $Code
     if ([string]::IsNullOrWhiteSpace($OutPrompt)) { throw 'SEND_PROMPT requires non-empty prompt' }
     if ($OutPrompt.Length -gt 12000) { throw 'SEND_PROMPT exceeds prompt length limit' }
   } elseif (-not [string]::IsNullOrEmpty($OutPrompt)) { throw 'STOP/HUMAN prompt must be empty' }
+  if ($MasterQualificationMode) {
+    if (-not [string]::IsNullOrWhiteSpace($ExpectedAction) -and $Action -ne $ExpectedAction) { throw ("master qualification action mismatch: expected {0}, got {1}" -f $ExpectedAction,$Action) }
+    $ActualPromptSha256 = if ([string]::IsNullOrEmpty($OutPrompt)) { '' } else { Get-Sha256Hex $OutPrompt }
+    if ($ActualPromptSha256 -ne $ExpectedPromptSha256.ToLowerInvariant()) { throw 'master qualification prompt sha256 mismatch' }
+  }
   Write-BridgeClipboard -Action $Action -Prompt $OutPrompt -Reason ([string]$Result.reason)
   exit 0
 }
