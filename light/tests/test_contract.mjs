@@ -61,7 +61,7 @@ for (const required of ['Q15B_LIGHT_PROBE.js','RelayCodexLightBridge.ps1','Q15B_
   assert.ok(runner.includes(required), `runner missing required token: ${required}`);
 }
 
-for (const required of ["'exec'", "'--ephemeral'", "'--skip-git-repo-check'", "'--sandbox'", "'read-only'", "'--output-schema'", 'WaitForExit(120000)', 'CODEX_DIRECT_PASS', 'CODEX_CREDITS_REQUIRED']) {
+for (const required of ["'exec'", "'--ephemeral'", "'--skip-git-repo-check'", "'--sandbox'", "'read-only'", "'--output-schema'", 'WaitForExit(120000)', 'CODEX_DIRECT_PASS', 'CODEX_CREDITS_REQUIRED', 'Codex CLI:', 'CODEX_DIRECT_DIAGNOSTIC_', '$Out', '$Err', '$Combined']) {
   assert.ok(direct.includes(required), `direct preflight missing required token: ${required}`);
 }
 for (const forbidden of ['--dangerously-bypass-approvals-and-sandbox','--full-auto','Invoke-WebRequest','Start-Process chrome','XRunAndWait']) {
