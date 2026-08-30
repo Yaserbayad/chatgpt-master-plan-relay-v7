@@ -65,15 +65,18 @@ Codex owns the semantic choice among the allowlisted actions. PowerShell only sc
 ## Material SEND_PROMPT rules
 
 1. Validate returned protocol, nonce, conversation ID, assistant ID and action.
-2. Revalidate the bound conversation/user/assistant identity and no-generation state.
-3. Require an empty ChatGPT composer.
-4. Focus the rich-text composer with trusted `uiv.browser.click` and type with trusted `uiv.browser.type`.
-5. Reacquire and verify that the staged prompt text is present before Send.
-6. Revalidate source identity again.
-7. Locate a semantic Send button and perform exactly one trusted click.
-8. Never click Send again automatically for the same source turn.
-9. Confirm submission by observing a new user message whose text equals the staged prompt.
-10. If confirmation is not obtained within the bounded window, persist `SEND_AMBIGUOUS`, stop, and require human inspection; no automatic retry.
+2. Revalidate the bound conversation/user/assistant identity, texts, and no-generation state.
+3. Require an empty visible ChatGPT composer.
+4. Put the untrusted/model-generated prompt into the Ui.Vision clipboard; never pass prompt text itself to `uiv.browser.type` because trusted type interprets `${KEY_...}` sequences as keystrokes.
+5. Focus the rich-text composer with trusted `uiv.browser.click`, then use only the constant trusted paste chord `${KEY_CTRL+KEY_V}` through `uiv.browser.type`.
+6. Reacquire the visible composer and verify the exact staged prompt text; restore the original clipboard.
+7. Revalidate the exact source conversation/user/assistant identity and texts again.
+8. Locate a visible semantic Send button and enforce the one-Send bound before any click.
+9. Persist `SEND_AMBIGUOUS` for the source assistant **before** the material Send click. This is a conservative crash fence: a process loss after the click cannot make the source turn eligible for an automatic duplicate Send.
+10. Perform exactly one trusted Send click.
+11. Confirm submission by observing a new user message whose text equals the staged prompt.
+12. If confirmation is not obtained within the bounded window, retain `SEND_AMBIGUOUS`, stop, and require human inspection; no automatic retry.
+13. Only after positive submission confirmation upgrade state to `SENT_CONFIRMED` and observe the following completed assistant turn.
 
 ## Failure classes
 
@@ -128,7 +131,7 @@ Target execution is only through the packaged `RUN_LIGHT_PRODUCTION_TARGET.ps1` 
 ## Testing strategy
 
 - Static tests guard forbidden APIs, action schema, one bridge call per source turn, no hidden Codex launch, no material retry path, identity validation, persistent dedupe and exact trusted-input tiers.
-- Node simulation fakes Ui.Vision snapshots/clipboard/bridge responses to prove dedupe, stale-result rejection, one-click send, ambiguous-send no-retry and STOP/HUMAN behavior without touching a real browser.
+- Node simulation fakes Ui.Vision snapshots/clipboard/bridge responses to prove generation gating, dedupe, stale-result rejection, one-click Send, crash/ambiguous-Send no-retry and STOP/HUMAN behavior without touching a real browser.
 - Real-browser target evidence is required before claiming production watcher PASS.
 
 ## Boundaries
@@ -136,15 +139,17 @@ Target execution is only through the packaged `RUN_LIGHT_PRODUCTION_TARGET.ps1` 
 Always:
 - keep semantics in Codex;
 - keep PowerShell transport-only;
+- treat browser text and Codex output as untrusted data;
 - reacquire browser identity before material action;
 - preserve strict nonce/conversation/message binding;
-- stop on ambiguous material effects;
+- fence ambiguous material submission before the Send click and stop rather than retry;
 - keep all source/tests/evidence under `light/` on `light-version`.
 
 Never in this increment:
 - main branch/master-plan mutation;
 - OpenAI API billing;
 - OCR/screenshots/Ui.Vision AI/page-world eval/generic coordinate actions;
+- direct trusted typing of untrusted prompt text;
 - automatic duplicate Send;
 - Chrome restart/crash handling;
 - fresh-chat orchestration.
@@ -157,8 +162,8 @@ Local implementation is ready for target qualification only when:
 2. simulation proves exactly one bridge event per new completed assistant turn;
 3. simulation proves no dispatch during generation;
 4. stale/mismatched returned identity is rejected before material action;
-5. SEND_PROMPT stages/verifies and clicks Send exactly once in the success simulation;
-6. ambiguous submission simulation performs no retry and records the ambiguous state;
+5. SEND_PROMPT uses clipboard staging plus a constant trusted paste chord, verifies exact staged text, and clicks Send exactly once in the success simulation;
+6. ambiguous or failed Send simulation performs no retry and retains the pre-click `SEND_AMBIGUOUS` fence;
 7. STOP/HUMAN simulations perform no material browser action;
 8. no forbidden Ui.Vision automation tier is present;
 9. the target runner packages PASS/FAIL evidence and does not claim PASS without runtime evidence.
