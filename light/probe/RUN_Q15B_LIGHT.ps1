@@ -76,7 +76,12 @@ try {
 
   $Row = Import-Csv -LiteralPath $Evidence.FullName | Select-Object -First 1
   if ($null -eq $Row) { throw 'Light Q15-B evidence CSV is empty.' }
-  if ($Row.result -ne 'PASS') { throw ("Light Q15-B macro failed: {0}" -f $Row.failure_reason) }
+  if ($Row.result -ne 'PASS') {
+    if (($Row.PSObject.Properties.Name -contains 'failure_class') -and $Row.failure_class -eq 'CODEX_CREDITS_REQUIRED') {
+      throw 'CODEX_CREDITS_REQUIRED: Codex workspace credits are unavailable. Run TEST_CODEX_DIRECT.ps1 after credits are restored, then rerun Q15-B.'
+    }
+    throw ("Light Q15-B macro failed: {0}" -f $Row.failure_reason)
+  }
   if ($Row.bridge_action -ne 'LIGHT_PROBE_OK') { throw 'LIGHT_PROBE_OK missing from evidence.' }
   if ($Row.xrun_exit_code -ne '0' -or $Row.codex_exit_code -ne '0') { throw 'bridge/Codex exit code was nonzero.' }
   if ($Row.browser_identity_revalidated -ne 'true') { throw 'post-Codex browser identity revalidation missing.' }
