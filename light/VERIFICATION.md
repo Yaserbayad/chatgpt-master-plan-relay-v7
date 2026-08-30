@@ -8,15 +8,13 @@ Durable evidence: `light/evidence/Q15B_2026-08-30.md`
 
 Accepted Q15-B source revision: `3562b6090c3ad1c8663d4f1fcc6cb506269051d1`
 
-Q15-B no longer gates production implementation.
+Q15-B proves the target Codex execution primitive used by Light: one locally authenticated `codex-cli 0.151.0` console-backed, ephemeral, no-tool, read-only, structured, nonce-bound turn with exit 0 and post-Codex browser identity revalidation. It does not by itself prove repeated normal-production semantic decisions.
 
-## First production watcher/actuator
+## Production watcher history
 
-Status: **Q08 SENTINEL / SUBMIT-SURFACE CONTRACT RESTORED, LOCALLY VERIFIED — TARGET PASS REQUIRED**.
+Production is **not yet target-PASS**.
 
-Contract: `light/PRODUCTION_CONTRACT.md`
-
-Evidence records:
+Durable evidence includes:
 
 - `light/evidence/PRODUCTION_LOCAL_2026-08-30.md`
 - `light/evidence/PRODUCTION_TARGET_FAIL_2026-08-30_122613.md`
@@ -24,129 +22,108 @@ Evidence records:
 - `light/evidence/PRODUCTION_TARGET_FAIL_2026-08-30_140440.md`
 - `light/evidence/PRODUCTION_TARGET_PREFLIGHT_FAIL_2026-08-30_142107.md`
 
-### Target attempt 1
+The prior target attempts established these reusable corrections:
 
-Safe pre-Send failure:
+1. finder snapshots are not authoritative staged-text proof;
+2. the Q09 selector-only diagnosis was falsified by target evidence;
+3. the target-proven Q08 contract is required: `Start Voice -> Send prompt`, unique copy sentinel before Ctrl+C, sentinel replacement, exact copied text with only terminal-NBSP normalization;
+4. the target runner must create its own macro staging directory rather than require it to pre-exist;
+5. no failed/ambiguous material Send is automatically retried.
+
+The current production watcher preserves the Q08 sentinel/submit-surface contract, strict identity/nonce binding, one-Send maximum, pre-click `SEND_AMBIGUOUS`, exact submission confirmation, and following stable-completion requirement.
+
+## Master qualification / same-chat soak
+
+Status: **LOCALLY VERIFIED MASTER CANDIDATE — ONE REAL TARGET RUN REQUIRED**.
+
+Preferred next qualification path:
+
+`light/production/RUN_LIGHT_MASTER_QUALIFICATION.ps1`
+
+Contract:
+
+`light/MASTER_QUALIFICATION_CONTRACT.md`
+
+Local evidence:
+
+`light/evidence/MASTER_QUALIFICATION_LOCAL_2026-08-30.md`
+
+The master harness replaces the normal sequence of one-off target test followed by a separate soak. It performs one bounded seven-cycle run:
+
+- cycle 0: deterministic forced seed `SEND_PROMPT` to prove the complete target mechanical path and establish a controlled handshake;
+- cycles 1-5: **normal production mode**; Codex must independently choose `SEND_PROMPT` and return exactly `LIGHT_SOAK_01` through `LIGHT_SOAK_05` from the preceding ChatGPT assistant state;
+- cycle 6: **normal production mode**; Codex must choose `STOP` when the assistant explicitly declares the objective complete.
+
+Total successful run:
+
+- 7 Codex turns;
+- 6 bounded safe material Sends;
+- 5 normal-production semantic SEND decisions;
+- 1 normal-production terminal STOP decision.
+
+PowerShell remains a deterministic supervisor/test oracle only. It does not decide semantics and does not perform ChatGPT browser actions.
+
+### Master safety and proof rules
+
+Every SEND cycle requires:
+
+- same conversation and exact user/assistant ID chain;
+- unique nonce;
+- expected source assistant SHA-256;
+- bridge/Codex exit 0;
+- exact expected Codex action and prompt SHA-256;
+- browser identity revalidated;
+- `Start Voice -> Send prompt` transition;
+- nonce-bound copy sentinel replaced;
+- exact staged copy;
+- exactly one Send click;
+- exact new-user-message confirmation;
+- following stable assistant completion.
+
+The terminal cycle requires `STOP`, empty prompt hash, zero Send clicks, no submission and no next-completion wait.
+
+Qualification-only bridge guards validate expected source identity/hash before Codex and expected action/prompt hash after Codex but before returning an actionable result to Ui.Vision. Therefore a wrong semantic Codex output fails before staging or Send. These guards are inactive in normal production unless `master_qualification_mode=true`.
+
+The master harness stops at the first failure and never retries a failed or ambiguous material action. Partial evidence is preserved.
+
+### Current master source binding
 
 ```text
-STAGE_VERIFY_FAILED: staged prompt does not match
+8328f06495b83c2f263b26e6e9f335d8df426aa5  light/production/LIGHT_PRODUCTION_WATCHER.js
+2490165233cc5904e3731fc6ac4279e7ef29f2ef  light/production/RelayCodexLightProduction.ps1
+d06dbdcfb341e443663736fcdc14274c0560b3c3  light/production/LIGHT_PRODUCTION_ACTION.schema.json
+09f513ce062387669c21c09d9f02dab6bb4009be  light/production/RUN_LIGHT_MASTER_QUALIFICATION.ps1
+dc45da6fc711e4d429f31d92041bb8fb766a124d  light/MASTER_QUALIFICATION_CONTRACT.md
+add4d4c45cf467a74240c058860ba05b88b0b03f  light/tests/test_production_contract.mjs
+f60d602a4ee27a8a4c87782dc8b9272237e8dd74  light/tests/simulate_production_watcher.mjs
+ea9d2c1b6d3c43f11c33607d6c3fd05f8038d544  light/tests/test_master_qualification_harness.mjs
+767447fc550346fd9a1ef503d427c84ca50e6335  light/tests/simulate_master_qualification.mjs
 ```
 
-The finder-snapshot text check was removed because Ui.Vision finder results are snapshots.
-
-### Target attempt 2
-
-Safe pre-Send failure:
+### Fresh local verification
 
 ```text
-SEND_CONTROL_MISSING: semantic Send control not found
-```
-
-The Light watcher had omitted the Q09-qualified Send selector / discovery behavior, so that behavior was restored.
-
-### Target attempt 3 — convergence correction
-
-The third target run failed with the same `SEND_CONTROL_MISSING` signature even though the uploaded evidence proves the Q09 selector, `includeHidden:true`, and enabled filtering were actually executed. No Send click occurred.
-
-Therefore the attempt-2 selector-only root-cause claim is **falsified**.
-
-The third evidence ZIP is independently hash-verified and byte-bound to the failed watcher blob `c8968386530efc4381411fed1aae90dda38c485f`.
-
-Reinspection of the already target-qualified Q08 evidence exposed a more fundamental implementation regression: Light had reintroduced Q08's known false-positive clipboard oracle. It wrote the prompt to the clipboard before paste, then copied and compared against the same prompt without first replacing the clipboard with a unique sentinel. A silent paste/copy no-op can therefore leave the clipboard unchanged and falsely pass staging.
-
-Q08 final target PASS had explicitly required:
-
-```text
-Start Voice -> Send prompt
-unique copy sentinel before Ctrl+C
-copy must replace sentinel
-copied text == prompt after CR + terminal-NBSP-only normalization
-```
-
-### Target attempt 4 — runner preflight only
-
-The uploaded `LIGHT_PRODUCTION_evidence_20260830_142107.zip` is internally hash-valid and byte-bound to the current Q08 sentinel watcher, but the PowerShell runner stopped before launching Ui.Vision:
-
-```text
-required path missing: C:\Users\usr\Desktop\uivision\macros
-```
-
-No target CSV or Ui.Vision target log was produced. This run therefore provides **no new watcher evidence** and does not change the Q08 sentinel candidate's target status.
-
-The runner incorrectly treated its controlled macro staging directory as an external pre-existing prerequisite. It now creates that directory recursively and verifies it before copying the macro. The watcher, bridge and schema are unchanged.
-
-### Current correction
-
-The production watcher restores the target-proven Q08 contract:
-
-1. require one visible `composer-submit-button-color` surface with `aria-label="Start Voice"` before staging;
-2. trusted clipboard paste through the composer;
-3. require the same visible surface to transition to enabled `aria-label="Send prompt"`;
-4. seed a unique nonce-bound clipboard sentinel before Ctrl+C;
-5. require Ctrl+C to replace the sentinel;
-6. compare copied text with terminal-NBSP-only editor normalization;
-7. restore original clipboard;
-8. revalidate source identity;
-9. reacquire the same visible submit surface as `Send prompt` before the one bounded click.
-
-The runner now self-heals `C:\Users\usr\Desktop\uivision\macros` before launch. The previous selector-only `includeHidden:true` click path remains removed. One-Send maximum, pre-click `SEND_AMBIGUOUS`, dedupe, identity binding, STOP/HUMAN, and no automatic retry remain unchanged.
-
-### Current source binding
-
-```text
-d06dbdcfb341e443663736fcdc14274c0560b3c3  LIGHT_PRODUCTION_ACTION.schema.json
-eb8ff2a0367732f66207b4611cfe7336b9da0d16  LIGHT_PRODUCTION_WATCHER.js
-15bc7662948976fe06cbdd010566453049e69879  RUN_LIGHT_PRODUCTION_TARGET.ps1
-3fb41fe1ef6f4ac6f0ade600858d700c49d19aaf  RelayCodexLightProduction.ps1
-8002197f4d5d504702fbe747f48fb7502abf2eca  test_production_contract.mjs
-9864c04ee91e140637871811ded502c27ecc2639  simulate_production_watcher.mjs
-```
-
-### Current local verification
-
-```text
-node --check light/production/LIGHT_PRODUCTION_WATCHER.js
-PASS
-
 node light/tests/test_production_contract.mjs
 LIGHT PRODUCTION CONTRACT TESTS: PASS
 
 node light/tests/simulate_production_watcher.mjs
 LIGHT PRODUCTION SENTINEL/SUBMIT-SURFACE SIMULATION: PASS
 
-focused runner self-heal regression
-LIGHT RUNNER MACRODIR SELF-HEAL CONTRACT: PASS
+node light/tests/test_master_qualification_harness.mjs
+LIGHT MASTER QUALIFICATION STATIC CONTRACT: PASS
+
+node light/tests/simulate_master_qualification.mjs
+LIGHT MASTER QUALIFICATION ACCEPTANCE SIMULATION: PASS
 ```
 
-The simulation proves:
+The master adversarial simulation independently rejects conversation drift, user/assistant chain breaks, nonce reuse, wrong source assistant state, wrong Codex prompt hash, staging transition failure, sentinel failure, double Send, early STOP, terminal SEND and terminal completion wait.
 
-- paste no-op fails before Send by missing `Start Voice -> Send prompt` transition;
-- copy no-op fails because the sentinel is not replaced;
-- copied-content mismatch fails before Send;
-- terminal NBSP editor serialization is accepted without broad whitespace trimming;
-- generation gating, stale identity, STOP/HUMAN, duplicate-turn, Send-click failure, one-Send and no-retry behavior remain intact.
-
-The local environment has no PowerShell runtime, so the runner's Windows execution remains target evidence only.
+The local execution environment has no Windows PowerShell/real Chrome+Ui.Vision target, so no target PASS is claimed from these local results.
 
 ## Remaining acceptance boundary
 
-Production is **not target-PASS**.
+Run the packaged master qualification once against exactly one completed configured-Project ChatGPT conversation with an empty composer showing `Start Voice`. Do not interact with ChatGPT during the run.
 
-Run the replacement bounded target package once against exactly one completed configured-Project ChatGPT conversation tab with an empty composer. It may send exactly one fixed prompt:
+A genuine master PASS requires all seven target cycles and the returned evidence ZIP to verify independently. After that PASS, the current same-chat production path **and bounded reliability soak** are qualified. Fresh-chat/recovery remains the next separate major stage.
 
-`Reply exactly LIGHT_PRODUCTION_TARGET_OK.`
-
-Target PASS requires evidence proving:
-
-1. bridge/Codex exit 0;
-2. pre-action identity revalidation;
-3. `baseline_submit_aria=Start Voice`;
-4. `pasted_submit_aria=Send prompt`;
-5. `copy_sentinel_replaced=true`;
-6. `staged_copy_exact=true`;
-7. exactly one Send click;
-8. exact new-user-message confirmation;
-9. following stable completed assistant turn;
-10. evidence bundle bound to the current source.
-
-Do not blindly rerun a target failure. Diagnose returned evidence first. After independently verified target PASS, proceed to bounded same-chat reliability/soak before fresh-chat/recovery work.
+The older one-off production target runner remains available only as a focused diagnostic fallback; the master harness is the preferred qualification path.
