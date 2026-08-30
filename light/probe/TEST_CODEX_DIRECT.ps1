@@ -4,10 +4,38 @@ $ErrorActionPreference = 'Stop'
 $WorkDir = $null
 $Protocol = 'relay-light-direct-v1'
 $Nonce = 'DIRECT_' + [Guid]::NewGuid().ToString('N')
+$DiagnosticPath = $null
 
 function PsLiteral([string]$Value) { return "'" + $Value.Replace("'", "''") + "'" }
 function Is-CreditFailure([string]$Text) {
   return $Text -match '(?i)workspace is out of credits|out of credits|usage limit reached|reached your usage limit|add credits to continue|increase your limits to continue'
+}
+function Read-Text([string]$Path) {
+  if (-not (Test-Path -LiteralPath $Path)) { return '' }
+  return ((Get-Content -LiteralPath $Path -Raw -ErrorAction SilentlyContinue) | Out-String).Trim()
+}
+function One-Line([string]$Text, [int]$Max = 1200) {
+  $Value = ($Text -replace '[\r\n]+',' ').Trim()
+  if ($Value.Length -gt $Max) { return $Value.Substring(0,$Max) }
+  return $Value
+}
+function Write-Diagnostic([string]$Version, [int]$ExitCode, [string]$Stdout, [string]$Stderr) {
+  $Stamp = Get-Date -Format 'yyyyMMdd_HHmmss'
+  $Base = Split-Path -Parent $MyInvocation.ScriptName
+  if ([string]::IsNullOrWhiteSpace($Base)) { $Base = (Get-Location).Path }
+  $Path = Join-Path $Base ("CODEX_DIRECT_DIAGNOSTIC_{0}.txt" -f $Stamp)
+  $Body = @(
+    "utc=$([DateTime]::UtcNow.ToString('o'))",
+    "codex_version=$Version",
+    "exit_code=$ExitCode",
+    'flags=exec --ephemeral --skip-git-repo-check --sandbox read-only -C <temp> --output-schema <schema> <prompt>',
+    '--- stdout ---',
+    $Stdout,
+    '--- stderr ---',
+    $Stderr
+  ) -join "`r`n"
+  [IO.File]::WriteAllText($Path, $Body, (New-Object Text.UTF8Encoding($false)))
+  return $Path
 }
 
 try {
@@ -16,6 +44,7 @@ try {
   if ([string]::IsNullOrWhiteSpace($CodexPath)) { throw 'codex command path unresolved' }
   $CodexVersion = ((& $CodexPath --version 2>$null) | Out-String).Trim()
   if ([string]::IsNullOrWhiteSpace($CodexVersion)) { throw 'codex version unavailable' }
+  Write-Host ("Codex CLI: {0}" -f $CodexVersion)
 
   $ExecHelp = ((& $CodexPath exec --help 2>&1) | Out-String)
   foreach ($RequiredFlag in @('--ephemeral','--skip-git-repo-check','--sandbox','--output-schema')) {
@@ -82,20 +111,23 @@ exit $Code
   }
 
   $ExitCode = [int]$Process.ExitCode
-  $Err = if (Test-Path -LiteralPath $StderrPath) { ((Get-Content -LiteralPath $StderrPath -Raw -ErrorAction SilentlyContinue) | Out-String).Trim() } else { '' }
+  $Out = Read-Text $StdoutPath
+  $Err = Read-Text $StderrPath
+  $Combined = (($Out + "`n" + $Err).Trim())
   if ($ExitCode -ne 0) {
-    if (Is-CreditFailure $Err) {
+    $DiagnosticPath = Write-Diagnostic -Version $CodexVersion -ExitCode $ExitCode -Stdout $Out -Stderr $Err
+    if (Is-CreditFailure $Combined) {
       Write-Host 'CODEX_CREDITS_REQUIRED'
+      Write-Host ("Diagnostic: {0}" -f $DiagnosticPath)
       exit 3
     }
-    if ($Err.Length -gt 400) { $Err = $Err.Substring(0,400) }
-    throw ("codex exec failed with exit code {0}: {1}" -f $ExitCode,($Err -replace '[\r\n]+',' '))
+    $Summary = One-Line $Combined
+    if ([string]::IsNullOrWhiteSpace($Summary)) { $Summary = '(no stdout/stderr returned by codex)' }
+    throw ("codex exec failed with exit code {0}: {1}; diagnostic={2}" -f $ExitCode,$Summary,$DiagnosticPath)
   }
 
-  if (-not (Test-Path -LiteralPath $StdoutPath)) { throw 'codex stdout missing' }
-  $Raw = (Get-Content -LiteralPath $StdoutPath -Raw).Trim()
-  if ([string]::IsNullOrWhiteSpace($Raw)) { throw 'codex stdout empty' }
-  $Result = $Raw | ConvertFrom-Json
+  if ([string]::IsNullOrWhiteSpace($Out)) { throw 'codex stdout empty' }
+  $Result = $Out | ConvertFrom-Json
   if ([string]$Result.protocol -ne $Protocol) { throw 'direct test protocol mismatch' }
   if ([string]$Result.nonce -ne $Nonce) { throw 'direct test nonce mismatch' }
   if ([string]$Result.status -ne 'CODEX_DIRECT_PASS') { throw 'direct test status mismatch' }
@@ -107,6 +139,7 @@ catch {
   $Message = [string]$_.Exception.Message
   if (Is-CreditFailure $Message) {
     Write-Host 'CODEX_CREDITS_REQUIRED'
+    if ($null -ne $DiagnosticPath) { Write-Host ("Diagnostic: {0}" -f $DiagnosticPath) }
     exit 3
   }
   Write-Host ("CODEX_DIRECT_FAIL: {0}" -f $Message)
