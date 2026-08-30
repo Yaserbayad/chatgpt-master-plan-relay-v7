@@ -7,7 +7,7 @@ const INPUT_PROTOCOL = 'relay-light-production-event-v1';
 const OUTPUT_PROTOCOL = 'relay-light-production-action-v1';
 const MESSAGE = 'css=[data-message-author-role]';
 const STOP = 'css=[data-testid="stop-button"]';
-const COMPOSERS = ['css=[role="textbox"][contenteditable="true"][aria-label="Chat with ChatGPT"]','css=#prompt-textarea','css=[contenteditable="true"][data-virtualkeyboard="true"]'];
+const COMPOSER = 'css=[role="textbox"][contenteditable="true"][aria-label="Chat with ChatGPT"]';
 const SUBMIT_SURFACE = 'css=button[class*="composer-submit-button-color"]';
 const STATE_FILE = 'LIGHT_PRODUCTION_STATE.csv';
 const LIGHT_MAX_SENDS = 1;
@@ -23,7 +23,6 @@ function normalize(v) { return raw(v).replace(/\r\n/g,'\n').replace(/\r/g,'\n');
 function normalizeEditorClipboard(v) { return normalize(v).replace(/\u00A0+$/,''); }
 function attr(m,n) { try { const v=m.getAttribute(n); return v==null?'':String(v); } catch (_) { return m&&m.attributes&&m.attributes[n]!=null?String(m.attributes[n]):''; } }
 function all(locator, timeout=2, includeHidden=false) { const o={required:false,timeout}; if(includeHidden)o.includeHidden=true; const r=uiv.findElements(locator,o); return Array.isArray(r)?r:[]; }
-function first(locators, timeout=2) { for (const l of locators) { const xs=all(l,timeout,false); if(xs.length) return xs[0]; } return null; }
 function hasAttr(m,n) { const a=m&&m.attributes?m.attributes:{}; if(Object.prototype.hasOwnProperty.call(a,n)) return true; try{return m.getAttribute(n)!==null;}catch(_){return false;} }
 function enabled(m) { return !!m&&!hasAttr(m,'disabled')&&clean(attr(m,'aria-disabled')).toLowerCase()!=='true'; }
 function submitSurfaceSnapshot() {
@@ -102,15 +101,15 @@ try {
     const beforeStage=assertSourceIdentity(boundIndex,source); browserIdentityRevalidated=!!beforeStage;
     const baselineSurface=submitSurfaceSnapshot(); baselineSubmitAria=baselineSurface.aria;
     if(!isVoiceSurface(baselineSurface)) throw new Error(`COMPOSER_NOT_EMPTY: expected Start Voice baseline; found count=${baselineSurface.count}, aria=${baselineSurface.aria||'(empty)'}`);
-    const composer=first(COMPOSERS,2); if(!composer)throw new Error('STAGE_VERIFY_FAILED: ChatGPT composer not found');
+    const composerCount=all(COMPOSER,2,false).length; if(composerCount!==1)throw new Error(`STAGE_VERIFY_FAILED: expected exactly one target composer; found ${composerCount}`);
     uiv.clipboard.write(prompt); if(normalize(uiv.clipboard.read())!==normalize(prompt)) throw new Error('STAGE_VERIFY_FAILED: prompt clipboard round-trip mismatch');
-    uiv.browser.click(composer); uiv.browser.type('${KEY_CTRL+KEY_V}'); uiv.sleep(500);
+    uiv.browser.click(COMPOSER); uiv.browser.type('${KEY_CTRL+KEY_V}'); uiv.sleep(500);
     const pastedSurface=submitSurfaceSnapshot(); pastedSubmitAria=pastedSurface.aria;
     if(!isSendSurface(pastedSurface)) throw new Error(`STAGE_VERIFY_FAILED: submit surface did not transition to Send prompt; found count=${pastedSurface.count}, aria=${pastedSurface.aria||'(empty)'}`);
     const copySentinel=`LIGHT_COPY_SENTINEL_${nonce}_${new Date().toISOString()}`;
     uiv.clipboard.write(copySentinel); if(uiv.clipboard.read()!==copySentinel) throw new Error('STAGE_VERIFY_FAILED: could not seed copy sentinel');
-    const staged=first(COMPOSERS,2); if(!staged)throw new Error('STAGE_VERIFY_FAILED: ChatGPT composer disappeared after paste');
-    uiv.browser.click(staged); uiv.browser.type('${KEY_CTRL+KEY_A}'); uiv.browser.type('${KEY_CTRL+KEY_C}'); uiv.sleep(250);
+    const stagedCount=all(COMPOSER,2,false).length; if(stagedCount!==1)throw new Error(`STAGE_VERIFY_FAILED: expected exactly one target composer after paste; found ${stagedCount}`);
+    uiv.browser.click(COMPOSER); uiv.browser.type('${KEY_CTRL+KEY_A}'); uiv.browser.type('${KEY_CTRL+KEY_C}'); uiv.sleep(250);
     const copied=raw(uiv.clipboard.read()); copySentinelReplaced=copied!==copySentinel;
     if(!copySentinelReplaced) throw new Error('STAGE_VERIFY_FAILED: copy-back did not replace sentinel');
     stagedCopyExact=normalizeEditorClipboard(copied)===normalizeEditorClipboard(prompt);
