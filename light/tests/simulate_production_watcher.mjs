@@ -5,12 +5,13 @@ import assert from 'node:assert/strict';
 const source=fs.readFileSync(new URL('../production/LIGHT_PRODUCTION_WATCHER.js',import.meta.url),'utf8');
 const projectUrl='https://chatgpt.com/g/g-p-6a9323b61110819182dba0224678aa8b/c/convo-1';
 const targetPrompt='Reply exactly LIGHT_PRODUCTION_TARGET_OK.';
+const composerLocator='css=[role="textbox"][contenteditable="true"][aria-label="Chat with ChatGPT"]';
 function message(author,id,text){return {text,attributes:{'data-message-author-role':author,'data-message-id':id},getAttribute(n){return this.attributes[n]??null;}};}
 function surface(aria){return {kind:'submit',attributes:{'aria-label':aria},getAttribute(n){return this.attributes[n]??null;}};}
 function composer(){return {kind:'composer',text:'',value:'',attributes:{},getAttribute(){return null;}};}
 
 function run(mode='success'){
-  let clipboard='ORIGINAL_CLIPBOARD',generating=mode==='generating',selectedAll=false,composerText='',sendClicks=0,bridgeCalls=0,postSendSleeps=0,newUser=false,nextAssistant=false,runCalledWhileGenerating=false;
+  let clipboard='ORIGINAL_CLIPBOARD',generating=mode==='generating',selectedAll=false,focused=false,composerText='',sendClicks=0,bridgeCalls=0,postSendSleeps=0,newUser=false,nextAssistant=false,runCalledWhileGenerating=false;
   const typed=[]; const csv=new Map(); const messages=[message('user','user-1','Initial'),message('assistant','assistant-1','Completed')];
   const uiv={
     tabs:{list:()=>[{index:1,url:projectUrl}],select:()=>({index:1,url:projectUrl})},
@@ -36,9 +37,10 @@ function run(mode='success'){
       clipboard=JSON.stringify({protocol:'relay-light-production-action-v1',nonce:mode==='stale'?e.nonce+'_STALE':e.nonce,conversation_id:e.conversation_id,assistant_message_id:e.assistant_message_id,assistant_text_length:e.assistant_text_length,assistant_text_sha256:'a'.repeat(64),action:mode==='stop'?'STOP':mode==='human'?'HUMAN':'SEND_PROMPT',prompt:(mode==='stop'||mode==='human')?'':targetPrompt,prompt_sha256:(mode==='stop'||mode==='human')?'':'b'.repeat(64),reason:'simulated',codex_version:'codex-cli-test',codex_exit_code:0,codex_duration_ms:1});
     },
     browser:{
-      click(m){if(m.kind==='composer')return;if(m.kind==='submit'){if(mode==='send_click_fail')throw new Error('send click fail');sendClicks++;return;}throw new Error('bad click');},
+      click(m){if(m===composerLocator){focused=true;return;}if(m&&m.kind==='composer'){focused=false;return;}if(m&&m.kind==='submit'){if(mode==='send_click_fail')throw new Error('send click fail');sendClicks++;return;}throw new Error('bad click');},
       type(text){
         typed.push(String(text));
+        if(!focused)return;
         if(text==='${KEY_CTRL+KEY_V}'){if(mode!=='paste_noop')composerText=clipboard;}
         else if(text==='${KEY_CTRL+KEY_A}')selectedAll=true;
         else if(text==='${KEY_CTRL+KEY_C}'){
