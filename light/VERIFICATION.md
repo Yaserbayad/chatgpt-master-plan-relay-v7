@@ -18,7 +18,7 @@ Q15-B no longer gates production implementation.
 
 ## First production watcher/actuator
 
-Status: **CORRECTED LOCALLY VERIFIED TARGET CANDIDATE — TARGET PASS REQUIRED**.
+Status: **Q09-SEND-DISCOVERY CORRECTED, LOCALLY VERIFIED TARGET CANDIDATE — TARGET PASS REQUIRED**.
 
 Contract:
 
@@ -28,44 +28,82 @@ Evidence records:
 
 - `light/evidence/PRODUCTION_LOCAL_2026-08-30.md`
 - `light/evidence/PRODUCTION_TARGET_FAIL_2026-08-30_122613.md`
+- `light/evidence/PRODUCTION_TARGET_FAIL_2026-08-30_123922.md`
 
-### First target attempt
+### Target attempt 1 — staging snapshot false negative
 
-The first real Windows/Chrome production target attempt reached the material staging gate and failed safely with:
+The first Windows/Chrome production attempt failed safely before Send with:
 
 ```text
 STAGE_VERIFY_FAILED: staged prompt does not match
 ```
 
-The failure occurred before the Send-control lookup and before any Send click in the accepted watcher source. No automatic retry occurred. The generated target evidence ZIP was not uploaded with the report, so no claim is made that the ZIP itself was inspected.
+The material gate was corrected to verify staging by trusted copy-back (`Ctrl+A` / `Ctrl+C`) rather than treating a Ui.Vision rich-editor finder snapshot's `.text/.value` as authoritative.
 
-The failing verifier compared the clipboard-pasted ChatGPT rich contenteditable composer against a newly acquired Ui.Vision finder match's `.text/.value`. Ui.Vision v10 finder matches are snapshots; the target failure therefore did not prove that paste itself failed and did not provide an independent staged-text readback.
+### Target attempt 2 — Send discovery regression
 
-### Corrective change
+The corrected copy-back candidate then reached the next material gate and failed safely with:
 
-The staged-prompt material gate now uses trusted copy-back instead of finder-snapshot text:
+```text
+SEND_CONTROL_MISSING: semantic Send control not found
+```
 
-1. clipboard-stage the model prompt;
-2. focus the composer;
-3. trusted `${KEY_CTRL+KEY_V}` paste;
-4. reacquire/refocus composer;
-5. trusted `${KEY_CTRL+KEY_A}` then `${KEY_CTRL+KEY_C}`;
-6. require copied clipboard text to exactly match the intended prompt, with CR normalization only;
-7. restore original clipboard;
-8. revalidate source identity before locating/clicking Send.
+The uploaded second evidence ZIP was independently verified. Runtime evidence proves:
 
-No model-generated prompt text is passed to `uiv.browser.type`; only the three constant trusted key chords are used. One-Send, dedupe, nonce/identity, `SEND_AMBIGUOUS` pre-click fencing and no-retry behavior are unchanged.
+```text
+xrun_exit_code=0
+bridge_action=SEND_PROMPT
+codex_exit_code=0
+browser_identity_revalidated=true
+send_click_count=0
+submission_confirmed=false
+next_completion_observed=false
+```
+
+The Ui.Vision log proves staging copy-back completed successfully and source identity was revalidated before Send discovery. It then queried only:
+
+```text
+css=button[data-testid="send-button"]
+css=button[aria-label="Send prompt"]
+```
+
+with the default visible-only finder behavior; neither matched. No Send click occurred.
+
+Existing target-qualified main Relay Q09 technical evidence had already proven this exact mechanical Send surface and discovery behavior:
+
+```text
+css=button[class*="composer-submit-button-color"][aria-label="Send prompt"]
+includeHidden: true
+enabled-state filtering
+```
+
+The Light implementation had simplified away those qualified invariants. This was the root cause of target attempt 2.
+
+### Current correction
+
+The Light watcher now:
+
+1. tries the Q09-qualified `composer-submit-button-color` selector first;
+2. queries each Send locator with `includeHidden: true`;
+3. filters out `disabled` and `aria-disabled=true` candidates;
+4. requires exactly one enabled candidate for a locator and fails on ambiguity;
+5. retains the prior two selectors only as secondary fallbacks;
+6. preserves one-Send maximum, pre-click `SEND_AMBIGUOUS`, identity revalidation, dedupe, and no-retry semantics.
+
+The staging-copy-back correction from attempt 1 remains unchanged.
 
 ### Current source binding
 
 ```text
 d06dbdcfb341e443663736fcdc14274c0560b3c3  LIGHT_PRODUCTION_ACTION.schema.json
-dc934f5a39ecf2c877c47e9936aeb13a7b8cc620  LIGHT_PRODUCTION_WATCHER.js
+c8968386530efc4381411fed1aae90dda38c485f  LIGHT_PRODUCTION_WATCHER.js
 ea7878a8b9849d9aa2f1fbd822004d0bfb6fafb4  RUN_LIGHT_PRODUCTION_TARGET.ps1
 3fb41fe1ef6f4ac6f0ade600858d700c49d19aaf  RelayCodexLightProduction.ps1
-147274e28a75c3ad585dbc2e410e8c6b338b8573  test_production_contract.mjs
-de8c1f3d3218c0f3da6df060fdde3fd0b65e2d95  simulate_production_watcher.mjs
+9406c92c762f285f25cab7a29346bb6bc70a1b56  test_production_contract.mjs
+393ce2046207e8dc2d9df44b2d810bd8842bce36  simulate_production_watcher.mjs
 ```
+
+The three corrected watcher/test blobs above were reread from GitHub and byte-bound to the locally tested files with `git hash-object`.
 
 ### Current local verification
 
@@ -78,23 +116,23 @@ LIGHT PRODUCTION CONTRACT TESTS: PASS
 
 node light/tests/simulate_production_watcher.mjs
 LIGHT PRODUCTION STAGE COPY-BACK SIMULATION: PASS
+
+focused Q09 Send-discovery regression
+SEND DISCOVERY REGRESSION: PASS
 ```
 
-The regression simulation explicitly proves:
+The regression suite now proves both target failure boundaries:
 
-- a stale/empty contenteditable finder snapshot after a successful paste does not cause false failure;
-- corrupted copy-back fails before Send;
-- no dispatch while generating;
-- stale bridge identity fails before staging;
-- STOP/HUMAN perform no material action;
-- `SEND_AMBIGUOUS` persists before Send and ambiguous/click-failure paths do not retry;
-- duplicate handled source turns are rejected before Codex.
+- stale/empty rich-editor finder snapshots after successful paste do not create a staging false negative;
+- corrupted copy-back still fails before Send;
+- Send discovery succeeds only when the Q09-qualified hidden semantic selector path is honored;
+- generation, stale identity, STOP/HUMAN, duplicate-turn, ambiguous-send, and no-retry fences remain intact.
 
-The local execution environment has no PowerShell runtime; unchanged PowerShell bridge/runner runtime remains a Windows-target boundary.
+The local execution environment has no PowerShell runtime; unchanged PowerShell bridge/runner execution remains a Windows-target boundary.
 
 ## Remaining acceptance boundary
 
-Run the corrected bounded production target package once against exactly one completed configured-Project ChatGPT conversation tab with an empty composer. The qualification may send exactly one fixed safe prompt:
+Run the replacement bounded production target package once against exactly one completed configured-Project ChatGPT conversation tab with an empty composer. The qualification may send exactly one fixed safe prompt:
 
 `Reply exactly LIGHT_PRODUCTION_TARGET_OK.`
 
@@ -103,9 +141,10 @@ Production target PASS requires returned evidence proving:
 1. bridge/Codex exit 0;
 2. exact pre-action browser identity revalidation;
 3. exact staged-text trusted copy-back verification;
-4. exactly one Send click;
-5. exact new-user-message confirmation;
-6. following stable completed assistant turn observed;
-7. evidence bundle bound to the corrected source.
+4. qualified semantic Send discovery;
+5. exactly one Send click;
+6. exact new-user-message confirmation;
+7. following stable completed assistant turn observed;
+8. evidence bundle bound to the current source.
 
 Do not blindly rerun a target failure. Diagnose returned evidence first. After independently verified target PASS, proceed to bounded same-chat reliability/soak before implementing fresh-chat/recovery behavior.
