@@ -7,8 +7,8 @@ const INPUT_PROTOCOL = 'relay-light-production-event-v1';
 const OUTPUT_PROTOCOL = 'relay-light-production-action-v1';
 const MESSAGE = 'css=[data-message-author-role]';
 const STOP = 'css=[data-testid="stop-button"]';
-const COMPOSERS = ['css=#prompt-textarea','css=[contenteditable="true"][data-virtualkeyboard="true"]'];
-const SENDS = ['css=button[class*="composer-submit-button-color"][aria-label="Send prompt"]','css=button[data-testid="send-button"]','css=button[aria-label="Send prompt"]'];
+const COMPOSERS = ['css=[role="textbox"][contenteditable="true"][aria-label="Chat with ChatGPT"]','css=#prompt-textarea','css=[contenteditable="true"][data-virtualkeyboard="true"]'];
+const SUBMIT_SURFACE = 'css=button[class*="composer-submit-button-color"]';
 const STATE_FILE = 'LIGHT_PRODUCTION_STATE.csv';
 const LIGHT_MAX_SENDS = 1;
 const POLL_MS = 3000;
@@ -19,16 +19,23 @@ const SEND_CONFIRM_MS = 2000;
 
 function clean(v) { return v == null ? '' : String(v).replace(/\s+/g,' ').trim(); }
 function raw(v) { return v == null ? '' : String(v); }
+function normalize(v) { return raw(v).replace(/\r\n/g,'\n').replace(/\r/g,'\n'); }
+function normalizeEditorClipboard(v) { return normalize(v).replace(/\u00A0+$/,''); }
 function attr(m,n) { try { const v=m.getAttribute(n); return v==null?'':String(v); } catch (_) { return m&&m.attributes&&m.attributes[n]!=null?String(m.attributes[n]):''; } }
 function all(locator, timeout=2, includeHidden=false) { const o={required:false,timeout}; if(includeHidden)o.includeHidden=true; const r=uiv.findElements(locator,o); return Array.isArray(r)?r:[]; }
 function first(locators, timeout=2) { for (const l of locators) { const xs=all(l,timeout,false); if(xs.length) return xs[0]; } return null; }
 function hasAttr(m,n) { const a=m&&m.attributes?m.attributes:{}; if(Object.prototype.hasOwnProperty.call(a,n)) return true; try{return m.getAttribute(n)!==null;}catch(_){return false;} }
 function enabled(m) { return !!m&&!hasAttr(m,'disabled')&&clean(attr(m,'aria-disabled')).toLowerCase()!=='true'; }
-function firstEnabled(locators,timeout=2) { for(const l of locators){ const xs=all(l,timeout,true).filter(enabled); if(xs.length===1)return xs[0]; if(xs.length>1)throw new Error(`SEND_CONTROL_MISSING: ambiguous enabled Send controls for ${l}: ${xs.length}`); } return null; }
+function submitSurfaceSnapshot() {
+  const xs=all(SUBMIT_SURFACE,1,false);
+  if(xs.length!==1) return {count:xs.length,match:null,aria:'',disabled:'',ariaDisabled:''};
+  const m=xs[0]; return {count:1,match:m,aria:clean(attr(m,'aria-label')),disabled:hasAttr(m,'disabled')?'true':'false',ariaDisabled:clean(attr(m,'aria-disabled'))};
+}
+function isVoiceSurface(s) { return s.count===1&&s.aria.toLowerCase()==='start voice'; }
+function isSendSurface(s) { return s.count===1&&enabled(s.match)&&s.aria.toLowerCase()==='send prompt'; }
 function conversationId(url) { const m=String(url||'').match(/\/c\/([^/?#]+)/); return m?m[1]:''; }
 function makeNonce() { return `LIGHT_PROD_${new Date().toISOString().replace(/[^0-9A-Za-z]/g,'')}_${Math.random().toString(36).slice(2,14)}`; }
 function messageText(m) { const t=raw(m&&m.text); return t || raw(m&&m.value); }
-function editableText(m) { return raw(m&&m.text) || raw(m&&m.value); }
 function classifyFailure(reason,response) {
   const s=`${clean(reason)} ${clean(response&&response.reason)}`.toLowerCase();
   if(/workspace is out of credits|out of credits|usage limit reached|reached your usage limit|add credits to continue|increase your limits to continue/.test(s)) return 'CODEX_CREDITS_REQUIRED';
@@ -73,7 +80,7 @@ function confirmSubmission(boundIndex,source,prompt){
 
 uiv.setVar('!TIMEOUT_MACRO',900);
 const boundIndex=tabBinding(); const originalClipboard=raw(uiv.clipboard.read()); const startedAt=Date.now();
-let source=null,response=null,nonce='',xrunExit='',result='FAIL',failureReason='',failureClass='NONE',sendClickCount=0,submissionConfirmed=false,nextCompletionObserved=false,browserIdentityRevalidated=false,newUserId='',nextAssistantId='';
+let source=null,response=null,nonce='',xrunExit='',result='FAIL',failureReason='',failureClass='NONE',sendClickCount=0,submissionConfirmed=false,nextCompletionObserved=false,browserIdentityRevalidated=false,newUserId='',nextAssistantId='',baselineSubmitAria='',pastedSubmitAria='',copySentinelReplaced=false,stagedCopyExact=false;
 try {
   source=waitStableCompleted(boundIndex);
   const prior=readState();
@@ -93,16 +100,25 @@ try {
   else {
     const prompt=raw(response.prompt); if(!prompt.trim()) throw new Error('INVALID_ACTION: SEND_PROMPT prompt is empty');
     const beforeStage=assertSourceIdentity(boundIndex,source); browserIdentityRevalidated=!!beforeStage;
+    const baselineSurface=submitSurfaceSnapshot(); baselineSubmitAria=baselineSurface.aria;
+    if(!isVoiceSurface(baselineSurface)) throw new Error(`COMPOSER_NOT_EMPTY: expected Start Voice baseline; found count=${baselineSurface.count}, aria=${baselineSurface.aria||'(empty)'}`);
     const composer=first(COMPOSERS,2); if(!composer)throw new Error('STAGE_VERIFY_FAILED: ChatGPT composer not found');
-    if(clean(editableText(composer)))throw new Error('COMPOSER_NOT_EMPTY: refusing to overwrite existing draft');
-    uiv.clipboard.write(prompt); if(uiv.clipboard.read()!==prompt) throw new Error('STAGE_VERIFY_FAILED: prompt clipboard round-trip mismatch');
-    uiv.browser.click(composer); uiv.browser.type('${KEY_CTRL+KEY_V}'); uiv.sleep(250);
+    uiv.clipboard.write(prompt); if(normalize(uiv.clipboard.read())!==normalize(prompt)) throw new Error('STAGE_VERIFY_FAILED: prompt clipboard round-trip mismatch');
+    uiv.browser.click(composer); uiv.browser.type('${KEY_CTRL+KEY_V}'); uiv.sleep(500);
+    const pastedSurface=submitSurfaceSnapshot(); pastedSubmitAria=pastedSurface.aria;
+    if(!isSendSurface(pastedSurface)) throw new Error(`STAGE_VERIFY_FAILED: submit surface did not transition to Send prompt; found count=${pastedSurface.count}, aria=${pastedSurface.aria||'(empty)'}`);
+    const copySentinel=`LIGHT_COPY_SENTINEL_${nonce}_${new Date().toISOString()}`;
+    uiv.clipboard.write(copySentinel); if(uiv.clipboard.read()!==copySentinel) throw new Error('STAGE_VERIFY_FAILED: could not seed copy sentinel');
     const staged=first(COMPOSERS,2); if(!staged)throw new Error('STAGE_VERIFY_FAILED: ChatGPT composer disappeared after paste');
-    uiv.browser.click(staged); uiv.browser.type('${KEY_CTRL+KEY_A}'); uiv.browser.type('${KEY_CTRL+KEY_C}'); uiv.sleep(100);
-    const copied=raw(uiv.clipboard.read()); if(copied.replace(/\r/g,'')!==prompt.replace(/\r/g,''))throw new Error('STAGE_VERIFY_FAILED: staged prompt copy-back does not match');
+    uiv.browser.click(staged); uiv.browser.type('${KEY_CTRL+KEY_A}'); uiv.browser.type('${KEY_CTRL+KEY_C}'); uiv.sleep(250);
+    const copied=raw(uiv.clipboard.read()); copySentinelReplaced=copied!==copySentinel;
+    if(!copySentinelReplaced) throw new Error('STAGE_VERIFY_FAILED: copy-back did not replace sentinel');
+    stagedCopyExact=normalizeEditorClipboard(copied)===normalizeEditorClipboard(prompt);
+    if(!stagedCopyExact) throw new Error('STAGE_VERIFY_FAILED: staged prompt copy-back does not match');
     uiv.clipboard.write(originalClipboard);
     assertSourceIdentity(boundIndex,source);
-    const send=firstEnabled(SENDS,2); if(!send)throw new Error('SEND_CONTROL_MISSING: semantic Send control not found');
+    const sendSurface=submitSurfaceSnapshot(); if(!isSendSurface(sendSurface))throw new Error(`SEND_CONTROL_MISSING: submit surface not Send prompt; count=${sendSurface.count}, aria=${sendSurface.aria||'(empty)'}`);
+    const send=sendSurface.match;
     if(sendClickCount>=LIGHT_MAX_SENDS) throw new Error('INVALID_ACTION: material send bound exceeded');
     writeState(source.assistant.id,'SEND_AMBIGUOUS');
     uiv.browser.click(send); sendClickCount+=1;
@@ -115,9 +131,9 @@ try {
 finally { uiv.clipboard.write(originalClipboard); }
 
 const rows=[[
-  'result','failure_reason','failure_class','elapsed_ms','conversation_id','source_user_message_id','source_assistant_message_id','nonce','xrun_exit_code','bridge_action','codex_version','codex_exit_code','codex_duration_ms','assistant_text_sha256','browser_identity_revalidated','send_click_count','submission_confirmed','new_user_message_id','next_completion_observed','next_assistant_message_id'
+  'result','failure_reason','failure_class','elapsed_ms','conversation_id','source_user_message_id','source_assistant_message_id','nonce','xrun_exit_code','bridge_action','codex_version','codex_exit_code','codex_duration_ms','assistant_text_sha256','browser_identity_revalidated','baseline_submit_aria','pasted_submit_aria','copy_sentinel_replaced','staged_copy_exact','send_click_count','submission_confirmed','new_user_message_id','next_completion_observed','next_assistant_message_id'
 ],[
-  result,failureReason,failureClass,Date.now()-startedAt,source?source.conversationId:'',source&&source.user?source.user.id:'',source&&source.assistant?source.assistant.id:'',nonce,xrunExit,response?clean(response.action):'',response?clean(response.codex_version):'',response&&response.codex_exit_code!=null?response.codex_exit_code:'',response&&response.codex_duration_ms!=null?response.codex_duration_ms:'',response?clean(response.assistant_text_sha256):'',browserIdentityRevalidated?'true':'false',sendClickCount,submissionConfirmed?'true':'false',newUserId,nextCompletionObserved?'true':'false',nextAssistantId
+  result,failureReason,failureClass,Date.now()-startedAt,source?source.conversationId:'',source&&source.user?source.user.id:'',source&&source.assistant?source.assistant.id:'',nonce,xrunExit,response?clean(response.action):'',response?clean(response.codex_version):'',response&&response.codex_exit_code!=null?response.codex_exit_code:'',response&&response.codex_duration_ms!=null?response.codex_duration_ms:'',response?clean(response.assistant_text_sha256):'',browserIdentityRevalidated?'true':'false',baselineSubmitAria,pastedSubmitAria,copySentinelReplaced?'true':'false',stagedCopyExact?'true':'false',sendClickCount,submissionConfirmed?'true':'false',newUserId,nextCompletionObserved?'true':'false',nextAssistantId
 ]];
 const stamp=new Date().toISOString().replace(/[:.]/g,'-'); const file=`LIGHT_PRODUCTION_target_${stamp}.csv`; uiv.csv.write(file,rows); uiv.files.exportToDownloads(file);
 if(result!=='PASS')throw new Error(`LIGHT PRODUCTION TARGET FAIL: ${failureReason}; evidence=${file}`);
