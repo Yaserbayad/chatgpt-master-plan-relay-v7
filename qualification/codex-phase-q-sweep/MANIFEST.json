@@ -1,6 +1,6 @@
 {
   "schema_version": "codex-phase-q-sweep-manifest-1",
-  "generated_utc": "2026-08-30T05:12:11.7241514Z",
+  "generated_utc": "2026-08-30T06:06:11.5655923Z",
   "hash_algorithm": "SHA-256",
   "manifest_self_hash": {
     "included_in_artifacts": false,
@@ -10,7 +10,7 @@
     "remote": "https://github.com/Yaserbayad/chatgpt-master-plan-relay-v7.git",
     "branch": "main",
     "head_sha_start": "08ab965c4f2f673a89b3a640713b333c96a96a4c",
-    "head_sha_end": "08ab965c4f2f673a89b3a640713b333c96a96a4c",
+      "head_sha_end": "bef7f62944c5d745245ea916a460ab856ec5239e",
     "head_sha_end_semantics": "Observed after all qualification work and immediately before the evidence commit; the containing commit SHA is reported outside this self-referential artifact.",
     "state_json_blob_sha_start": "b675e90e0019918984268554d3aff6fa606b8227"
   },
@@ -24,7 +24,7 @@
     "legacy_xmodules": "3.2.3 (additional legacy component)",
     "realuser": "V2026 (user-reported)"
   },
-  "artifact_count": 32,
+  "artifact_count": 39,
   "artifacts": [
     {
       "relative_path": "qualification/codex-phase-q-sweep/ACTUATOR_BLOCKER_EVIDENCE.json",
@@ -52,8 +52,8 @@
     },
     {
       "relative_path": "qualification/codex-phase-q-sweep/Q10/DIAGNOSIS.md",
-      "sha256": "C70D7337D1A5A4FBF2C2CF19088BB569EE26A7E7FC784B2005B941FE6795E4A1",
-      "size_bytes": 2379,
+      "sha256": "417CA226A190C3B0ADD3B639E397463A75B6DAE8CB4076636D73DE90838DDC8B",
+      "size_bytes": 2689,
       "test_id": "Q10",
       "evidence_type": "report",
       "utc_creation_timestamp": "2026-08-29T23:33:25.0486704Z",
@@ -69,6 +69,18 @@
       "test_id": "Q10",
       "evidence_type": "test_harness",
       "utc_creation_timestamp": "2026-08-29T23:56:42.5415083Z",
+      "sensitive_redacted": {
+        "sensitive": false,
+        "redacted": false
+      }
+    },
+    {
+      "relative_path": "qualification/codex-phase-q-sweep/Q10/raw/Q10_CLI_LAUNCH_RECORD_20260830T055300Z.json",
+      "sha256": "910A83D6948261B3819604C3959E0587F29E7BD77DF9E7E041AC1CA6B97DCEC2",
+      "size_bytes": 1318,
+      "test_id": "Q10",
+      "evidence_type": "raw_or_normalized_json",
+      "utc_creation_timestamp": "2026-08-30T05:53:02.3850854Z",
       "sensitive_redacted": {
         "sensitive": false,
         "redacted": false
@@ -123,6 +135,30 @@
       }
     },
     {
+      "relative_path": "qualification/codex-phase-q-sweep/Q10/raw/Q10_fresh_chat_spa_2026-08-30T05-56-43-152Z.csv",
+      "sha256": "35C9599A48BAF59378DF12B0E206727B388F10369F174D90F1CEE1CB383D92F6",
+      "size_bytes": 677,
+      "test_id": "Q10",
+      "evidence_type": "raw_csv",
+      "utc_creation_timestamp": "2026-08-30T05:57:40.1891386Z",
+      "sensitive_redacted": {
+        "sensitive": false,
+        "redacted": false
+      }
+    },
+    {
+      "relative_path": "qualification/codex-phase-q-sweep/Q10/raw/Q10_POST_RUN_TARGET_OBSERVATION_20260830T055700Z.json",
+      "sha256": "2B68DEA9949A4DFD9BE0DD739BBEAD1BBD32EED9C0501E03CAE73AC9B41A791E",
+      "size_bytes": 696,
+      "test_id": "Q10",
+      "evidence_type": "raw_or_normalized_json",
+      "utc_creation_timestamp": "2026-08-30T05:58:04.4163775Z",
+      "sensitive_redacted": {
+        "sensitive": false,
+        "redacted": false
+      }
+    },
+    {
       "relative_path": "qualification/codex-phase-q-sweep/Q10/raw/Q10_TARGET_DOM_OBSERVATION.json",
       "sha256": "41F240666F048EDF22BABCE6844FD6F4CB3840CE53EAC28CE8C3CC99D0A5EDB4",
       "size_bytes": 1383,
@@ -147,9 +183,57 @@
       }
     },
     {
+      "relative_path": "qualification/codex-phase-q-sweep/Q10/raw/Q10_TARGET_RUN_RECORD_20260830T055900Z.json",
+      "sha256": "66AE3B7D202E968EF57985A7A8B13D031CF5688CF3A9A7B80C1ACB2226B5494D",
+      "size_bytes": 1633,
+      "test_id": "Q10",
+      "evidence_type": "raw_or_normalized_json",
+      "utc_creation_timestamp": "2026-08-30T05:56:29.8542874Z",
+      "sensitive_redacted": {
+        "sensitive": false,
+        "redacted": false
+      }
+    },
+    {
+      "relative_path": "qualification/codex-phase-q-sweep/Q10/raw/Q10_uivision_cli_20260830T055900Z.log",
+      "sha256": "5BA7E793EDBD70B3DCC26BA438AD9CAE2F2E1958510E23C609D3A38E0073633E",
+      "size_bytes": 1478,
+      "test_id": "Q10",
+      "evidence_type": "artifact",
+      "utc_creation_timestamp": "2026-08-30T05:56:43.9089792Z",
+      "sensitive_redacted": {
+        "sensitive": false,
+        "redacted": false
+      }
+    },
+    {
+      "relative_path": "qualification/codex-phase-q-sweep/Q10/raw/Q10_UIVISION_NATIVE_LOG_EXCERPT_20260830T055300Z.txt",
+      "sha256": "8A36A2B22169EFE028C1A9DCFAF1D2BF960191C7F9E95CC4194F69788D78CCFF",
+      "size_bytes": 1224,
+      "test_id": "Q10",
+      "evidence_type": "artifact",
+      "utc_creation_timestamp": "2026-08-30T05:58:04.4173712Z",
+      "sensitive_redacted": {
+        "sensitive": false,
+        "redacted": false
+      }
+    },
+    {
+      "relative_path": "qualification/codex-phase-q-sweep/Q10/raw/UIVISION_CLI_LAUNCH_PAGE.html",
+      "sha256": "668B2DAB17EB038628CA503EDC7A52731F345E865E004CDDA31C6157229C8759",
+      "size_bytes": 2519,
+      "test_id": "Q10",
+      "evidence_type": "artifact",
+      "utc_creation_timestamp": "2026-08-30T05:57:40.2377875Z",
+      "sensitive_redacted": {
+        "sensitive": false,
+        "redacted": false
+      }
+    },
+    {
       "relative_path": "qualification/codex-phase-q-sweep/Q10/RESULT.md",
-      "sha256": "311CD325E4D085B769683983776714F3FCE746950034C4CBD3AFB296E97FED4D",
-      "size_bytes": 816,
+      "sha256": "96267995FFF4329FE9C5A76C3F10686224CFFE2556FC50C7C05CE58EC83D992A",
+      "size_bytes": 1113,
       "test_id": "Q10",
       "evidence_type": "report",
       "utc_creation_timestamp": "2026-08-29T23:33:25.0486704Z",
@@ -340,8 +424,8 @@
     },
     {
       "relative_path": "qualification/codex-phase-q-sweep/Q16_CANDIDATE_REPORT.md",
-      "sha256": "253B73E51DD198E04137F6325F4C67A5693005FEEEC849C914DFFE477AF79F41",
-      "size_bytes": 11962,
+      "sha256": "65BF52E20F1B34D3D656828F35AF94C745D2D953DAEC94F867B43EDC1591D046",
+      "size_bytes": 12465,
       "test_id": "Q16",
       "evidence_type": "report",
       "utc_creation_timestamp": "2026-08-29T23:42:10.3866581Z",
@@ -364,8 +448,8 @@
     },
     {
       "relative_path": "qualification/codex-phase-q-sweep/README.md",
-      "sha256": "EF564685019DB298E1983F3BAE28461B940EE03C1E53863C22FAC5E3D7077880",
-      "size_bytes": 2221,
+      "sha256": "5FC00EEEF4A3B0521D9C2707935D0DE5D991FD8AEFF359BF7A4EE9CCB1BC03FE",
+      "size_bytes": 2439,
       "test_id": "SWEEP",
       "evidence_type": "report",
       "utc_creation_timestamp": "2026-08-29T23:33:25.0441108Z",
@@ -376,8 +460,8 @@
     },
     {
       "relative_path": "qualification/codex-phase-q-sweep/SUPPLEMENTAL_TARGET_DATA.md",
-      "sha256": "6285FDABE3F8D3CEDAFA46DF83CD7F00FC8BCBBDEA36EF7C6DB00A21AC1CB809",
-      "size_bytes": 1686,
+      "sha256": "E3AE5450FE7CE6E879EB0DF4A4F0FE21A1EE533F93ADED5E5A008E2CBE9D4B78",
+      "size_bytes": 2274,
       "test_id": "SWEEP",
       "evidence_type": "report",
       "utc_creation_timestamp": "2026-08-29T23:33:25.0702035Z",
@@ -417,12 +501,19 @@
     "qualification/codex-phase-q-sweep/MANIFEST.json",
     "qualification/codex-phase-q-sweep/Q10/DIAGNOSIS.md",
     "qualification/codex-phase-q-sweep/Q10/probe/Q10_FRESH_CHAT_SPA_PROBE.test.js",
+    "qualification/codex-phase-q-sweep/Q10/raw/Q10_CLI_LAUNCH_RECORD_20260830T055300Z.json",
     "qualification/codex-phase-q-sweep/Q10/raw/Q10_fresh_chat_spa_2026-08-29T22-59-15-486Z.csv",
     "qualification/codex-phase-q-sweep/Q10/raw/Q10_fresh_chat_spa_2026-08-29T22-59-15-486Z.summary.json",
     "qualification/codex-phase-q-sweep/Q10/raw/Q10_fresh_chat_spa_2026-08-29T22-59-40-724Z.csv",
     "qualification/codex-phase-q-sweep/Q10/raw/Q10_fresh_chat_spa_2026-08-29T22-59-40-724Z.summary.json",
+    "qualification/codex-phase-q-sweep/Q10/raw/Q10_fresh_chat_spa_2026-08-30T05-56-43-152Z.csv",
+    "qualification/codex-phase-q-sweep/Q10/raw/Q10_POST_RUN_TARGET_OBSERVATION_20260830T055700Z.json",
     "qualification/codex-phase-q-sweep/Q10/raw/Q10_TARGET_DOM_OBSERVATION.json",
     "qualification/codex-phase-q-sweep/Q10/raw/Q10_TARGET_DOM_QUERY_CAPTURE.json",
+    "qualification/codex-phase-q-sweep/Q10/raw/Q10_TARGET_RUN_RECORD_20260830T055900Z.json",
+    "qualification/codex-phase-q-sweep/Q10/raw/Q10_uivision_cli_20260830T055900Z.log",
+    "qualification/codex-phase-q-sweep/Q10/raw/Q10_UIVISION_NATIVE_LOG_EXCERPT_20260830T055300Z.txt",
+    "qualification/codex-phase-q-sweep/Q10/raw/UIVISION_CLI_LAUNCH_PAGE.html",
     "qualification/codex-phase-q-sweep/Q10/RESULT.md",
     "qualification/codex-phase-q-sweep/Q11/Q11_ROUTE_COMPARISON.md",
     "qualification/codex-phase-q-sweep/Q11/RESULT.md",

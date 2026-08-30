@@ -1,0 +1,39 @@
+{
+  "recorded_at_utc": "2026-08-30T05:56:20Z",
+  "authorization": "single_corrected_q10_target_run",
+  "launch_state": "COMPLETED_PROVEN_PRE_SEND_FAILURE",
+  "dispatched_at_utc": "2026-08-30T05:56:37.2919055Z",
+  "macro_started_at_utc": "2026-08-30T05:56:38.705Z",
+  "macro_completed_at_utc": "2026-08-30T05:56:43.890Z",
+  "macro_started": true,
+  "macro_run_count": 1,
+  "result": "FAIL",
+  "failure_boundary": "PRE_SEND",
+  "failure_reason": "Q10 cannot expose current Project home control: active configured-Project conversation links=0; Open sidebar controls=0",
+  "send_attempted": false,
+  "send_action_count": 0,
+  "send_dispatch_state": "NOT_ATTEMPTED",
+  "new_conversation_id": null,
+  "new_stable_marker_user_count": 0,
+  "material_action_ambiguous": false,
+  "launcher": {
+    "path": "C:\\Users\\usr\\Documents\\Codex\\ui.vision.html",
+    "sha256": "668b2dab17eb038628ca503edc7a52731f345e865e004cdda31c6157229c8759",
+    "storage_mode": "xfile",
+    "direct": 1,
+    "macro_query_value": "Q10_FRESH_CHAT_SPA_PROBE.js",
+    "savelog": "qualification/codex-phase-q-sweep/Q10/raw/Q10_uivision_cli_20260830T055900Z.log"
+  },
+  "macro": {
+    "active_path": "C:\\Users\\usr\\Desktop\\uivision\\macros\\Q10_FRESH_CHAT_SPA_PROBE.js",
+    "sha256": "7684f33d8dc86309c8e71554212de8c064ab50ad8cfb6bdbb1cd087f49223d92"
+  },
+  "preflight": {
+    "project_token": "g-p-6a9323b61110819182dba0224678aa8b",
+    "project_title": "t",
+    "old_conversation_id": "6a932926-c750-83ed-9e99-d3addc14f456",
+    "idle": true,
+    "configured_project_verified": true
+  },
+  "sensitive_or_redacted": false
+}

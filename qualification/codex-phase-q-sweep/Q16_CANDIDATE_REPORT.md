@@ -7,7 +7,7 @@
 
 | Qualification | Objective | Execution status | Candidate result | Strongest evidence | Unresolved issue | Rerun safe |
 |---|---|---|---|---|---|---|
-| Q10 | Prove a fresh chat remains in the configured Project and produces a new conversation ID after exactly one trusted Send. | Prior runs reconciled; selector drift diagnosed; corrected probe regression-tested; corrected target run not executed. | `INCONCLUSIVE` | Two raw CSVs prove `send_action_count=0`; live DOM observation proves one replacement Project-home relationship. | The corrected selector has not been actuated through UI.Vision. | Yes, exactly once through the corrected UI.Vision probe. |
+| Q10 | Prove a fresh chat remains in the configured Project and produces a new conversation ID after exactly one trusted Send. | Corrected canonical probe executed exactly once through the official UI.Vision CLI. | `FAIL` | Saved UI.Vision log and exported CSV prove `send_action_count=0`, `NOT_ATTEMPTED`, unchanged old conversation, and zero marker users. | UI.Vision's own finder cannot see the active configured-Project conversation link or Open-sidebar control that the observer can see. | No; the single authorized corrected run was consumed. |
 | Q11 | Compare preserved v6.0.3 and V10 send paths and choose exactly one production route. | Repository/workspace evidence inventory completed; V10 selected provisionally. | `INCONCLUSIVE` | Q07–Q09 target evidence supports the V10 semantic trusted-browser route; no authoritative v6.0.3 package or target evidence was found. | The required two-sided comparison cannot complete until the preserved v6.0.3 evidence is recovered. | Yes, after the missing v6.0.3 evidence is supplied. |
 | Q12 | Prove UI.Vision Hard-Drive CSV FENCE durability across reread, abrupt termination, and restart. | `NOT_EXECUTED` | `NOT_EXECUTED` | Actuator-boundary evidence records that the UI.Vision extension page cannot be controlled through the permitted surface. | No journal was created, written, reread, interrupted, or restarted. | Yes, after permitted UI.Vision actuation is restored. |
 | Q13 | Prove exactly one secure UI.Vision-controlled Telegram notification arrives without leaking the secret. | `NOT_EXECUTED` | `NOT_EXECUTED` | Actuator-boundary evidence plus a zero-match token-shape scan of changed artifacts. | No message or arrival proof exists; exact-secret absence was not tested because the secret was not read. | Yes, through the existing secure mechanism after UI.Vision actuation is restored. |
@@ -16,28 +16,28 @@
 
 ## Critical findings
 
-1. **Browser identity and Q10 navigation:** target Chrome observation is available, but the legacy active-row selector has drifted. The current target exposes one active configured-Project conversation anchor whose nearest Project-group ancestor contains one visible `Open project home` button. The canonical qualification probe now binds to that relationship and still fails closed on non-unique resolution.
+1. **Browser identity and Q10 navigation:** target Chrome observation confirms configured Project `t` and old conversation `6a932926-c750-83ed-9e99-d3addc14f456`. The corrected canonical probe ran once through UI.Vision, but UI.Vision's own finder returned zero active configured-Project conversation links and zero Open-sidebar controls before any navigation or Send.
 2. **Production input route:** only the V10 semantic trusted-browser route has preserved current-target evidence for multiline/Unicode input and exactly one Send. The alleged v6.0.3 route is unresolved, not disproven. Q11 therefore selects V10 solely on available evidence.
 3. **Journal and restart/recovery semantics:** Q12 is load-bearing and supplies no durability proof. No FENCE, restart, or crash-window recovery contract may be accepted or inferred from filesystem substitutes.
-4. **Non-replayable material action:** both prior Q10 failures are proven pre-Send. No material action remains ambiguous, and one corrected rerun is safe; any future post-Send uncertainty must remain non-replayable.
+4. **Non-replayable material action:** the corrected Q10 run is a proven pre-Send failure with `send_action_count=0` and `send_dispatch_state=NOT_ATTEMPTED`. No material action remains ambiguous, but the single authorized run is consumed and no further run is authorized.
 5. **Telegram mechanism:** Q13 provides neither UI.Vision initiation nor arrival evidence. The heuristic scan only shows that changed artifacts contain no token-shaped value; it does not compare against the configured secret.
 6. **Version guard:** Q14 reads Windows build, running and on-disk Chrome versions, Chrome Local State `profile.last_used`, the UI.Vision path registered in that profile's Secure Preferences, disable reasons, and Desktop Automation version. It rejects a mismatch with a nonzero exit, but was not demonstrated gating the unavailable UI.Vision actuator; auto-update behavior can still cause drift and was not disabled.
 7. **Low-resource design:** Q15 was not run. A shell delay or Codex observation would not qualify UI.Vision idle/sleep behavior, so no polling interval or resource claim may be frozen from this sweep.
 
 ## Failures and blocker boundaries
 
-### Q10 preserved pre-Send failures
+### Q10 corrected CLI run
 
-- **Boundary:** after one sidebar-open click, before Project-home activation, composer staging, or Send.
-- **Observed behavior:** both exported CSVs report `active Project rows=0`, `sidebar_click_count=1`, `home_click_count=0`, and `send_action_count=0`; the live target contains zero marker turns.
+- **Boundary:** UI.Vision finder resolution, before Project-home activation, composer staging, or Send.
+- **Observed behavior:** the new exported CSV reports zero active configured-Project conversation links and zero Open-sidebar controls, `sidebar_click_count=0`, `home_click_count=0`, `send_action_count=0`, and `NOT_ATTEMPTED`; the post-run target contains zero marker turns.
 - **Material side effect:** no Send occurred. The sidebar presentation changed, but no qualified material action occurred.
-- **Retry safety:** exactly one corrected UI.Vision rerun is safe.
-- **Smallest corrective direction:** use the target-proven active-conversation/ancestor Project-home relationship already implemented in the qualification probe; do not alter the production architecture.
+- **Retry safety:** no further run is authorized; the single corrected UI.Vision run was consumed.
+- **Smallest corrective direction:** diagnose why UI.Vision's `uiv.$` browser scope cannot observe controls that are present in the same target tab, without performing another material run.
 
-### UI.Vision actuator blocker affecting Q10, Q12, Q13, and Q15
+### Historical UI.Vision IDE-control blocker affecting Q12, Q13, and Q15
 
-- **Boundary:** control of `chrome-extension://gcbalfbdmfieckjlnblleoemohcganoc/popup.html`, before any corrected probe or required qualification action.
-- **Observed behavior:** exact-profile Chrome/ChatGPT observation works, while the permitted Codex Chrome control surface rejects control of the UI.Vision extension URL under its URL security policy. Chrome, the Codex extension, and the native host otherwise pass diagnostics.
+- **Boundary:** control of `chrome-extension://gcbalfbdmfieckjlnblleoemohcganoc/popup.html` for the still-unexecuted qualifications.
+- **Observed behavior:** exact-profile Chrome/ChatGPT observation works, while the permitted Codex Chrome control surface rejects control of the UI.Vision extension URL under its URL security policy. Q10 independently proved that official CLI launch can start an exact hard-drive JavaScript macro.
 - **Material side effect:** none from the blocked executions; UI.Vision did not actuate a Send, journal write, Telegram notification, or sleep/check cycle.
 - **Retry safety:** safe after the same permitted control path can actuate UI.Vision. No substitute browser/controller is acceptable.
 - **Smallest corrective direction:** restore permitted UI.Vision IDE control in the existing Chrome profile, then execute the already-scoped probes. Do not introduce a helper or replacement controller.
@@ -51,7 +51,8 @@
 | Q10 | `qualification/codex-phase-q-sweep/Q10/raw/Q10_fresh_chat_spa_2026-08-29T22-59-15-486Z.csv` | `76203D7A30C1A836B81F9551A25D5811F9810326E9AD476F87F1F6D12D27D1BE` | First direct failed-run record. |
 | Q10 | `qualification/codex-phase-q-sweep/Q10/raw/Q10_fresh_chat_spa_2026-08-29T22-59-40-724Z.csv` | `201D0143DC57882C3CE5B4B8399F5D521A7C0E0787A788480B4DED01EA27F99D` | Most recent direct failed-run record. |
 | Q10 | `qualification/codex-phase-q-sweep/Q10/raw/Q10_TARGET_DOM_QUERY_CAPTURE.json` | `ECD609C0FD42F343BBA36235C0ABC20004982F1762E4543E90AB93D1CFAAE436` | Minimally scoped raw live selector/marker query result. |
-| Q10 | `qualification/Q10_FRESH_CHAT_SPA_PROBE.js` | `7684F33D8DC86309C8E71554212DE8C064AB50AD8CFB6BDBB1CD087F49223D92` | Corrected fail-closed qualification probe; not target-executed. |
+| Q10 | `qualification/Q10_FRESH_CHAT_SPA_PROBE.js` | `7684F33D8DC86309C8E71554212DE8C064AB50AD8CFB6BDBB1CD087F49223D92` | Corrected fail-closed qualification probe; executed exactly once through UI.Vision CLI. |
+| Q10 | `qualification/codex-phase-q-sweep/Q10/raw/Q10_fresh_chat_spa_2026-08-30T05-56-43-152Z.csv` | `35C9599A48BAF59378DF12B0E206727B388F10369F174D90F1CEE1CB383D92F6` | Direct corrected-run result proving the pre-Send boundary. |
 | Q10 | `qualification/Q10_RUNBOOK.md` | `16FF1A64086F9DD6FC2AA4E06DA9238B76CDB3388EDC013833EB8B0FDC2C70E2` | Operator rerun boundary and current probe hashes. |
 | Q10 | `qualification/codex-phase-q-sweep/Q10/probe/Q10_FRESH_CHAT_SPA_PROBE.test.js` | `72845DE24CBA99E05F5BF71872277FA49895F5CC7E6DFB6DD6E0079A0DF08D3C` | Local regression harness for success and ambiguity cases. |
 | Q11 | `qualification/codex-phase-q-sweep/Q11/Q11_ROUTE_COMPARISON.md` | `34967568DC8BE023877E9583A282E0579C84ABA04361041497DA5528E2CD1056` | Route inventory and provisional decision record. |
@@ -72,8 +73,8 @@
 
 ## Gate conclusion
 
-Q10, Q12, Q13, and Q15 still require UI.Vision-actuated target execution. Therefore it is **not safe** for the ChatGPT Project Governor to begin independent acceptance. The Governor may inspect this candidate package, but Q16 cannot be accepted from it.
+Q10 failed its corrected UI.Vision-actuated target execution, while Q12, Q13, and Q15 remain unexecuted. Therefore it is **not safe** for the ChatGPT Project Governor to begin independent acceptance. The Governor may inspect this candidate package, but Q16 cannot be accepted from it.
 
 ## Authority boundary
 
-This sweep did not modify `master-plan/STATE.json` or `master-plan/MASTER_PLAN.md`. It corrected the qualification-only canonical Q10 probe after a failing regression test, but did not execute that correction through UI.Vision. It used permitted read-only Chrome observation and opened a fresh same-profile diagnostic tab, but did not actuate UI.Vision, perform a material browser action, send any message, inspect Telegram credentials, or fabricate target evidence.
+This sweep did not modify `master-plan/STATE.json` or `master-plan/MASTER_PLAN.md`. It executed the qualification-only canonical Q10 probe exactly once through UI.Vision's official Command Line API. That run failed before Project-home navigation or Send. Read-only Chrome observation reconciled the unchanged configured Project target; no material browser action, message, Telegram action, credential inspection, or fabricated evidence occurred.

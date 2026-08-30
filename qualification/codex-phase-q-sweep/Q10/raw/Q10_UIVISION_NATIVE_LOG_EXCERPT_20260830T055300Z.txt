@@ -1,0 +1,8 @@
+2026-08-30T05:53:28.837Z - [error] The system cannot find the file specified. (os error 2)
+2026-08-30T05:56:38.705Z - [status] Q10_FRESH_CHAT_SPA_PROBE.js started
+2026-08-30T05:56:39.056Z - [info] Executing: uiv.$ {"locator":"css=[data-testid=\"stop-button\"]","required":false,"timeout":1}
+2026-08-30T05:56:40.093Z - [info] Executing: uiv.$ {"locator":"css=a[data-sidebar-item][data-active][href*=\"g-p-6a9323b61110819182dba0224678aa8b\"][href*=\"/c/\"]","required":false,"timeout":2,"includeHidden":true}
+2026-08-30T05:56:42.125Z - [info] Executing: uiv.$ {"locator":"css=button[aria-label=\"Open sidebar\"]","required":false,"timeout":1,"includeHidden":true}
+2026-08-30T05:56:43.160Z - [info] Executing: uiv.csv.write {"file":"Q10_fresh_chat_spa_2026-08-30T05-56-43-152Z.csv"}
+2026-08-30T05:56:43.794Z - [info] 'Q10_fresh_chat_spa_2026-08-30T05-56-43-152Z.csv' exported to the browser's Downloads folder
+2026-08-30T05:56:43.890Z - [error] Q10_FRESH_CHAT_SPA_PROBE.js failed: Q10 PRE_SEND_FAILURE: Q10 cannot expose current Project home control: active configured-Project conversation links=0; Open sidebar controls=0; NO RESEND; evidence=Q10_fresh_chat_spa_2026-08-30T05-56-43-152Z.csv (line 213) (Runtime 5.18s)

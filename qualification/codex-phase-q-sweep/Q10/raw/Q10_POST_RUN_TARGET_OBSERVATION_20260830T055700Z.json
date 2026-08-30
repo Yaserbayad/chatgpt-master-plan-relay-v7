@@ -1,0 +1,18 @@
+{
+  "observed_at_utc": "2026-08-30T05:57:00Z",
+  "observation_only": true,
+  "url": "https://chatgpt.com/g/g-p-6a9323b61110819182dba0224678aa8b/c/6a932926-c750-83ed-9e99-d3addc14f456",
+  "project_token": "g-p-6a9323b61110819182dba0224678aa8b",
+  "project_title": "t",
+  "old_conversation_id": "6a932926-c750-83ed-9e99-d3addc14f456",
+  "new_conversation_id": null,
+  "configured_project_verified": true,
+  "project_link_visible": true,
+  "open_sidebar_control_visible_to_observer": true,
+  "marker_text_visible": false,
+  "new_stable_marker_user_count": 0,
+  "stop_control_visible": false,
+  "idle": true,
+  "material_action_ambiguous": false,
+  "sensitive_or_redacted": false
+}

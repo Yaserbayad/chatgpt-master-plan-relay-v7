@@ -1,0 +1,30 @@
+{
+  "recorded_at_utc": "2026-08-30T05:53:00Z",
+  "authorization": "exactly_one_corrected_q10_run",
+  "launch_state": "CLI_RESOLUTION_FAILURE_PRE_RUN",
+  "dispatched_at_utc": "2026-08-30T05:53:25.2492404Z",
+  "macro_started": false,
+  "send_possible": false,
+  "native_log_result": "The system cannot find the file specified. (os error 2)",
+  "diagnosis": "macro query omitted the required .js suffix; UI.Vision passed the name verbatim and never emitted a macro-start status",
+  "launcher": {
+    "path": "C:\\Users\\usr\\Documents\\Codex\\ui.vision.html",
+    "sha256": "668b2dab17eb038628ca503edc7a52731f345e865e004cdda31c6157229c8759",
+    "storage_mode": "xfile",
+    "direct": 1,
+    "savelog": "qualification/codex-phase-q-sweep/Q10/raw/Q10_uivision_cli_20260830T055300Z.log"
+  },
+  "macro": {
+    "name": "Q10_FRESH_CHAT_SPA_PROBE",
+    "active_path": "C:\\Users\\usr\\Desktop\\uivision\\macros\\Q10_FRESH_CHAT_SPA_PROBE.js",
+    "sha256": "7684f33d8dc86309c8e71554212de8c064ab50ad8cfb6bdbb1cd087f49223d92"
+  },
+  "preflight": {
+    "project_token": "g-p-6a9323b61110819182dba0224678aa8b",
+    "project_title": "t",
+    "old_conversation_id": "6a932926-c750-83ed-9e99-d3addc14f456",
+    "idle": true,
+    "configured_project_verified": true
+  },
+  "sensitive_or_redacted": false
+}

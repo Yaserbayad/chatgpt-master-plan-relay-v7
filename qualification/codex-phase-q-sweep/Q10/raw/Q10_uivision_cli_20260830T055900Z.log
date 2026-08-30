@@ -1,0 +1,11 @@
+Status=Error: Q10 PRE_SEND_FAILURE: Q10 cannot expose current Project home control: active configured-Project conversation links=0; Open sidebar controls=0; NO RESEND; evidence=Q10_fresh_chat_spa_2026-08-30T05-56-43-152Z.csv
+###
+[status] Q10_FRESH_CHAT_SPA_PROBE.js started
+[info] Executing: uiv.$ {"locator":"css=[data-testid=\"stop-button\"]","required":false,"timeout":1}
+[info] Executing: uiv.$ {"locator":"css=a[data-sidebar-item][data-active][href*=\"g-p-6a9323b61110819182dba0224678aa8b\"][href*=\"/c/\"]","required":false,"timeout":2,"includ…
+[info] Executing: uiv.$ {"locator":"css=button[aria-label=\"Open sidebar\"]","required":false,"timeout":1,"includeHidden":true}
+[info] Executing: uiv.csv.write {"file":"Q10_fresh_chat_spa_2026-08-30T05-56-43-152Z.csv","rows":[["category","result","failure_reason","send_attempted","send_action_count","send_dis…
+[info] Executing:  | localStorageExport | Q10_fresh_chat_spa_2026-08-30T05-56-43-152Z.csv |  | 
+[info] 'Q10_fresh_chat_spa_2026-08-30T05-56-43-152Z.csv' exported to the browser's Downloads folder
+[info] perf: 1 commands, avg 643ms each (tab 1, dispatch 3, wait-start 91, run 548) — first 643ms, slowest localStorageExport 643ms
+[error] Q10_FRESH_CHAT_SPA_PROBE.js failed: Q10 PRE_SEND_FAILURE: Q10 cannot expose current Project home control: active configured-Project conversation links=0; Open sidebar controls=0; NO RESEND; evidence=Q10_fresh_chat_spa_2026-08-30T05-56-43-152Z.csv (line 213) (Runtime 5.18s)

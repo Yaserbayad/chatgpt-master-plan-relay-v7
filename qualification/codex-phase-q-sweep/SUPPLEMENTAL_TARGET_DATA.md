@@ -19,4 +19,13 @@ This file includes only selector, URL grammar, and runtime facts relevant to Q10
 - Current visible stable assistant IDs: `d185f1ae-c05f-4b8a-8875-19f25091e2a9`, `ce63490d-2ff6-46d6-ac98-962a153294ee`.
 - Relevant target console error/warning set: empty.
 
+## Q10 corrected CLI run facts
+
+- UI.Vision version: `10.0.178`; storage mode: hard-drive (`xfile`).
+- Canonical macro SHA-256: `7684f33d8dc86309c8e71554212de8c064ab50ad8cfb6bdbb1cd087f49223d92`.
+- One macro start was recorded at `2026-08-30T05:56:38.705Z`.
+- UI.Vision run-local selector counts: active configured-Project conversation links `0`; Open-sidebar controls `0`.
+- Send boundary: `send_action_count=0`, `send_dispatch_state=NOT_ATTEMPTED`.
+- Post-run target: same Project token and old conversation ID, idle, marker absent, no new conversation.
+
 These are time- and state-specific observations, not eternal selector guarantees. Material actions must reacquire and enforce strict uniqueness.
