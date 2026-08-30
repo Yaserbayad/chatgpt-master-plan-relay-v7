@@ -1,44 +1,57 @@
 # Light Production Watcher — Local Verification 2026-08-30
 
-Status: **locally verified Q09-Send-discovery corrected target candidate; real-browser production target PASS required**.
+Status: **locally verified Q08-sentinel / submit-surface corrected target candidate; real-browser production target PASS required**.
 
 This record applies only to `light-version`. It does not alter or imply main-project state.
 
-## Preconditions and target evidence
+## Target evidence history
 
-- Q15-B target qualification is independently verified PASS in `light/evidence/Q15B_2026-08-30.md`.
-- Production contract is frozen in `light/PRODUCTION_CONTRACT.md`.
-- First target increment is same-chat only and permits at most one material Send.
-- Target attempt 1 failed safely pre-Send at staging snapshot verification: `light/evidence/PRODUCTION_TARGET_FAIL_2026-08-30_122613.md`.
-- Target attempt 2 independently proved the staging copy-back correction, then failed safely pre-Send at Send-control discovery: `light/evidence/PRODUCTION_TARGET_FAIL_2026-08-30_123922.md`.
+- Q15-B target qualification: independently verified PASS.
+- Production attempt 1: safe pre-Send staging snapshot false negative.
+- Production attempt 2: safe pre-Send `SEND_CONTROL_MISSING`; led to a Q09 selector correction.
+- Production attempt 3: independently verified the Q09 selector correction was actually executed and still failed pre-Send with `SEND_CONTROL_MISSING`; this falsified the selector-only diagnosis.
+
+Third target evidence: `light/evidence/PRODUCTION_TARGET_FAIL_2026-08-30_140440.md`.
+
+## Recovered target-qualified contract
+
+Main Relay Q08 had already proven that comparing Ctrl+C output to the same payload left on the clipboard before Ctrl+V is an invalid oracle: paste/copy can silently no-op while the unchanged clipboard still equals the expected payload.
+
+Q08 final target PASS required both:
+
+- visible submit-surface state transition `Start Voice -> Send prompt` after trusted paste;
+- a unique clipboard sentinel written before Ctrl+C, which Ctrl+C must replace with the editor contents.
+
+It also established that only terminal U+00A0 markers may be normalized from rich-editor clipboard serialization.
+
+The previous Light watcher omitted those requirements. The current candidate restores them before any material Send.
 
 ## Current source binding
 
-The locally tested bytes are bound to these Git blobs on `light-version`:
-
 ```text
 d06dbdcfb341e443663736fcdc14274c0560b3c3  light/production/LIGHT_PRODUCTION_ACTION.schema.json
-c8968386530efc4381411fed1aae90dda38c485f  light/production/LIGHT_PRODUCTION_WATCHER.js
+eb8ff2a0367732f66207b4611cfe7336b9da0d16  light/production/LIGHT_PRODUCTION_WATCHER.js
 ea7878a8b9849d9aa2f1fbd822004d0bfb6fafb4  light/production/RUN_LIGHT_PRODUCTION_TARGET.ps1
 3fb41fe1ef6f4ac6f0ade600858d700c49d19aaf  light/production/RelayCodexLightProduction.ps1
-9406c92c762f285f25cab7a29346bb6bc70a1b56  light/tests/test_production_contract.mjs
-393ce2046207e8dc2d9df44b2d810bd8842bce36  light/tests/simulate_production_watcher.mjs
+41a1ea86da47a56f14b22b093c79eb402c841d52  light/tests/test_production_contract.mjs
+9864c04ee91e140637871811ded502c27ecc2639  light/tests/simulate_production_watcher.mjs
 ```
 
-The watcher and both production test files were reread from GitHub after persistence and their Git blob SHAs exactly match `git hash-object` on the locally tested files.
-
-Current local SHA-256 values:
+Local SHA-256 values for changed/tested files:
 
 ```text
-b368b9dff2fd8c5ac8ed6c611e3f7561181b432a79dce9ea51d9da1ae4368f4c  LIGHT_PRODUCTION_ACTION.schema.json
-50c14b5674425067d163cc3ee8b9bbab3538fab346d4a3d960b0c505b732062f  LIGHT_PRODUCTION_WATCHER.js
-26814afa20b19849aed404cf9d3cd836ccc57a2c1c49d16aad3c16f8aa7d43c9  RUN_LIGHT_PRODUCTION_TARGET.ps1
-071cf5e7071e242e76476ba0e740c190482c75e4577c712cd4dbad39a2c00619  RelayCodexLightProduction.ps1
-3abbc6cc33cf3c632fcc70ad15517140628dbb43218f36346b8fc475829dffc2  test_production_contract.mjs
-3e29051beb09385db802cfc512a059d2c814a6842306d195d13cc74df2aa1eac  simulate_production_watcher.mjs
+16bcb6fbc5596fd2f5a8e6783665858c42887cd1f969e8eb048eba45d6b53e15  LIGHT_PRODUCTION_WATCHER.js
+5f4939c7e54b587d95884a65a5175c888e82166904744f89501eca98f2660320  simulate_production_watcher.mjs
+cf715852788c8e222499996bfe7325e6f743417614e70e3426447b8b270fdba5  test_production_contract.mjs
 ```
 
-## Verification performed after the Q09 Send-discovery correction
+The watcher and both production test files were reread from GitHub after persistence and their Git blob SHAs exactly matched `git hash-object` on the locally tested files.
+
+## Verification performed
+
+TDD first reproduced the old false-oracle behavior: with silent trusted paste/copy no-ops, the failed watcher bypassed staging verification and reached `SEND_CONTROL_MISSING`.
+
+After restoring the Q08 contract:
 
 ```text
 node --check light/production/LIGHT_PRODUCTION_WATCHER.js
@@ -48,73 +61,50 @@ node light/tests/test_production_contract.mjs
 LIGHT PRODUCTION CONTRACT TESTS: PASS
 
 node light/tests/simulate_production_watcher.mjs
-LIGHT PRODUCTION STAGE COPY-BACK SIMULATION: PASS
-
-focused Q09 Send-discovery regression
-SEND DISCOVERY REGRESSION: PASS
+LIGHT PRODUCTION SENTINEL/SUBMIT-SURFACE SIMULATION: PASS
 ```
 
-The local Linux execution environment does not contain `pwsh`, so PowerShell runtime execution is not claimed from local evidence. The unchanged PowerShell bridge/runner remain target-bound to Windows.
+## Current staging and Send proof
 
-## Staging-verification behavior retained from target attempt 1
+For `SEND_PROMPT` the watcher now requires, in order:
 
-The model-generated prompt never enters the trusted-key parser. Current staging proof is:
+1. source identity still current and ChatGPT not generating;
+2. exactly one visible `composer-submit-button-color` surface with `aria-label="Start Voice"`;
+3. clipboard prompt round-trip;
+4. trusted click + constant Ctrl+V;
+5. the visible submit surface transitions to enabled `aria-label="Send prompt"`;
+6. a unique nonce-bound copy sentinel is written to the clipboard;
+7. constant Ctrl+A + Ctrl+C replaces that sentinel;
+8. copied editor text equals the prompt after CR normalization and terminal-NBSP-only normalization;
+9. original clipboard is restored;
+10. source identity is revalidated again;
+11. the same visible submit surface is reacquired as enabled `Send prompt`;
+12. `SEND_AMBIGUOUS` is persisted before the one allowed Send click;
+13. exact new-user-message confirmation is required;
+14. following stable completed assistant turn is required.
 
-1. prompt enters the clipboard;
-2. trusted browser input sends only `${KEY_CTRL+KEY_V}`;
-3. composer is reacquired/refocused;
-4. trusted input sends only `${KEY_CTRL+KEY_A}` then `${KEY_CTRL+KEY_C}`;
-5. copied composer text must exactly match the intended prompt, with CR normalization only;
-6. original clipboard is restored;
-7. source conversation/user/assistant identity is revalidated before Send.
+The model-generated prompt never enters `uiv.browser.type`; only constant trusted key chords do.
 
-Target attempt 2 reached beyond this gate without a staging failure, so the trusted copy-back path now has direct target evidence.
+## Behavior proven by simulation/static tests
 
-## Send-discovery correction from target attempt 2
-
-Target attempt 2 proved `SEND_CONTROL_MISSING` after successful staging and identity revalidation, with `send_click_count=0`. The failed Light watcher searched only visible generic selectors.
-
-Existing target-qualified main Relay Q09 technical evidence had already proven:
-
-```text
-css=button[class*="composer-submit-button-color"][aria-label="Send prompt"]
-includeHidden: true
-enabled-state filtering
-```
-
-The current Light watcher restores those mechanical invariants:
-
-- Q09-qualified selector is first;
-- all Send candidate searches use `includeHidden: true`;
-- candidates with `disabled` or `aria-disabled=true` are rejected;
-- multiple enabled candidates for one locator are treated as ambiguous failure;
-- generic selectors remain secondary fallbacks.
-
-No material-send semantics changed.
-
-## Behavior proven by static/simulation tests
-
-- no dispatch while ChatGPT is generating;
+- no dispatch while generating;
 - stable completed source-turn gating;
 - one bridge event per source turn;
-- handled/ambiguous source-turn dedupe before Codex;
-- strict nonce/conversation/assistant binding before material action;
-- `SEND_PROMPT | STOP | HUMAN` allowlist;
-- STOP/HUMAN perform no material browser action;
-- stale/empty rich-editor finder snapshots do not cause false staging failure;
-- corrupted copy-back fails before Send;
-- exact trusted key sequence is Paste -> Select All -> Copy;
-- source identity is revalidated after staging and before Send;
-- Send discovery requires the Q09-qualified hidden semantic path in regression simulation;
-- at most one Send click;
-- `SEND_AMBIGUOUS` is persisted before the material Send click;
-- ambiguous confirmation and Send-click exception never retry;
-- successful submission requires an exact new user message;
-- success requires the following stable completed assistant turn;
-- no OCR/screenshots/Ui.Vision AI/page-world eval/generic coordinates/fresh-chat/Chrome-restart logic.
+- strict nonce/conversation/assistant binding;
+- STOP/HUMAN perform no material action;
+- paste no-op fails before Send;
+- copy no-op fails because the sentinel remains unchanged;
+- copied-content mismatch fails before Send;
+- terminal NBSP clipboard serialization is accepted narrowly;
+- stale identity fails before material action;
+- one Send maximum;
+- `SEND_AMBIGUOUS` is persisted before the click;
+- click failure / ambiguous confirmation do not retry;
+- duplicate handled source turns are rejected before Codex;
+- no OCR, screenshots, Ui.Vision AI, page-world eval, generic coordinates, fresh-chat, or Chrome-restart behavior.
 
 ## Remaining acceptance boundary
 
-The corrected production watcher is **not target-PASS yet**. Run the replacement bounded Windows/Chrome package once. It may send exactly one fixed safe prompt, `Reply exactly LIGHT_PRODUCTION_TARGET_OK.`, and accepts PASS only when target evidence proves bridge/Codex exit 0, staging copy-back, qualified Send discovery, exactly one Send click, exact submission confirmation, following stable completion, and a valid evidence ZIP.
+The current production watcher is **not target-PASS**. Run the replacement bounded Windows/Chrome package once. PASS requires target evidence for the state transition, sentinel replacement, exact staged copy, one Send, exact user-message confirmation, and following stable assistant completion.
 
-Do not blindly repeat a failure; diagnose returned evidence first.
+Do not repeat a failed target run before its evidence is diagnosed.
