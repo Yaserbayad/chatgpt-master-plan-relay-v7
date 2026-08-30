@@ -33,7 +33,7 @@ function run(mode='success'){
     clipboard:{read:()=>clipboard,write:v=>{clipboard=String(v);}},
     run(command){
       assert.equal(command,'XRunAndWait'); bridgeCalls++; if(generating)runCalledWhileGenerating=true; const e=JSON.parse(clipboard);
-      clipboard=JSON.stringify({protocol:'relay-light-production-action-v1',nonce:mode==='stale'?e.nonce+'_STALE':e.nonce,conversation_id:e.conversation_id,assistant_message_id:e.assistant_message_id,assistant_text_length:e.assistant_text_length,assistant_text_sha256:'a'.repeat(64),action:mode==='stop'?'STOP':mode==='human'?'HUMAN':'SEND_PROMPT',prompt:(mode==='stop'||mode==='human')?'':targetPrompt,prompt_sha256:'b'.repeat(64),reason:'simulated',codex_version:'codex-cli-test',codex_exit_code:0,codex_duration_ms:1});
+      clipboard=JSON.stringify({protocol:'relay-light-production-action-v1',nonce:mode==='stale'?e.nonce+'_STALE':e.nonce,conversation_id:e.conversation_id,assistant_message_id:e.assistant_message_id,assistant_text_length:e.assistant_text_length,assistant_text_sha256:'a'.repeat(64),action:mode==='stop'?'STOP':mode==='human'?'HUMAN':'SEND_PROMPT',prompt:(mode==='stop'||mode==='human')?'':targetPrompt,prompt_sha256:(mode==='stop'||mode==='human')?'':'b'.repeat(64),reason:'simulated',codex_version:'codex-cli-test',codex_exit_code:0,codex_duration_ms:1});
     },
     browser:{
       click(m){if(m.kind==='composer')return;if(m.kind==='submit'){if(mode==='send_click_fail')throw new Error('send click fail');sendClicks++;return;}throw new Error('bad click');},
@@ -52,10 +52,11 @@ function run(mode='success'){
   };
   if(mode==='duplicate')csv.set('LIGHT_PRODUCTION_STATE.csv',[['assistant_message_id','status','updated_at'],['assistant-1','SENT_CONFIRMED','x']]);
   let error=null;try{vm.runInNewContext(source,{uiv,Date,Math,JSON,Number,Set,Array,String,Error,RegExp,Object},{timeout:3000});}catch(e){error=e;}
-  return {error,clipboard,typed,sendClicks,bridgeCalls,csv,runCalledWhileGenerating};
+  const target=[...csv.entries()].find(([k])=>k.startsWith('LIGHT_PRODUCTION_target_'))?.[1]||null;
+  return {error,clipboard,typed,sendClicks,bridgeCalls,csv,runCalledWhileGenerating,target};
 }
 
-for(const mode of ['success','success_nbsp']){const r=run(mode);assert.equal(r.error,null,`${mode} must pass`);assert.deepEqual(r.typed,['${KEY_CTRL+KEY_V}','${KEY_CTRL+KEY_A}','${KEY_CTRL+KEY_C}']);assert.equal(r.sendClicks,1);assert.equal(r.clipboard,'ORIGINAL_CLIPBOARD');}
+for(const mode of ['success','success_nbsp']){const r=run(mode);assert.equal(r.error,null,`${mode} must pass`);assert.deepEqual(r.typed,['${KEY_CTRL+KEY_V}','${KEY_CTRL+KEY_A}','${KEY_CTRL+KEY_C}']);assert.equal(r.sendClicks,1);assert.equal(r.clipboard,'ORIGINAL_CLIPBOARD');const h=r.target[0],v=r.target[1];assert.equal(h.includes('bridge_prompt_sha256'),true);assert.equal(v[h.indexOf('bridge_prompt_sha256')],'b'.repeat(64));}
 const gen=run('generating');assert.equal(gen.error,null);assert.equal(gen.runCalledWhileGenerating,false);assert.equal(gen.sendClicks,1);
 const pasteNoop=run('paste_noop');assert.ok(pasteNoop.error);assert.match(String(pasteNoop.error.message),/submit surface did not transition to Send prompt/);assert.equal(pasteNoop.sendClicks,0);
 const copyNoop=run('copy_noop');assert.ok(copyNoop.error);assert.match(String(copyNoop.error.message),/copy-back did not replace sentinel/);assert.equal(copyNoop.sendClicks,0);
