@@ -1,0 +1,36 @@
+{
+  "schema_version": "q14-version-evidence-1",
+  "candidate_classification": "INCONCLUSIVE",
+  "guard": "probe/Q14_VERSION_GUARD.ps1",
+  "guard_test": "probe/Q14_VERSION_GUARD.test.ps1",
+  "positive_run": {
+    "result": "MATCH",
+    "exit_code": 0,
+    "evidence": "raw/Q14_VERSION_GUARD_positive.json"
+  },
+  "simulated_chrome_mismatch": {
+    "expected_chrome": "0.0.0.0",
+    "result": "MISMATCH",
+    "named_fields": ["chrome_running", "chrome_on_disk"],
+    "exit_code": 1,
+    "evidence": "raw/Q14_VERSION_GUARD_chrome_mismatch.json"
+  },
+  "frozen_tuple": {
+    "windows_build": "26100.9168",
+    "chrome": "152.0.7977.65",
+    "uivision": "10.0.178",
+    "desktop_automation": "2.0.12",
+    "chrome_profile_directory": "Default (read from Chrome Local State profile.last_used)"
+  },
+  "limitations": [
+    "The guard was not demonstrated gating a UI.Vision macro because the permitted actuator surface is unavailable.",
+    "The target tab-to-running-Chrome-process association is not independently exposed.",
+    "Qualification-only external preflight; not a production browser supervisor.",
+    "Not an in-macro version guard.",
+    "Chrome may drift because Google Updater services are installed and a GoogleUpdater scheduled task is Ready.",
+    "UI.Vision may drift through Chrome extension update behavior; updates were not claimed disabled.",
+    "The guard rereads the live executable and extension manifest on every invocation, so it detects rather than prevents drift.",
+    "The friendly profile name friendsenc and RealUser V2026 remain user-reported.",
+    "Legacy XModules 3.2.3 is an additional component and is not conflated with Desktop Automation v2.0.12."
+  ]
+}

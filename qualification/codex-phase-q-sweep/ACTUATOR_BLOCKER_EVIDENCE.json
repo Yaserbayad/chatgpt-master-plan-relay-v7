@@ -1,0 +1,35 @@
+{
+  "schema_version": "phase-q-sweep-actuator-blocker-1",
+  "recorded_utc": "2026-08-29T23:37:44.5307447Z",
+  "permitted_actuator": "UI.Vision extension 10.0.178 in the existing Google Chrome profile",
+  "control_surface": "Codex Chrome extension integration",
+  "extension_tab": {
+    "title": "Ui.Vision IDE 10.0.178 - (Tab: t - Reconstruct Relay v7 State)",
+    "url": "chrome-extension://gcbalfbdmfieckjlnblleoemohcganoc/popup.html",
+    "control_result": "REJECTED_BY_CONTROL_SURFACE_URL_SECURITY_POLICY",
+    "material_action_attempted": false
+  },
+  "target_chrome": {
+    "exact_profile_connection": "AVAILABLE",
+    "chatgpt_target_observation": "AVAILABLE",
+    "fresh_same_profile_tab_navigation": "AVAILABLE",
+    "material_action_attempted": false
+  },
+  "diagnostics": {
+    "chrome_running": true,
+    "chrome_executable": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+    "codex_chrome_extension_installed": true,
+    "codex_chrome_extension_enabled": true,
+    "native_host_manifest_valid": true,
+    "selected_profile_directory": "Default"
+  },
+  "qualification_effect": {
+    "Q10": "corrected probe not executed",
+    "Q12": "not executed",
+    "Q13": "not executed",
+    "Q15": "not executed"
+  },
+  "substitute_controller_used": false,
+  "raw_capture": "raw/CHROME_UIVISION_CONTROL_SURFACE_CAPTURE.json",
+  "interpretation": "Target Chrome is available for permitted observation, so this is not TARGET_CHROME_UNAVAILABLE. The unavailable capability is control of the required UI.Vision extension page through the permitted Codex Chrome surface."
+}

@@ -1,0 +1,2 @@
+category,result,failure_reason,send_performed,send_action_count,home_click_count,sidebar_click_count,url_before,old_conversation_id,fresh_root_observed,fresh_root_url,new_conversation_id,expected_uivision,timestamp,label,classification,url,conversation_id
+meta,FAIL,Q10 current Project home control unresolved: active Project rows=0,,0,0,1,https://chatgpt.com/g/g-p-6a9323b61110819182dba0224678aa8b-t/c/6a932926-c750-83ed-9e99-d3addc14f456,6a932926-c750-83ed-9e99-d3addc14f456,,,,10.0.178,,,,,

@@ -1,14 +1,17 @@
 // Q10 Same-Project fresh-chat/SPA qualification for ChatGPT Master Plan Relay v7.
-// MATERIAL TEST: uses the active Project row's target-proven "Open project home" control,
+// MATERIAL TEST: uses the active configured-Project conversation's nearest Project-group
+// "Open project home" control,
 // then performs exactly ONE trusted Send. Never retries/resends after that Send.
 
 const TARGET_PROJECT_TOKEN = 'g-p-6a9323b61110819182dba0224678aa8b';
 const EXPECTED_UIVISION = '10.0.178';
-const ACTIVE_PROJECT_ROW = 'css=[data-sidebar-item][data-sidebar-keep-open="true"][data-active][role="button"]';
-const PROJECT_HOME_BUTTON = 'css=button[aria-label="Open project home"]';
+const ACTIVE_PROJECT_CONVERSATION = `css=a[data-sidebar-item][data-active][href*="${TARGET_PROJECT_TOKEN}"][href*="/c/"]`;
+const ACTIVE_PROJECT_GROUP = `css=li:has(a[data-sidebar-item][data-active][href*="${TARGET_PROJECT_TOKEN}"][href*="/c/"]):has(button[aria-label="Open project home"])`;
+const CURRENT_PROJECT_HOME_BUTTON = `${ACTIVE_PROJECT_GROUP} button[aria-label="Open project home"]`;
 const OPEN_SIDEBAR = 'css=button[aria-label="Open sidebar"]';
 const COMPOSER = 'css=#prompt-textarea[role="textbox"][contenteditable="true"]';
 const SEND = 'css=button[class*="composer-submit-button-color"][aria-label="Send prompt"]';
+const MESSAGE = 'css=[data-message-author-role]';
 const MARKER = 'Q10_FRESH_CHAT_SPA_PROBE';
 
 function clean(v) { return v == null ? '' : String(v).replace(/\s+/g, ' ').trim(); }
@@ -58,18 +61,26 @@ function classify(url, oldConversationId) {
   return 'DIFFERENT_PROJECT_OR_ORIGIN';
 }
 function enabled(m) { return m && !hasAttr(m,'disabled') && clean(getAttr(m,'aria-disabled')).toLowerCase() !== 'true'; }
+function messageRows(stage, matches) {
+  return matches.map((m, i) => ({
+    stage,
+    index: i + 1,
+    author: clean(getAttr(m, 'data-message-author-role')),
+    id: clean(getAttr(m, 'data-message-id')),
+    text: clean(m.text)
+  }));
+}
+function addById(map, rows) {
+  for (const row of rows) if (row.id && !map.has(row.id)) map.set(row.id, row);
+}
 
 function locateCurrentProjectHomeButton() {
-  const active = uniqueVisible(ACTIVE_PROJECT_ROW, 2);
-  if (active.length !== 1) return {button:null, reason:`active Project rows=${active.length}`};
-  const ar = rectOf(active[0]);
-  const homes = uniqueVisible(PROJECT_HOME_BUTTON, 2);
-  const matches = homes.filter(h => {
-    const r = rectOf(h);
-    const verticalOverlap = Math.min(ar.y + ar.height, r.y + r.height) - Math.max(ar.y, r.y);
-    return verticalOverlap > 0 && r.x >= ar.x && r.x <= ar.x + ar.width + 20;
-  });
-  return matches.length === 1 ? {button:matches[0], reason:''} : {button:null, reason:`matching Project-home controls=${matches.length}`};
+  const active = uniqueVisible(ACTIVE_PROJECT_CONVERSATION, 2);
+  if (active.length !== 1) return {button:null, reason:`active configured-Project conversation links=${active.length}`};
+  const groups = uniqueVisible(ACTIVE_PROJECT_GROUP, 2);
+  if (groups.length !== 1) return {button:null, reason:`nearest active configured-Project groups=${groups.length}`};
+  const homes = uniqueVisible(CURRENT_PROJECT_HOME_BUTTON, 2);
+  return homes.length === 1 ? {button:homes[0], reason:''} : {button:null, reason:`ancestor-related Project-home controls=${homes.length}`};
 }
 
 const trace = [];
@@ -87,8 +98,9 @@ const oldConversationId = conversationId(before);
 if (!oldConversationId) throw new Error(`Q10 requires an existing conversation ID before fresh entry: ${before}`);
 if (findAll('css=[data-testid="stop-button"]', 1).length) throw new Error('Q10 requires ChatGPT idle/completed before fresh entry');
 
-let sendPerformed = false;
+let sendAttempted = false;
 let sendActionCount = 0;
+let sendDispatchState = 'NOT_ATTEMPTED';
 let homeClickCount = 0;
 let sidebarClickCount = 0;
 let result = 'FAIL';
@@ -96,6 +108,9 @@ let failureReason = '';
 let freshRootObserved = false;
 let freshRootUrl = '';
 let newConversationId = '';
+let afterRows = [];
+let newUsers = [];
+let markerUsers = [];
 
 try {
   let home = locateCurrentProjectHomeButton();
@@ -109,7 +124,7 @@ try {
   }
   if (!home.button) throw new Error(`Q10 current Project home control unresolved: ${home.reason}`);
 
-  // Target-proven fresh-entry mechanism: active Project row -> its unique associated Open project home control.
+  // Target-proven fresh-entry mechanism: active configured-Project conversation -> nearest Project-group ancestor -> unique Open project home control.
   uiv.browser.click(home.button);
   homeClickCount += 1;
 
@@ -137,6 +152,12 @@ try {
   const composers = uniqueVisible(COMPOSER, 1);
   if (composers.length !== 1) throw new Error(`Q10 fresh Project root lost its unique composer; found ${composers.length}`);
 
+  const beforeSend = new Map();
+  addById(beforeSend, messageRows('before-send-visible', findAll(MESSAGE)));
+  addById(beforeSend, messageRows('before-send-all', findAll(MESSAGE, 2, true)));
+  const beforeUserIds = new Set(Array.from(beforeSend.values()).filter(r => r.author === 'user').map(r => r.id));
+  if (beforeUserIds.size) throw new Error(`Q10 fresh Project root unexpectedly contains ${beforeUserIds.size} stable user message IDs before Send`);
+
   uiv.browser.click(composers[0]);
   uiv.browser.type(MARKER);
   uiv.sleep(350);
@@ -144,34 +165,50 @@ try {
   const sends = findAll(SEND, 2, true).filter(m => visible(m) && enabled(m));
   if (sends.length !== 1) throw new Error(`Q10 requires exactly one enabled Send prompt after staging marker; found ${sends.length}`);
 
-  // THE ONLY SEND ACTION. Never retry/resend after this point.
-  uiv.browser.click(sends[0]);
+  // THE ONLY SEND ACTION. Crossing this boundary is permanently ambiguous unless
+  // stable target evidence later proves the exact marker turn. Never retry/resend.
+  sendAttempted = true;
   sendActionCount += 1;
-  sendPerformed = true;
+  sendDispatchState = 'DISPATCH_POSSIBLE';
+  uiv.browser.click(sends[0]);
+  sendDispatchState = 'CLICK_RETURNED';
 
+  const after = new Map();
   for (let i = 0; i < 40; i += 1) {
     uiv.sleep(250);
     const o = observe(`post-send-${i + 1}`, oldConversationId);
     if (o.state === 'DIFFERENT_PROJECT_OR_ORIGIN') { failureReason = `post-send navigation left configured Project: ${o.url}`; break; }
     if (o.state === 'SAME_PROJECT_OLD_CONVERSATION') { failureReason = `post-send URL resolved to old conversation ID ${oldConversationId}`; break; }
-    if (o.state === 'SAME_PROJECT_NEW_CONVERSATION') { newConversationId = o.cid; result = 'PASS'; break; }
+    addById(after, messageRows(`after-${i + 1}-visible`, findAll(MESSAGE)));
+    addById(after, messageRows(`after-${i + 1}-all`, findAll(MESSAGE, 2, true)));
+    afterRows = Array.from(after.values());
+    newUsers = afterRows.filter(r => r.author === 'user' && !beforeUserIds.has(r.id));
+    markerUsers = newUsers.filter(r => r.text === MARKER);
+    if (o.state === 'SAME_PROJECT_NEW_CONVERSATION') newConversationId = o.cid;
+    if (newConversationId && newUsers.length) break;
   }
-  if (result !== 'PASS' && !failureReason) failureReason = 'new same-Project conversation ID was not proven after the single Send';
+  if (!failureReason && !newConversationId) failureReason = 'new same-Project conversation ID was not proven after the single possible Send';
+  else if (!failureReason && sendActionCount !== 1) failureReason = `internal Send action count is ${sendActionCount}, expected 1`;
+  else if (!failureReason && newUsers.length !== 1) failureReason = `single possible Send produced ${newUsers.length} newly observed stable user message IDs`;
+  else if (!failureReason && markerUsers.length !== 1) failureReason = `single possible Send produced ${markerUsers.length} stable user turns with the exact marker`;
+  else if (!failureReason && newUsers[0].text !== MARKER) failureReason = `new stable user turn text does not exactly match marker: ${newUsers[0].text}`;
+  else if (!failureReason) result = 'PASS';
 } catch (error) {
   failureReason = clean(error && error.message ? error.message : error);
 }
 
 const rows = [[
-  'category','result','failure_reason','send_performed','send_action_count','home_click_count','sidebar_click_count','url_before','old_conversation_id','fresh_root_observed','fresh_root_url','new_conversation_id','expected_uivision',
-  'timestamp','label','classification','url','conversation_id'
+  'category','result','failure_reason','send_attempted','send_action_count','send_dispatch_state','home_click_count','sidebar_click_count','url_before','old_conversation_id','fresh_root_observed','fresh_root_url','new_conversation_id','new_user_count','marker_user_count','new_user_id','new_user_text','expected_uivision',
+  'timestamp','label','classification','url','conversation_id','stage','author','message_id','text'
 ]];
-rows.push(['meta',result,failureReason,sendPerformed,sendActionCount,homeClickCount,sidebarClickCount,before,oldConversationId,freshRootObserved,freshRootUrl,newConversationId,EXPECTED_UIVISION,'','','','','']);
-for (const t of trace) rows.push(['trace','','','','','','','','','','','','',t[0],t[1],t[2],t[3],t[4]]);
+rows.push(['meta',result,failureReason,sendAttempted,sendActionCount,sendDispatchState,homeClickCount,sidebarClickCount,before,oldConversationId,freshRootObserved,freshRootUrl,newConversationId,newUsers.length,markerUsers.length,newUsers.length === 1 ? newUsers[0].id : '',newUsers.length === 1 ? newUsers[0].text : '',EXPECTED_UIVISION,'','','','','','','','','']);
+for (const t of trace) rows.push(['trace','','','','','','','','','','','','','','','','','',t[0],t[1],t[2],t[3],t[4],'','','','']);
+for (const r of afterRows) rows.push(['message','','','','','','','','','','','','','','','','','','','','','','',r.stage,r.author,r.id,r.text]);
 
 const stamp = new Date().toISOString().replace(/[:.]/g, '-');
 const file = `Q10_fresh_chat_spa_${stamp}.csv`;
 uiv.csv.write(file, rows);
 uiv.files.exportToDownloads(file);
 
-if (result !== 'PASS') throw new Error(`Q10 ${sendPerformed ? 'AMBIGUOUS_AFTER_SINGLE_SEND' : 'PRE_SEND_FAILURE'}: ${failureReason}; NO RESEND; evidence=${file}`);
-uiv.log(`Q10 PASS: active Project-home entry resolved to new conversation ${newConversationId}; ${file}`, 'green');
+if (result !== 'PASS') throw new Error(`Q10 ${sendAttempted ? 'AMBIGUOUS_AFTER_POSSIBLE_SEND' : 'PRE_SEND_FAILURE'}: ${failureReason}; NO RESEND; evidence=${file}`);
+uiv.log(`Q10 PASS: one possible Send resolved to exactly one marker user turn ${newUsers[0].id} in new conversation ${newConversationId}; ${file}`, 'green');

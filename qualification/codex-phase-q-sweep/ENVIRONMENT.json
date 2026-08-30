@@ -1,0 +1,54 @@
+{
+  "schema_version": "phase-q-sweep-environment-1",
+  "recorded_utc": "2026-08-29T23:30:32.6494513Z",
+  "evidence_kind": "direct_evidence_and_user_report_separated",
+  "platform": {
+    "windows": {
+      "value": "Windows 11 Pro 24H2 build 26100.9168",
+      "provenance": "direct version-guard evidence"
+    },
+    "chrome": {
+      "value": "152.0.7977.65",
+      "provenance": "direct executable and process-crash-annotation evidence"
+    },
+    "chrome_profile_directory": {
+      "value": "Default",
+      "provenance": "direct Codex Chrome diagnostics and Q14 guard evidence"
+    },
+    "chrome_friendly_profile_name": {
+      "value": "Friendsenc",
+      "provenance": "direct Codex Chrome session metadata",
+      "independently_inspected": true
+    },
+    "uivision_extension": {
+      "value": "10.0.178",
+      "provenance": "direct live-tab-title and installed-extension-manifest evidence"
+    },
+    "uivision_desktop_automation_v2": {
+      "value": "2.0.12",
+      "provenance": "direct executable/package evidence"
+    },
+    "legacy_xmodules": {
+      "value": "3.2.3",
+      "provenance": "direct inventory evidence",
+      "interpretation": "additional legacy component; not Desktop Automation v2"
+    },
+    "realuser": {
+      "value": "V2026",
+      "provenance": "user_report_only",
+      "independently_inspected": false
+    }
+  },
+  "target": {
+    "project_token": "g-p-6a9323b61110819182dba0224678aa8b",
+    "github_repository_access": "succeeded",
+    "telegram_configuration": "reported by existing evidence; no secret read"
+  },
+  "runtime_drift": {
+    "google_updater_services_installed": true,
+    "google_updater_scheduled_task_ready": true,
+    "chrome_and_extension_update_behavior": "may cause version drift",
+    "updates_disabled_claimed": false,
+    "guard_behavior": "rereads live executable and extension manifest on every invocation; detects rather than prevents drift"
+  }
+}

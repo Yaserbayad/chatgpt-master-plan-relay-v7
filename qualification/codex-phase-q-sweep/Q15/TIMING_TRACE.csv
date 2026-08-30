@@ -1,0 +1,2 @@
+timestamp_utc,step,status,observed_duration_seconds,expected_durable_state,reason
+2026-08-29T23:30:32.6494513Z,UI.Vision_10_minute_sleep_check_cycle,NOT_EXECUTED,,Macro idle between observations; no routine refresh/OCR/image work while sleeping; completed response processed at next check,UI.Vision actuation unavailable through permitted Codex Chrome surface

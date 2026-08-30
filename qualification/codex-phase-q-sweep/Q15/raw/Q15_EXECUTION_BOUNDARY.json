@@ -1,0 +1,12 @@
+{
+  "schema_version": "q15-execution-boundary-1",
+  "recorded_utc": "2026-08-30T00:02:24.0923394Z",
+  "execution_status": "NOT_EXECUTED",
+  "required_actuator": "UI.Vision extension 10.0.178 in the existing Chrome profile",
+  "blocked_before": "10-minute UI.Vision sleep/check cycle",
+  "shell_sleep_substituted": false,
+  "browser_observation_substituted": false,
+  "material_action_attempted": false,
+  "shared_blocker_evidence": "../../ACTUATOR_BLOCKER_EVIDENCE.json",
+  "interpretation": "No evidence was produced for idle resource behavior or next-check processing; one target run remains required after permitted UI.Vision actuation is restored."
+}

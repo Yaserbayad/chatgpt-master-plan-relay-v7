@@ -1,0 +1,35 @@
+{
+  "schema_version": "q10-target-dom-observation-1",
+  "observation_utc": "2026-08-29T23:28:02.321Z",
+  "collection_method": "read-only observation through the Codex Chrome extension in the existing Chrome profile",
+  "target_url": "https://chatgpt.com/g/g-p-6a9323b61110819182dba0224678aa8b/c/6a932926-c750-83ed-9e99-d3addc14f456",
+  "marker_user_turn_count": 0,
+  "legacy_active_row_selector": {
+    "selector": "[data-sidebar-item][data-sidebar-keep-open=\"true\"][data-active][role=\"button\"]",
+    "count": 0
+  },
+  "active_target_conversation": {
+    "selector": "a[data-sidebar-item][data-active][href*=\"g-p-6a9323b61110819182dba0224678aa8b\"][href*=\"/c/\"]",
+    "count": 1,
+    "node_name": "A",
+    "has_data_sidebar_keep_open": false,
+    "has_explicit_role": false
+  },
+  "target_proven_project_home_selector": {
+    "selector": "li:has(a[data-sidebar-item][data-active][href*=\"g-p-6a9323b61110819182dba0224678aa8b\"][href*=\"/c/\"]) button[aria-label=\"Open project home\"]",
+    "count": 1,
+    "visible": true,
+    "ancestor_hops_from_active_anchor_to_project_group": 4
+  },
+  "composer": {
+    "selector": "#prompt-textarea",
+    "count": 1,
+    "label": "Chat with ChatGPT"
+  },
+  "idle_empty_draft_controls": {
+    "visible_send_count": 0,
+    "visible_stop_count": 0
+  },
+  "relevant_console_error_or_warning_count": 0,
+  "material_action_attempted": false
+}

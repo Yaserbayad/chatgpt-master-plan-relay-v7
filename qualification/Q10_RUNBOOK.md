@@ -61,16 +61,17 @@ Therefore the prior direct-root URL and title-independent old composer label wer
 
 The corrected qualification probe now:
 1. requires an existing completed conversation in the configured Project and captures its conversation ID;
-2. locates the unique visible active Project sidebar row;
-3. locates the unique visible `Open project home` control geometrically associated with that row;
+2. locates exactly one active configured-Project conversation anchor by Project token and `/c/` route;
+3. locates exactly one visible `Open project home` control in that anchor's nearest Project-group ancestor;
 4. trusted-clicks that control once;
 5. accepts generic ChatGPT SPA states as `UNKNOWN_TRANSITIONAL`, but positively classifies another explicit Project route as different;
 6. waits for a same-Project `/project` surface with no conversation ID;
 7. requires exactly one visible `#prompt-textarea[role="textbox"][contenteditable="true"]` composer;
 8. stages `Q10_FRESH_CHAT_SPA_PROBE`;
 9. reacquires exactly one enabled Send;
-10. performs exactly one trusted Send;
-11. observes only until a different same-Project conversation ID appears or the run ends without resend.
+10. marks the transaction `DISPATCH_POSSIBLE` before invoking exactly one trusted Send, so a dispatched-but-throwing click is never classified pre-Send;
+11. observes only until a different same-Project conversation ID and stable user-turn evidence appear or the run ends without resend;
+12. passes only when exactly one newly observed stable user-message ID has text exactly equal to `Q10_FRESH_CHAT_SPA_PROBE`.
 
 The Project title and target-route suffix are not hard-coded.
 
@@ -82,8 +83,10 @@ The Project title and target-route suffix are not hard-coded.
 - no `uiv.open` direct navigation;
 - no `uiv.eval`;
 - no clipboard path;
-- GitHub blob SHA: `80fde836a991627a0a526a92c3788c9d852d3b9f`;
-- SHA-256: `73d3d994f290eb73778c2290b4591181bcae761ba48840725327b9b53192264d`.
+- Git blob SHA: `d925e14b0c0ec609a8bcc12d23d991c0fcc12986`;
+- SHA-256: `7684f33d8dc86309c8e71554212de8c064ab50ad8cfb6bdbb1cd087f49223d92`;
+- local regression SHA-256: `72845de24cba99e05f5bf71872277fa49895f5cc7e6dfb6dd6e0079a0df08d3c`;
+- regression cases: successful exact-marker correlation, dispatched-then-throw ambiguity, URL-only transition, absent marker, duplicate markers, and pre-Send failure.
 
 Discovery evidence GitHub blob SHA: `9bb9c1443e00d2fbf5f90f881fc80a1891e6ed2f`.
 
@@ -94,7 +97,7 @@ Discovery evidence GitHub blob SHA: `9bb9c1443e00d2fbf5f90f881fc80a1891e6ed2f`.
 3. Run the current canonical `qualification/Q10_FRESH_CHAT_SPA_PROBE.js` exactly once.
 4. Do not manually click/type during the run.
 5. After execution, supply the exported `Q10_fresh_chat_spa_*.csv`.
-6. If the probe reports `AMBIGUOUS_AFTER_SINGLE_SEND`, do not rerun it. Preserve the CSV for reconciliation.
+6. If the probe reports `AMBIGUOUS_AFTER_POSSIBLE_SEND`, do not rerun it. Preserve the CSV for reconciliation.
 7. If it reports `PRE_SEND_FAILURE`, do not repeat materially equivalent execution; analyze the evidence first.
 
 ## Q10 acceptance remains unchanged
@@ -104,7 +107,8 @@ Q10 can PASS only after target evidence proves all six conditions:
 2. the fresh-chat entry path is deterministic;
 3. exactly one trusted qualification Send occurs;
 4. a new conversation ID appears and differs from the previous conversation ID;
-5. no false wrong-Project classification occurs during transitional SPA states;
-6. no resend is performed after the single Send.
+5. exactly one newly observed stable user-message ID contains the exact qualification marker;
+6. no false wrong-Project classification occurs during transitional SPA states;
+7. no resend is performed after the single Send.
 
 Q10 remains TODO until those conditions are proven.

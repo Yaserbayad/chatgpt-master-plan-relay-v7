@@ -1,0 +1,61 @@
+{
+  "schema_version": "q14-version-guard-1",
+  "timestamp_utc": "2026-08-30T00:01:47.1101583Z",
+  "result": "MATCH",
+  "designed_for_pre_material_execution": true,
+  "material_action_allowed": true,
+  "enforcement": "nonzero process exit on any missing or mismatched field",
+  "checks": [
+    {
+      "field": "windows_build",
+      "expected": "26100.9168",
+      "actual": "26100.9168"
+    },
+    {
+      "field": "chrome_running",
+      "expected": "152.0.7977.65",
+      "actual": "152.0.7977.65"
+    },
+    {
+      "field": "chrome_on_disk",
+      "expected": "152.0.7977.65",
+      "actual": "152.0.7977.65"
+    },
+    {
+      "field": "uivision_registered_version",
+      "expected": "10.0.178",
+      "actual": "10.0.178"
+    },
+    {
+      "field": "uivision_disable_reason_count",
+      "expected": "0",
+      "actual": "0"
+    },
+    {
+      "field": "desktop_automation",
+      "expected": "2.0.12",
+      "actual": "2.0.12"
+    },
+    {
+      "field": "chrome_profile_directory",
+      "expected": "Default",
+      "actual": "Default"
+    }
+  ],
+  "mismatches": [],
+  "evidence_paths": {
+    "chrome": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+    "chrome_local_state": "C:\\Users\\usr\\AppData\\Local\\Google\\Chrome\\User Data\\Local State",
+    "chrome_secure_preferences": "C:\\Users\\usr\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Secure Preferences",
+    "uivision_registered_manifest": "C:\\Users\\usr\\AppData\\Local\\Google\\Chrome\\User Data\\Default\\Extensions\\gcbalfbdmfieckjlnblleoemohcganoc\\10.0.178_0\\manifest.json",
+    "desktop_automation": "C:\\Users\\usr\\AppData\\Local\\UI.Vision\\DesktopAutomation\\uivision-desktop-automation.exe"
+  },
+  "limitations": [
+    "Qualification-only external preflight; it is not a production browser supervisor.",
+    "Running Chrome is read from process module metadata; the target tab-to-process association is not independently exposed.",
+    "The Chrome profile directory is read from Local State profile.last_used and the UI.Vision path from that profile's Secure Preferences registration; the friendly profile name friendsenc remains user-reported.",
+    "An empty disable_reasons list is checked, but the guard was not demonstrated gating a UI.Vision macro because the permitted actuator surface is unavailable.",
+    "RealUser V2026 is not exposed by these file/version boundaries and remains user-reported.",
+    "The separately installed legacy XModules 3.2.3 package is inventoried outside this guard because the frozen v2 Desktop Automation dependency is 2.0.12."
+  ]
+}

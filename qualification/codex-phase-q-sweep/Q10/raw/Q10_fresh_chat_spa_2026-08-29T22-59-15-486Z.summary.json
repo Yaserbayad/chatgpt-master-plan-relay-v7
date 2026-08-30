@@ -1,0 +1,13 @@
+{
+  "schema_version": "q10-failed-attempt-summary-1",
+  "source_file": "Q10_fresh_chat_spa_2026-08-29T22-59-15-486Z.csv",
+  "source_sha256": "76203D7A30C1A836B81F9551A25D5811F9810326E9AD476F87F1F6D12D27D1BE",
+  "evidence_kind": "direct_csv_evidence",
+  "result": "FAIL",
+  "failure_reason": "Q10 current Project home control unresolved: active Project rows=0",
+  "send_action_count": 0,
+  "home_click_count": 0,
+  "sidebar_click_count": 1,
+  "classification": "PROVEN_PRE_SEND_FAILURE",
+  "interpretation": "No Send action occurred; this is not target-message evidence."
+}

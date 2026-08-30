@@ -1,0 +1,449 @@
+{
+  "schema_version": "codex-phase-q-sweep-manifest-1",
+  "generated_utc": "2026-08-30T05:12:11.7241514Z",
+  "hash_algorithm": "SHA-256",
+  "manifest_self_hash": {
+    "included_in_artifacts": false,
+    "reason": "A file cannot contain its own final byte hash without a self-reference paradox; MANIFEST.json is listed in all_files_changed_or_created instead."
+  },
+  "repository": {
+    "remote": "https://github.com/Yaserbayad/chatgpt-master-plan-relay-v7.git",
+    "branch": "main",
+    "head_sha_start": "08ab965c4f2f673a89b3a640713b333c96a96a4c",
+    "head_sha_end": "08ab965c4f2f673a89b3a640713b333c96a96a4c",
+    "head_sha_end_semantics": "Observed after all qualification work and immediately before the evidence commit; the containing commit SHA is reported outside this self-referential artifact.",
+    "state_json_blob_sha_start": "b675e90e0019918984268554d3aff6fa606b8227"
+  },
+  "environment_versions": {
+    "windows": "Windows 11 Pro 24H2 build 26100.9168",
+    "chrome": "152.0.7977.65",
+    "chrome_profile_directory": "Default",
+    "chrome_friendly_profile_name": "Friendsenc",
+    "uivision_extension": "10.0.178",
+    "desktop_automation_v2": "2.0.12",
+    "legacy_xmodules": "3.2.3 (additional legacy component)",
+    "realuser": "V2026 (user-reported)"
+  },
+  "artifact_count": 32,
+  "artifacts": [
+    {
+      "relative_path": "qualification/codex-phase-q-sweep/ACTUATOR_BLOCKER_EVIDENCE.json",
+      "sha256": "7D358744612F54F8150B5E6FC792869568FEFF57E3000E8642AF3196A2D15993",
+      "size_bytes": 1586,
+      "test_id": "SWEEP",
+      "evidence_type": "structured_evidence_or_metadata",
+      "utc_creation_timestamp": "2026-08-29T23:38:20.3445514Z",
+      "sensitive_redacted": {
+        "sensitive": false,
+        "redacted": false
+      }
+    },
+    {
+      "relative_path": "qualification/codex-phase-q-sweep/ENVIRONMENT.json",
+      "sha256": "49CF20ADC2C59EBBCB1D00D2545D7FA42B1524CD08C4EF3B016AF7364D8B5DA5",
+      "size_bytes": 1921,
+      "test_id": "SWEEP",
+      "evidence_type": "structured_evidence_or_metadata",
+      "utc_creation_timestamp": "2026-08-29T23:33:25.0456600Z",
+      "sensitive_redacted": {
+        "sensitive": false,
+        "redacted": false
+      }
+    },
+    {
+      "relative_path": "qualification/codex-phase-q-sweep/Q10/DIAGNOSIS.md",
+      "sha256": "C70D7337D1A5A4FBF2C2CF19088BB569EE26A7E7FC784B2005B941FE6795E4A1",
+      "size_bytes": 2379,
+      "test_id": "Q10",
+      "evidence_type": "report",
+      "utc_creation_timestamp": "2026-08-29T23:33:25.0486704Z",
+      "sensitive_redacted": {
+        "sensitive": false,
+        "redacted": false
+      }
+    },
+    {
+      "relative_path": "qualification/codex-phase-q-sweep/Q10/probe/Q10_FRESH_CHAT_SPA_PROBE.test.js",
+      "sha256": "72845DE24CBA99E05F5BF71872277FA49895F5CC7E6DFB6DD6E0079A0DF08D3C",
+      "size_bytes": 6268,
+      "test_id": "Q10",
+      "evidence_type": "test_harness",
+      "utc_creation_timestamp": "2026-08-29T23:56:42.5415083Z",
+      "sensitive_redacted": {
+        "sensitive": false,
+        "redacted": false
+      }
+    },
+    {
+      "relative_path": "qualification/codex-phase-q-sweep/Q10/raw/Q10_fresh_chat_spa_2026-08-29T22-59-15-486Z.csv",
+      "sha256": "76203D7A30C1A836B81F9551A25D5811F9810326E9AD476F87F1F6D12D27D1BE",
+      "size_bytes": 494,
+      "test_id": "Q10",
+      "evidence_type": "raw_csv",
+      "utc_creation_timestamp": "2026-08-29T23:31:07.5518659Z",
+      "sensitive_redacted": {
+        "sensitive": false,
+        "redacted": false
+      }
+    },
+    {
+      "relative_path": "qualification/codex-phase-q-sweep/Q10/raw/Q10_fresh_chat_spa_2026-08-29T22-59-15-486Z.summary.json",
+      "sha256": "F1110AD6956077C3EEAB37C71164240D8C07306B60B0771B5ED5DD191D5A5C6A",
+      "size_bytes": 573,
+      "test_id": "Q10",
+      "evidence_type": "raw_or_normalized_json",
+      "utc_creation_timestamp": "2026-08-29T23:33:25.0466716Z",
+      "sensitive_redacted": {
+        "sensitive": false,
+        "redacted": false
+      }
+    },
+    {
+      "relative_path": "qualification/codex-phase-q-sweep/Q10/raw/Q10_fresh_chat_spa_2026-08-29T22-59-40-724Z.csv",
+      "sha256": "201D0143DC57882C3CE5B4B8399F5D521A7C0E0787A788480B4DED01EA27F99D",
+      "size_bytes": 492,
+      "test_id": "Q10",
+      "evidence_type": "raw_csv",
+      "utc_creation_timestamp": "2026-08-29T23:31:07.5663804Z",
+      "sensitive_redacted": {
+        "sensitive": false,
+        "redacted": false
+      }
+    },
+    {
+      "relative_path": "qualification/codex-phase-q-sweep/Q10/raw/Q10_fresh_chat_spa_2026-08-29T22-59-40-724Z.summary.json",
+      "sha256": "9D44207415384337F29FC11233D0198CBDC294E3F0D90D075CA3989096A42B76",
+      "size_bytes": 594,
+      "test_id": "Q10",
+      "evidence_type": "raw_or_normalized_json",
+      "utc_creation_timestamp": "2026-08-29T23:33:25.0476730Z",
+      "sensitive_redacted": {
+        "sensitive": false,
+        "redacted": false
+      }
+    },
+    {
+      "relative_path": "qualification/codex-phase-q-sweep/Q10/raw/Q10_TARGET_DOM_OBSERVATION.json",
+      "sha256": "41F240666F048EDF22BABCE6844FD6F4CB3840CE53EAC28CE8C3CC99D0A5EDB4",
+      "size_bytes": 1383,
+      "test_id": "Q10",
+      "evidence_type": "raw_or_normalized_json",
+      "utc_creation_timestamp": "2026-08-29T23:38:20.3463015Z",
+      "sensitive_redacted": {
+        "sensitive": false,
+        "redacted": false
+      }
+    },
+    {
+      "relative_path": "qualification/codex-phase-q-sweep/Q10/raw/Q10_TARGET_DOM_QUERY_CAPTURE.json",
+      "sha256": "ECD609C0FD42F343BBA36235C0ABC20004982F1762E4543E90AB93D1CFAAE436",
+      "size_bytes": 1719,
+      "test_id": "Q10",
+      "evidence_type": "raw_or_normalized_json",
+      "utc_creation_timestamp": "2026-08-30T00:00:53.0425865Z",
+      "sensitive_redacted": {
+        "sensitive": false,
+        "redacted": false
+      }
+    },
+    {
+      "relative_path": "qualification/codex-phase-q-sweep/Q10/RESULT.md",
+      "sha256": "311CD325E4D085B769683983776714F3FCE746950034C4CBD3AFB296E97FED4D",
+      "size_bytes": 816,
+      "test_id": "Q10",
+      "evidence_type": "report",
+      "utc_creation_timestamp": "2026-08-29T23:33:25.0486704Z",
+      "sensitive_redacted": {
+        "sensitive": false,
+        "redacted": false
+      }
+    },
+    {
+      "relative_path": "qualification/codex-phase-q-sweep/Q11/Q11_ROUTE_COMPARISON.md",
+      "sha256": "34967568DC8BE023877E9583A282E0579C84ABA04361041497DA5528E2CD1056",
+      "size_bytes": 12331,
+      "test_id": "Q11",
+      "evidence_type": "report",
+      "utc_creation_timestamp": "2026-08-29T23:31:07.5713861Z",
+      "sensitive_redacted": {
+        "sensitive": false,
+        "redacted": false
+      }
+    },
+    {
+      "relative_path": "qualification/codex-phase-q-sweep/Q11/RESULT.md",
+      "sha256": "63ED3B168047F31863C26873E5FFF93667DC5C0D1A0D2C413FCC7AEC40B77051",
+      "size_bytes": 572,
+      "test_id": "Q11",
+      "evidence_type": "report",
+      "utc_creation_timestamp": "2026-08-30T05:09:35.2224183Z",
+      "sensitive_redacted": {
+        "sensitive": false,
+        "redacted": false
+      }
+    },
+    {
+      "relative_path": "qualification/codex-phase-q-sweep/Q12/RESULT.md",
+      "sha256": "A13EF166CF746A1F95289D495E3E67AB20F671D1344A95F14F19B64EE516B84D",
+      "size_bytes": 579,
+      "test_id": "Q12",
+      "evidence_type": "report",
+      "utc_creation_timestamp": "2026-08-29T23:33:25.0641895Z",
+      "sensitive_redacted": {
+        "sensitive": false,
+        "redacted": false
+      }
+    },
+    {
+      "relative_path": "qualification/codex-phase-q-sweep/Q12/TEST_MATRIX.md",
+      "sha256": "DA8AEAC7164B085105D3C86DB4395D307556DB6EE2FDF8E65562221E4502CBF9",
+      "size_bytes": 1975,
+      "test_id": "Q12",
+      "evidence_type": "report",
+      "utc_creation_timestamp": "2026-08-29T23:33:25.0626783Z",
+      "sensitive_redacted": {
+        "sensitive": false,
+        "redacted": false
+      }
+    },
+    {
+      "relative_path": "qualification/codex-phase-q-sweep/Q13/raw-redacted/Q13_REPOSITORY_SECRET_HEURISTIC_SCAN.json",
+      "sha256": "67C89D393050A3C616913ED7B441294B75E5E28E8FEB3596CE2F32E714D37445",
+      "size_bytes": 1363,
+      "test_id": "Q13",
+      "evidence_type": "raw_or_normalized_json",
+      "utc_creation_timestamp": "2026-08-29T23:39:18.5211023Z",
+      "sensitive_redacted": {
+        "sensitive": false,
+        "redacted": false
+      }
+    },
+    {
+      "relative_path": "qualification/codex-phase-q-sweep/Q13/RESULT.md",
+      "sha256": "59158C856BF8DBFB09039D2B084970699FA33D5BC76CB8DD361793BE75F771A9",
+      "size_bytes": 687,
+      "test_id": "Q13",
+      "evidence_type": "report",
+      "utc_creation_timestamp": "2026-08-29T23:33:25.0652011Z",
+      "sensitive_redacted": {
+        "sensitive": false,
+        "redacted": false
+      }
+    },
+    {
+      "relative_path": "qualification/codex-phase-q-sweep/Q14/probe/Q14_VERSION_GUARD.ps1",
+      "sha256": "AE630C4E22462944F4D986B46CB85010C6A6E274BF7A4783826BDCE228162304",
+      "size_bytes": 5391,
+      "test_id": "Q14",
+      "evidence_type": "qualification_probe",
+      "utc_creation_timestamp": "2026-08-29T23:27:07.7014153Z",
+      "sensitive_redacted": {
+        "sensitive": false,
+        "redacted": false
+      }
+    },
+    {
+      "relative_path": "qualification/codex-phase-q-sweep/Q14/probe/Q14_VERSION_GUARD.test.ps1",
+      "sha256": "02D5F80C5587AD9DE75F7C50A3737E643787A6A00AB15DA274D95794506A1BB7",
+      "size_bytes": 1612,
+      "test_id": "Q14",
+      "evidence_type": "test_harness",
+      "utc_creation_timestamp": "2026-08-29T23:26:33.9480406Z",
+      "sensitive_redacted": {
+        "sensitive": false,
+        "redacted": false
+      }
+    },
+    {
+      "relative_path": "qualification/codex-phase-q-sweep/Q14/raw/Q14_VERSION_GUARD_chrome_mismatch.json",
+      "sha256": "583BD42382A9B1E81CCA05F9317BD48AA8D7B4BAFF9CBC8EAB5A267F3DEBC971",
+      "size_bytes": 2862,
+      "test_id": "Q14",
+      "evidence_type": "raw_or_normalized_json",
+      "utc_creation_timestamp": "2026-08-29T23:33:25.0662033Z",
+      "sensitive_redacted": {
+        "sensitive": false,
+        "redacted": false
+      }
+    },
+    {
+      "relative_path": "qualification/codex-phase-q-sweep/Q14/raw/Q14_VERSION_GUARD_positive.json",
+      "sha256": "96BCDE68E8A050CAE4CC2A08D31DEE47961E442106836AAB0D8CC2DBAED1A7D8",
+      "size_bytes": 2643,
+      "test_id": "Q14",
+      "evidence_type": "raw_or_normalized_json",
+      "utc_creation_timestamp": "2026-08-29T23:33:25.0652011Z",
+      "sensitive_redacted": {
+        "sensitive": false,
+        "redacted": false
+      }
+    },
+    {
+      "relative_path": "qualification/codex-phase-q-sweep/Q14/RESULT.md",
+      "sha256": "E21DE73830E680438C909BA4419446977D8CC46B02C0A6AB277427FFDBAD8B9E",
+      "size_bytes": 1251,
+      "test_id": "Q14",
+      "evidence_type": "report",
+      "utc_creation_timestamp": "2026-08-29T23:33:25.0672032Z",
+      "sensitive_redacted": {
+        "sensitive": false,
+        "redacted": false
+      }
+    },
+    {
+      "relative_path": "qualification/codex-phase-q-sweep/Q14/VERSION_EVIDENCE.json",
+      "sha256": "B1C0504A8456B2304D61DD76813AA7831299EDC4DEFC037E4B0A1404B1E6FE57",
+      "size_bytes": 1691,
+      "test_id": "Q14",
+      "evidence_type": "structured_evidence_or_metadata",
+      "utc_creation_timestamp": "2026-08-29T23:33:25.0672032Z",
+      "sensitive_redacted": {
+        "sensitive": false,
+        "redacted": false
+      }
+    },
+    {
+      "relative_path": "qualification/codex-phase-q-sweep/Q15/raw/Q15_EXECUTION_BOUNDARY.json",
+      "sha256": "4B614800DAE4B2ECE9D3E02710A635576B23499964277E8CFAB809D71E1C4E24",
+      "size_bytes": 655,
+      "test_id": "Q15",
+      "evidence_type": "raw_or_normalized_json",
+      "utc_creation_timestamp": "2026-08-30T05:09:35.2239265Z",
+      "sensitive_redacted": {
+        "sensitive": false,
+        "redacted": false
+      }
+    },
+    {
+      "relative_path": "qualification/codex-phase-q-sweep/Q15/RESULT.md",
+      "sha256": "322BF80D72F74C539EF0458CC64C0364E9ED9C94F9B5727E8DABE44C3D62714B",
+      "size_bytes": 519,
+      "test_id": "Q15",
+      "evidence_type": "report",
+      "utc_creation_timestamp": "2026-08-29T23:33:25.0691982Z",
+      "sensitive_redacted": {
+        "sensitive": false,
+        "redacted": false
+      }
+    },
+    {
+      "relative_path": "qualification/codex-phase-q-sweep/Q15/TIMING_TRACE.csv",
+      "sha256": "00E64DAE5C87C51A66AA686E9040729FBC794C09E2EE463740B0C89EFEA3D2A5",
+      "size_bytes": 360,
+      "test_id": "Q15",
+      "evidence_type": "timing_trace",
+      "utc_creation_timestamp": "2026-08-29T23:33:25.0682015Z",
+      "sensitive_redacted": {
+        "sensitive": false,
+        "redacted": false
+      }
+    },
+    {
+      "relative_path": "qualification/codex-phase-q-sweep/Q16_CANDIDATE_REPORT.md",
+      "sha256": "253B73E51DD198E04137F6325F4C67A5693005FEEEC849C914DFFE477AF79F41",
+      "size_bytes": 11962,
+      "test_id": "Q16",
+      "evidence_type": "report",
+      "utc_creation_timestamp": "2026-08-29T23:42:10.3866581Z",
+      "sensitive_redacted": {
+        "sensitive": false,
+        "redacted": false
+      }
+    },
+    {
+      "relative_path": "qualification/codex-phase-q-sweep/raw/CHROME_UIVISION_CONTROL_SURFACE_CAPTURE.json",
+      "sha256": "EFD42C9BC7B6B0F3412E52D237AB1669B4DE2AE5BC78CA523598D8498A554865",
+      "size_bytes": 1605,
+      "test_id": "SWEEP",
+      "evidence_type": "raw_or_normalized_json",
+      "utc_creation_timestamp": "2026-08-30T00:00:53.0415847Z",
+      "sensitive_redacted": {
+        "sensitive": false,
+        "redacted": false
+      }
+    },
+    {
+      "relative_path": "qualification/codex-phase-q-sweep/README.md",
+      "sha256": "EF564685019DB298E1983F3BAE28461B940EE03C1E53863C22FAC5E3D7077880",
+      "size_bytes": 2221,
+      "test_id": "SWEEP",
+      "evidence_type": "report",
+      "utc_creation_timestamp": "2026-08-29T23:33:25.0441108Z",
+      "sensitive_redacted": {
+        "sensitive": false,
+        "redacted": false
+      }
+    },
+    {
+      "relative_path": "qualification/codex-phase-q-sweep/SUPPLEMENTAL_TARGET_DATA.md",
+      "sha256": "6285FDABE3F8D3CEDAFA46DF83CD7F00FC8BCBBDEA36EF7C6DB00A21AC1CB809",
+      "size_bytes": 1686,
+      "test_id": "SWEEP",
+      "evidence_type": "report",
+      "utc_creation_timestamp": "2026-08-29T23:33:25.0702035Z",
+      "sensitive_redacted": {
+        "sensitive": false,
+        "redacted": false
+      }
+    },
+    {
+      "relative_path": "qualification/Q10_FRESH_CHAT_SPA_PROBE.js",
+      "sha256": "7684F33D8DC86309C8E71554212DE8C064AB50AD8CFB6BDBB1CD087F49223D92",
+      "size_bytes": 12593,
+      "test_id": "Q10",
+      "evidence_type": "qualification_probe",
+      "utc_creation_timestamp": "2026-08-29T23:12:46.9867426Z",
+      "sensitive_redacted": {
+        "sensitive": false,
+        "redacted": false
+      }
+    },
+    {
+      "relative_path": "qualification/Q10_RUNBOOK.md",
+      "sha256": "16FF1A64086F9DD6FC2AA4E06DA9238B76CDB3388EDC013833EB8B0FDC2C70E2",
+      "size_bytes": 6377,
+      "test_id": "Q10",
+      "evidence_type": "report",
+      "utc_creation_timestamp": "2026-08-29T23:12:46.9887437Z",
+      "sensitive_redacted": {
+        "sensitive": false,
+        "redacted": false
+      }
+    }
+  ],
+  "all_files_changed_or_created": [
+    "qualification/codex-phase-q-sweep/ACTUATOR_BLOCKER_EVIDENCE.json",
+    "qualification/codex-phase-q-sweep/ENVIRONMENT.json",
+    "qualification/codex-phase-q-sweep/MANIFEST.json",
+    "qualification/codex-phase-q-sweep/Q10/DIAGNOSIS.md",
+    "qualification/codex-phase-q-sweep/Q10/probe/Q10_FRESH_CHAT_SPA_PROBE.test.js",
+    "qualification/codex-phase-q-sweep/Q10/raw/Q10_fresh_chat_spa_2026-08-29T22-59-15-486Z.csv",
+    "qualification/codex-phase-q-sweep/Q10/raw/Q10_fresh_chat_spa_2026-08-29T22-59-15-486Z.summary.json",
+    "qualification/codex-phase-q-sweep/Q10/raw/Q10_fresh_chat_spa_2026-08-29T22-59-40-724Z.csv",
+    "qualification/codex-phase-q-sweep/Q10/raw/Q10_fresh_chat_spa_2026-08-29T22-59-40-724Z.summary.json",
+    "qualification/codex-phase-q-sweep/Q10/raw/Q10_TARGET_DOM_OBSERVATION.json",
+    "qualification/codex-phase-q-sweep/Q10/raw/Q10_TARGET_DOM_QUERY_CAPTURE.json",
+    "qualification/codex-phase-q-sweep/Q10/RESULT.md",
+    "qualification/codex-phase-q-sweep/Q11/Q11_ROUTE_COMPARISON.md",
+    "qualification/codex-phase-q-sweep/Q11/RESULT.md",
+    "qualification/codex-phase-q-sweep/Q12/RESULT.md",
+    "qualification/codex-phase-q-sweep/Q12/TEST_MATRIX.md",
+    "qualification/codex-phase-q-sweep/Q13/raw-redacted/Q13_REPOSITORY_SECRET_HEURISTIC_SCAN.json",
+    "qualification/codex-phase-q-sweep/Q13/RESULT.md",
+    "qualification/codex-phase-q-sweep/Q14/probe/Q14_VERSION_GUARD.ps1",
+    "qualification/codex-phase-q-sweep/Q14/probe/Q14_VERSION_GUARD.test.ps1",
+    "qualification/codex-phase-q-sweep/Q14/raw/Q14_VERSION_GUARD_chrome_mismatch.json",
+    "qualification/codex-phase-q-sweep/Q14/raw/Q14_VERSION_GUARD_positive.json",
+    "qualification/codex-phase-q-sweep/Q14/RESULT.md",
+    "qualification/codex-phase-q-sweep/Q14/VERSION_EVIDENCE.json",
+    "qualification/codex-phase-q-sweep/Q15/raw/Q15_EXECUTION_BOUNDARY.json",
+    "qualification/codex-phase-q-sweep/Q15/RESULT.md",
+    "qualification/codex-phase-q-sweep/Q15/TIMING_TRACE.csv",
+    "qualification/codex-phase-q-sweep/Q16_CANDIDATE_REPORT.md",
+    "qualification/codex-phase-q-sweep/raw/CHROME_UIVISION_CONTROL_SURFACE_CAPTURE.json",
+    "qualification/codex-phase-q-sweep/README.md",
+    "qualification/codex-phase-q-sweep/SUPPLEMENTAL_TARGET_DATA.md",
+    "qualification/Q10_FRESH_CHAT_SPA_PROBE.js",
+    "qualification/Q10_RUNBOOK.md"
+  ]
+}
