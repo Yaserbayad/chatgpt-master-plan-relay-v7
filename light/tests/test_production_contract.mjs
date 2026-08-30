@@ -29,7 +29,7 @@ for (const required of [
   'stop-button','data-message-author-role','data-message-id','uiv.sleep','XRunAndWait',
   'LIGHT_PRODUCTION_STATE.csv','SENT_CONFIRMED','SEND_AMBIGUOUS','SEND_AMBIGUOUS_NO_RETRY',
   'uiv.browser.click','uiv.browser.type','${KEY_CTRL+KEY_V}','${KEY_CTRL+KEY_A}','${KEY_CTRL+KEY_C}',
-  'staged prompt copy-back does not match','send-button','Send prompt','prompt-textarea',
+  'staged prompt copy-back does not match','composer-submit-button-color','send-button','Send prompt','prompt-textarea',
   'assistant_message_id','conversation_id','nonce','LIGHT_MAX_SENDS = 1',
   'submission_confirmed','next_completion_observed','uiv.csv.write','uiv.csv.read','uiv.csv.exists'
 ]) assert.ok(watcher.includes(required), `watcher missing ${required}`);
@@ -38,6 +38,8 @@ assert.equal((watcher.match(/XRunAndWait/g) || []).length, 1, 'watcher must have
 assert.equal((watcher.match(/uiv\.browser\.type/g) || []).length, 3, 'watcher must have exactly paste/select-all/copy trusted key call sites');
 assert.ok(!watcher.includes('uiv.browser.type(prompt)'), 'untrusted Codex prompt must never enter the trusted-key parser');
 assert.ok(watcher.includes('uiv.clipboard.write(prompt)'), 'prompt must stage through clipboard before trusted paste');
+assert.ok(watcher.includes('function firstEnabled'), 'Send discovery must use the qualified enabled-control path');
+assert.ok(watcher.includes('all(l,timeout,true).filter(enabled)'), 'Send discovery must use includeHidden:true and enabled filtering');
 assert.equal((watcher.match(/uiv\.browser\.click/g) || []).length, 3, 'watcher must have composer+reacquired composer+Send trusted click call sites');
 assert.ok(!watcher.includes('editableText(staged)'), 'rich-editor finder snapshot must not be the authority for staged prompt verification');
 for (const forbidden of ['uiv.page.','uiv.eval(','uiv.ocr.','uiv.ai.','uiv.shot.','uiv.desktop.','uiv.open(','XClick','XType','FRESH_CHAT']) {
