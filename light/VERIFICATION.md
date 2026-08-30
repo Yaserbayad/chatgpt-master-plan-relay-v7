@@ -22,6 +22,7 @@ Evidence records:
 - `light/evidence/PRODUCTION_TARGET_FAIL_2026-08-30_122613.md`
 - `light/evidence/PRODUCTION_TARGET_FAIL_2026-08-30_123922.md`
 - `light/evidence/PRODUCTION_TARGET_FAIL_2026-08-30_140440.md`
+- `light/evidence/PRODUCTION_TARGET_PREFLIGHT_FAIL_2026-08-30_142107.md`
 
 ### Target attempt 1
 
@@ -62,9 +63,21 @@ copy must replace sentinel
 copied text == prompt after CR + terminal-NBSP-only normalization
 ```
 
+### Target attempt 4 — runner preflight only
+
+The uploaded `LIGHT_PRODUCTION_evidence_20260830_142107.zip` is internally hash-valid and byte-bound to the current Q08 sentinel watcher, but the PowerShell runner stopped before launching Ui.Vision:
+
+```text
+required path missing: C:\Users\usr\Desktop\uivision\macros
+```
+
+No target CSV or Ui.Vision target log was produced. This run therefore provides **no new watcher evidence** and does not change the Q08 sentinel candidate's target status.
+
+The runner incorrectly treated its controlled macro staging directory as an external pre-existing prerequisite. It now creates that directory recursively and verifies it before copying the macro. The watcher, bridge and schema are unchanged.
+
 ### Current correction
 
-The production watcher now restores that target-proven Q08 contract:
+The production watcher restores the target-proven Q08 contract:
 
 1. require one visible `composer-submit-button-color` surface with `aria-label="Start Voice"` before staging;
 2. trusted clipboard paste through the composer;
@@ -76,20 +89,18 @@ The production watcher now restores that target-proven Q08 contract:
 8. revalidate source identity;
 9. reacquire the same visible submit surface as `Send prompt` before the one bounded click.
 
-The previous selector-only `includeHidden:true` click path is removed. One-Send maximum, pre-click `SEND_AMBIGUOUS`, dedupe, identity binding, STOP/HUMAN, and no automatic retry remain unchanged.
+The runner now self-heals `C:\Users\usr\Desktop\uivision\macros` before launch. The previous selector-only `includeHidden:true` click path remains removed. One-Send maximum, pre-click `SEND_AMBIGUOUS`, dedupe, identity binding, STOP/HUMAN, and no automatic retry remain unchanged.
 
 ### Current source binding
 
 ```text
 d06dbdcfb341e443663736fcdc14274c0560b3c3  LIGHT_PRODUCTION_ACTION.schema.json
 eb8ff2a0367732f66207b4611cfe7336b9da0d16  LIGHT_PRODUCTION_WATCHER.js
-ea7878a8b9849d9aa2f1fbd822004d0bfb6fafb4  RUN_LIGHT_PRODUCTION_TARGET.ps1
+15bc7662948976fe06cbdd010566453049e69879  RUN_LIGHT_PRODUCTION_TARGET.ps1
 3fb41fe1ef6f4ac6f0ade600858d700c49d19aaf  RelayCodexLightProduction.ps1
-41a1ea86da47a56f14b22b093c79eb402c841d52  test_production_contract.mjs
+8002197f4d5d504702fbe747f48fb7502abf2eca  test_production_contract.mjs
 9864c04ee91e140637871811ded502c27ecc2639  simulate_production_watcher.mjs
 ```
-
-The watcher and both test files were reread from GitHub and byte-bound to the locally tested files.
 
 ### Current local verification
 
@@ -102,6 +113,9 @@ LIGHT PRODUCTION CONTRACT TESTS: PASS
 
 node light/tests/simulate_production_watcher.mjs
 LIGHT PRODUCTION SENTINEL/SUBMIT-SURFACE SIMULATION: PASS
+
+focused runner self-heal regression
+LIGHT RUNNER MACRODIR SELF-HEAL CONTRACT: PASS
 ```
 
 The simulation proves:
@@ -112,7 +126,7 @@ The simulation proves:
 - terminal NBSP editor serialization is accepted without broad whitespace trimming;
 - generation gating, stale identity, STOP/HUMAN, duplicate-turn, Send-click failure, one-Send and no-retry behavior remain intact.
 
-The local environment has no PowerShell runtime, so unchanged PowerShell bridge/runner execution remains Windows-target evidence only.
+The local environment has no PowerShell runtime, so the runner's Windows execution remains target evidence only.
 
 ## Remaining acceptance boundary
 
