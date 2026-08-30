@@ -40,15 +40,17 @@ The test passes only when all are true:
 - Existing Ui.Vision launcher: `C:\Users\usr\Documents\Codex\ui.vision.html`
 - Ui.Vision macros: `C:\Users\usr\Desktop\uivision\macros`
 
-## Current blocker and exact run order
+## Current Codex boundary and exact run order
 
-Successful Codex model execution remains an external prerequisite for target Q15-B. The latest Windows direct preflight returned `codex exec` exit code 1 before any Ui.Vision/browser qualification started. The previous preflight version inspected only stderr on failure, so that attempt did not preserve enough information to classify the cause. The corrected direct preflight now reports the Codex version, captures both stdout and stderr, classifies credit/usage-limit wording from either stream, and writes `CODEX_DIRECT_DIAGNOSTIC_*.txt` for any unclassified nonzero exit.
+The latest Windows direct preflight reached `codex exec` with `codex-cli 0.151.0` and returned exit code 1 with both stdout and stderr empty. This happened before Q15-B/Ui.Vision started, so it is not evidence of a browser-control failure.
+
+The affected Light source previously passed the prompt as a positional argument from a child PowerShell process while leaving non-TTY stdin implicit. Current Codex `exec` can consume piped stdin as prompt input. The current Light source therefore makes stdin deterministic in both Codex call sites: it invokes `codex exec ... -` and pipes the finite prompt to stdin. The read-only sandbox, ephemeral mode, output schema, timeout, and no-retry rules remain unchanged.
 
 Current next step:
 
-1. Run the corrected `TEST_CODEX_DIRECT.ps1` from the current `light/probe` source.
+1. Run the current `TEST_CODEX_DIRECT.ps1` from `light/probe` (or the supplied launcher package).
 2. If it reports `CODEX_CREDITS_REQUIRED`, stop until Codex entitlement is available.
-3. If it reports `CODEX_DIRECT_FAIL`, preserve the printed diagnostic file and diagnose that exact Codex boundary; do not start Q15-B.
+3. If it reports `CODEX_DIRECT_FAIL`, preserve `CODEX_DIRECT_DIAGNOSTIC_*.txt`; do not start Q15-B or blindly repeat the same run.
 4. Continue only if it prints `CODEX_DIRECT_PASS` and exits 0.
 5. Then leave exactly one completed ChatGPT conversation tab from the configured Project open and run `RUN_Q15B_LIGHT.ps1` from the same current source set.
 6. Accept Q15-B only if the runner produces a PASS evidence ZIP.
