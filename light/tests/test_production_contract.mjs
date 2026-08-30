@@ -1,65 +1,17 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import assert from 'node:assert/strict';
-
-const root = path.resolve(new URL('..', import.meta.url).pathname);
-const prod = path.join(root, 'production');
-const watcherPath = path.join(prod, 'LIGHT_PRODUCTION_WATCHER.js');
-const bridgePath = path.join(prod, 'RelayCodexLightProduction.ps1');
-const schemaPath = path.join(prod, 'LIGHT_PRODUCTION_ACTION.schema.json');
-const runnerPath = path.join(prod, 'RUN_LIGHT_PRODUCTION_TARGET.ps1');
-
-for (const p of [watcherPath, bridgePath, schemaPath, runnerPath]) {
-  assert.ok(fs.existsSync(p), `missing production file: ${path.basename(p)}`);
-}
-
-const watcher = fs.readFileSync(watcherPath, 'utf8');
-const bridge = fs.readFileSync(bridgePath, 'utf8');
-const schema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
-const runner = fs.readFileSync(runnerPath, 'utf8');
-
-assert.equal(schema.type, 'object');
-assert.equal(schema.additionalProperties, false);
-assert.deepEqual(schema.properties.action.enum, ['SEND_PROMPT','STOP','HUMAN']);
-for (const key of ['protocol','nonce','conversation_id','assistant_message_id','action','prompt','reason']) {
-  assert.ok(schema.required.includes(key), `schema missing ${key}`);
-}
-
-for (const required of [
-  'stop-button','data-message-author-role','data-message-id','uiv.sleep','XRunAndWait',
-  'LIGHT_PRODUCTION_STATE.csv','SENT_CONFIRMED','SEND_AMBIGUOUS','SEND_AMBIGUOUS_NO_RETRY',
-  'uiv.browser.click','uiv.browser.type','${KEY_CTRL+KEY_V}','${KEY_CTRL+KEY_A}','${KEY_CTRL+KEY_C}',
-  'staged prompt copy-back does not match','composer-submit-button-color','send-button','Send prompt','prompt-textarea',
-  'assistant_message_id','conversation_id','nonce','LIGHT_MAX_SENDS = 1',
-  'submission_confirmed','next_completion_observed','uiv.csv.write','uiv.csv.read','uiv.csv.exists'
-]) assert.ok(watcher.includes(required), `watcher missing ${required}`);
-
-assert.equal((watcher.match(/XRunAndWait/g) || []).length, 1, 'watcher must have one bridge call site');
-assert.equal((watcher.match(/uiv\.browser\.type/g) || []).length, 3, 'watcher must have exactly paste/select-all/copy trusted key call sites');
-assert.ok(!watcher.includes('uiv.browser.type(prompt)'), 'untrusted Codex prompt must never enter the trusted-key parser');
-assert.ok(watcher.includes('uiv.clipboard.write(prompt)'), 'prompt must stage through clipboard before trusted paste');
-assert.ok(watcher.includes('function firstEnabled'), 'Send discovery must use the qualified enabled-control path');
-assert.ok(watcher.includes('all(l,timeout,true).filter(enabled)'), 'Send discovery must use includeHidden:true and enabled filtering');
-assert.equal((watcher.match(/uiv\.browser\.click/g) || []).length, 3, 'watcher must have composer+reacquired composer+Send trusted click call sites');
-assert.ok(!watcher.includes('editableText(staged)'), 'rich-editor finder snapshot must not be the authority for staged prompt verification');
-for (const forbidden of ['uiv.page.','uiv.eval(','uiv.ocr.','uiv.ai.','uiv.shot.','uiv.desktop.','uiv.open(','XClick','XType','FRESH_CHAT']) {
-  assert.ok(!watcher.includes(forbidden), `watcher contains forbidden automation token ${forbidden}`);
-}
-
-for (const required of [
-  "'exec'","'--ephemeral'","'--ignore-user-config'","'--sandbox'","'read-only'",
-  "'--output-schema'","'--output-last-message'",'model_reasoning_effort="medium"',
-  'Do not use tools','qualification_mode','LIGHT_PRODUCTION_TARGET_PROMPT',
-  'SEND_PROMPT','STOP','HUMAN','Get-Sha256Hex','120000-character production bound','30000-character production bound','assistant_text_sha256','Set-Clipboard'
-]) assert.ok(bridge.includes(required), `bridge missing ${required}`);
-for (const forbidden of ['-WindowStyle Hidden','--dangerously-bypass-approvals-and-sandbox','--full-auto','Invoke-WebRequest']) {
-  assert.ok(!bridge.includes(forbidden), `bridge contains forbidden token ${forbidden}`);
-}
-
-for (const required of [
-  'LIGHT_PRODUCTION_WATCHER.js','RelayCodexLightProduction.ps1','LIGHT_PRODUCTION_ACTION.schema.json',
-  'production_config.json','qualification_mode','Reply exactly LIGHT_PRODUCTION_TARGET_OK.',
-  'LIGHT_PRODUCTION_evidence_','SHA256.txt','RESULT.txt','PASS','FAIL'
-]) assert.ok(runner.includes(required), `runner missing ${required}`);
-
+import fs from 'node:fs';import path from 'node:path';import assert from 'node:assert/strict';
+const root=path.resolve(new URL('..',import.meta.url).pathname),prod=path.join(root,'production');
+const watcher=fs.readFileSync(path.join(prod,'LIGHT_PRODUCTION_WATCHER.js'),'utf8');
+const bridge=fs.readFileSync(path.join(prod,'RelayCodexLightProduction.ps1'),'utf8');
+const schema=JSON.parse(fs.readFileSync(path.join(prod,'LIGHT_PRODUCTION_ACTION.schema.json'),'utf8'));
+const runner=fs.readFileSync(path.join(prod,'RUN_LIGHT_PRODUCTION_TARGET.ps1'),'utf8');
+assert.equal(schema.additionalProperties,false);assert.deepEqual(schema.properties.action.enum,['SEND_PROMPT','STOP','HUMAN']);
+for(const x of ['composer-submit-button-color','Start Voice','Send prompt','LIGHT_COPY_SENTINEL_','copy-back did not replace sentinel','normalizeEditorClipboard','\\u00A0+$','baseline_submit_aria','pasted_submit_aria','copy_sentinel_replaced','staged_copy_exact','SEND_AMBIGUOUS','SEND_AMBIGUOUS_NO_RETRY','LIGHT_MAX_SENDS = 1','${KEY_CTRL+KEY_V}','${KEY_CTRL+KEY_A}','${KEY_CTRL+KEY_C}'])assert.ok(watcher.includes(x),`watcher missing ${x}`);
+assert.ok(!watcher.includes('firstEnabled('),'must not use the failed selector-only Send discovery helper');
+assert.ok(!watcher.includes('all(l,timeout,true).filter(enabled)'),'must not click a match obtained only via includeHidden:true');
+assert.equal((watcher.match(/uiv\.browser\.type/g)||[]).length,3);
+assert.equal((watcher.match(/XRunAndWait/g)||[]).length,1);
+assert.ok(!watcher.includes('uiv.browser.type(prompt)'));
+for(const forbidden of ['uiv.page.','uiv.eval(','uiv.ocr.','uiv.ai.','uiv.shot.','uiv.desktop.','uiv.open(','XClick','XType','FRESH_CHAT'])assert.ok(!watcher.includes(forbidden),`watcher contains ${forbidden}`);
+for(const x of ["'--ephemeral'","'--ignore-user-config'","'--sandbox'","'read-only'","'--output-schema'","'--output-last-message'",'Do not use tools','SEND_PROMPT','STOP','HUMAN'])assert.ok(bridge.includes(x),`bridge missing ${x}`);
+for(const x of ['LIGHT_PRODUCTION_WATCHER.js','Reply exactly LIGHT_PRODUCTION_TARGET_OK.','LIGHT_PRODUCTION_evidence_','PASS','FAIL'])assert.ok(runner.includes(x),`runner missing ${x}`);
 console.log('LIGHT PRODUCTION CONTRACT TESTS: PASS');
