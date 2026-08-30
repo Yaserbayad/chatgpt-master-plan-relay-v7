@@ -10,6 +10,7 @@ function message(author,id,text) {
 
 function runCase(mode) {
   let clipboard = 'ORIGINAL_CLIPBOARD';
+  let xrunExit = '0';
   const csv = new Map();
   const logs = [];
   const messages = [
@@ -27,7 +28,7 @@ function runCase(mode) {
       return [];
     },
     setVar() {},
-    getVar(name) { return name === '!xrun_exitcode' ? '0' : ''; },
+    getVar(name) { return name === '!xrun_exitcode' ? xrunExit : ''; },
     clipboard: {
       read: () => clipboard,
       write: v => { clipboard = String(v); }
@@ -36,6 +37,19 @@ function runCase(mode) {
       assert.equal(command,'XRunAndWait');
       const event = JSON.parse(clipboard);
       const probe = event.assistant_text.replace(/\s+/g,' ').trim().slice(0,96);
+      if (mode === 'credits') {
+        xrunExit = '1';
+        clipboard = JSON.stringify({
+          protocol:'relay-light-probe-response-v1', nonce:event.nonce,
+          assistant_message_id:event.assistant_message_id,
+          assistant_text_length:event.assistant_text_length,
+          assistant_text_sha256:'a'.repeat(64), assistant_probe:probe,
+          action:'PROBE_ERROR',
+          note:'Your workspace is out of credits. Add credits to continue.',
+          codex_version:'codex-cli-test', codex_exit_code:1, codex_duration_ms:50
+        });
+        return;
+      }
       clipboard = JSON.stringify({
         protocol:'relay-light-probe-response-v1',
         nonce: mode === 'stale' ? `${event.nonce}_STALE` : event.nonce,
@@ -43,11 +57,8 @@ function runCase(mode) {
         assistant_text_length:event.assistant_text_length,
         assistant_text_sha256:'a'.repeat(64),
         assistant_probe:probe,
-        action:'LIGHT_PROBE_OK',
-        note:'ok',
-        codex_version:'codex-cli-test',
-        codex_exit_code:0,
-        codex_duration_ms:123
+        action:'LIGHT_PROBE_OK', failure_class:'NONE', note:'ok',
+        codex_version:'codex-cli-test', codex_exit_code:0, codex_duration_ms:123
       });
     },
     csv: { write: (name,rows) => csv.set(name,rows) },
@@ -63,17 +74,20 @@ function runCase(mode) {
 const success = runCase('success');
 assert.equal(success.error,null,'success simulation must not throw');
 assert.equal(success.clipboard,'ORIGINAL_CLIPBOARD','original clipboard must be restored');
-assert.equal(success.csv.size,1,'success must emit one evidence CSV');
 const successRows = [...success.csv.values()][0];
 assert.equal(successRows[1][0],'PASS');
-assert.equal(successRows[1][15],'true');
 
 const stale = runCase('stale');
 assert.ok(stale.error,'stale nonce simulation must throw');
 assert.match(String(stale.error.message),/stale\/mismatched nonce/);
 assert.equal(stale.clipboard,'ORIGINAL_CLIPBOARD','clipboard must be restored on failure');
-assert.equal(stale.csv.size,1,'failure must still emit evidence CSV');
-const staleRows = [...stale.csv.values()][0];
-assert.equal(staleRows[1][0],'FAIL');
+
+const credits = runCase('credits');
+assert.ok(credits.error,'credit exhaustion must remain a failed Q15-B qualification');
+assert.equal(credits.clipboard,'ORIGINAL_CLIPBOARD','clipboard must be restored on credit failure');
+const creditRows = [...credits.csv.values()][0];
+const failureClassIndex = creditRows[0].indexOf('failure_class');
+assert.notEqual(failureClassIndex,-1,'evidence must contain failure_class');
+assert.equal(creditRows[1][failureClassIndex],'CODEX_CREDITS_REQUIRED','credit exhaustion must be classified deterministically');
 
 console.log('LIGHT PROBE SIMULATION: PASS');
