@@ -40,13 +40,24 @@ The test passes only when all are true:
 - Existing Ui.Vision launcher: `C:\Users\usr\Documents\Codex\ui.vision.html`
 - Ui.Vision macros: `C:\Users\usr\Desktop\uivision\macros`
 
-## Run
+## Current blocker and exact run order
 
-Extract the ZIP to any normal folder and execute `RUN_Q15B_LIGHT.ps1` in Windows PowerShell.
+Successful Codex model execution is an external prerequisite for the remaining target qualification. Credit exhaustion is recorded as Q15-B FAIL/not-PASS with `failure_class=CODEX_CREDITS_REQUIRED`; it is not treated as an IPC or architecture failure.
 
-Before running, leave exactly one completed ChatGPT conversation tab from the configured Project open. The runner stages the Light files into `C:\Users\usr\Documents\CodexLight`, invokes the Ui.Vision macro, and creates a PASS/FAIL evidence ZIP on the Desktop.
+When Codex execution becomes available:
 
-The test does not submit anything to ChatGPT.
+1. Run `TEST_CODEX_DIRECT.ps1` from the current `light/probe` source. Continue only if it prints `CODEX_DIRECT_PASS` and exits 0.
+2. Leave exactly one completed ChatGPT conversation tab from the configured Project open.
+3. Run `RUN_Q15B_LIGHT.ps1` from the same current source set.
+4. Accept Q15-B only if the runner produces a PASS evidence ZIP.
+
+`TEST_CODEX_DIRECT.ps1` is browser-independent and read-only. It exists only to prove that the locally authenticated Codex CLI can complete one minimal structured execution before the browser round trip is attempted.
+
+## Q15-B runner
+
+Use the current `light/probe` files together. The runner stages the Light files into `C:\Users\usr\Documents\CodexLight`, invokes the Ui.Vision macro, and creates a PASS/FAIL evidence ZIP on the Desktop.
+
+The test does not submit anything to ChatGPT. A credit-limit failure remains a failed qualification attempt but is classified distinctly so it is not mistaken for a bridge defect.
 
 ## After PASS
 
