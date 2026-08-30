@@ -45,7 +45,7 @@ function runCase(mode) {
           assistant_text_length:event.assistant_text_length,
           assistant_text_sha256:'a'.repeat(64), assistant_probe:probe,
           action:'PROBE_ERROR',
-          note:'Your workspace is out of credits. Add credits to continue.',
+          note:"You've reached your usage limit. Increase your limits to continue using codex.",
           codex_version:'codex-cli-test', codex_exit_code:1, codex_duration_ms:50
         });
         return;
