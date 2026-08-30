@@ -37,19 +37,24 @@ for (const required of [
 
 assert.ok(!probe.includes("'assistant_text_sha256','assistant_probe'"), 'evidence must not persist the response-derived probe text');
 assert.ok(!bridge.includes('assistant.txt'), 'bridge must not persist the full assistant response');
+assert.ok(!bridge.includes('assistant_probe.txt'), 'Codex must not need a response-derived probe file');
+assert.ok(!bridge.includes('event.json'), 'Codex must not need a local event file');
 
-assert.equal((bridge.match(/\bcodex\b/gi) || []).length >= 2, true, 'bridge must resolve/invoke Codex');
 for (const required of [
-  "'exec'", "'--ephemeral'", "'--sandbox'", "'read-only'", "'--output-schema'",
-  "'--output-schema',$SchemaPath,'-'", '$Prompt | & $CodexPath @Args',
-  'WaitForExit(600000)', 'taskkill.exe', 'assistant_probe.txt', 'assistant_probe',
-  'assistant_text_sha256', 'LIGHT_PROBE_OK', 'PROBE_ERROR'
+  "'exec'", "'--ephemeral'", "'--skip-git-repo-check'", "'--ignore-user-config'",
+  "'--sandbox'", "'read-only'", "'--output-schema'", "'--output-last-message'",
+  'model_reasoning_effort="low"', 'DATA_JSON_BEGIN', 'DATA_JSON_END',
+  'Do not use tools', "'--output-last-message',$ResultPath,'-'", '$Prompt | & $CodexPath @Args',
+  "Start-Process -FilePath 'powershell.exe'", '-PassThru',
+  'WaitForExit(600000)', 'taskkill.exe', 'assistant_probe', 'assistant_text_sha256',
+  'LIGHT_PROBE_OK', 'PROBE_ERROR'
 ]) {
   assert.ok(bridge.includes(required), `bridge missing required safety/contract token: ${required}`);
 }
 for (const forbidden of [
   '--dangerously-bypass-approvals-and-sandbox', '--full-auto', 'Invoke-WebRequest',
-  'Start-Sleep -Seconds', "'--output-schema',$SchemaPath,$Prompt"
+  'Start-Sleep -Seconds', '-WindowStyle Hidden',
+  '2> $StderrPath', '$Output = $Prompt | & $CodexPath', 'Read only event.json'
 ]) {
   assert.ok(!bridge.includes(forbidden), `bridge contains forbidden token: ${forbidden}`);
 }
@@ -66,16 +71,18 @@ for (const required of ['Q15B_LIGHT_PROBE.js','RelayCodexLightBridge.ps1','Q15B_
 }
 
 for (const required of [
-  "'exec'", "'--ephemeral'", "'--skip-git-repo-check'", "'--sandbox'", "'read-only'", "'--output-schema'",
-  "'--output-schema',$SchemaPath,'-'", '$Prompt | & $CodexPath @Args',
-  'WaitForExit(120000)', 'CODEX_DIRECT_PASS', 'CODEX_CREDITS_REQUIRED',
-  'Codex CLI:', 'CODEX_DIRECT_DIAGNOSTIC_', '$Out', '$Err', '$Combined'
+  "'exec'", "'--ephemeral'", "'--skip-git-repo-check'", "'--ignore-user-config'",
+  "'--sandbox'", "'read-only'", "'--output-schema'", "'--output-last-message'",
+  'model_reasoning_effort="low"', 'Do not use tools', "'--output-last-message',$ResultPath,'-'", '$Prompt | & $CodexPath @Args',
+  "Start-Process -FilePath 'powershell.exe'", '-PassThru', 'WaitForExit(120000)',
+  'CODEX_DIRECT_PASS', 'CODEX_CREDITS_REQUIRED', 'Codex CLI:', 'CODEX_DIRECT_DIAGNOSTIC_'
 ]) {
   assert.ok(direct.includes(required), `direct preflight missing required token: ${required}`);
 }
 for (const forbidden of [
   '--dangerously-bypass-approvals-and-sandbox','--full-auto','Invoke-WebRequest',
-  'Start-Process chrome','XRunAndWait', "'--output-schema',$SchemaPath,$Prompt"
+  'Start-Process chrome','XRunAndWait','-WindowStyle Hidden',
+  '2> $StderrPath', '$Output = $Prompt | & $CodexPath'
 ]) {
   assert.ok(!direct.includes(forbidden), `direct preflight contains forbidden token: ${forbidden}`);
 }
