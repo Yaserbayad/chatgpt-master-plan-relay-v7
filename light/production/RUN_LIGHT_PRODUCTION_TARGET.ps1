@@ -36,7 +36,9 @@ function New-EvidenceBundle([string]$Result,[string]$Failure,$EvidenceFile) {
 }
 
 try {
-  foreach($p in @($Chrome,$Launcher,$MacroDir,$WatcherSource,$BridgeSource,$SchemaSource)){ if(-not(Test-Path -LiteralPath $p)){ throw "required path missing: ${p}" } }
+  foreach($p in @($Chrome,$Launcher,$WatcherSource,$BridgeSource,$SchemaSource)){ if(-not(Test-Path -LiteralPath $p)){ throw "required path missing: ${p}" } }
+  [IO.Directory]::CreateDirectory($MacroDir) | Out-Null
+  if(-not(Test-Path -LiteralPath $MacroDir -PathType Container)){ throw "macro staging directory unavailable after create: ${MacroDir}" }
   $Codex=Get-Command codex -ErrorAction Stop; $CodexPath=if(-not[string]::IsNullOrWhiteSpace([string]$Codex.Source)){[string]$Codex.Source}else{[string]$Codex.Definition}
   $Version=((& $CodexPath --version 2>$null)|Out-String).Trim(); if([string]::IsNullOrWhiteSpace($Version)){throw 'Codex CLI version unavailable'}
   Write-Host "Codex CLI: ${Version}"
