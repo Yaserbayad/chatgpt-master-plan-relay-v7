@@ -15,11 +15,11 @@ function run(mode='success'){
   const composerSnapshot=()=> mode==='snapshot_stale' ? '' : composerText;
   const uiv={
     tabs:{list:()=>[{index:1,url:projectUrl}],select:()=>({index:1,url:projectUrl})},
-    findElements(locator){
+    findElements(locator,opts={}){
       if(locator.includes('stop-button')) return generating?[{kind:'stop'}]:[];
       if(locator.includes('data-message-author-role')) return messages.slice();
       if(locator.includes('prompt-textarea')||locator.includes('contenteditable')) return [{kind:'composer',text:composerSnapshot(),value:composerSnapshot()}];
-      if(locator.includes('send-button')||locator.includes('Send prompt')) return composerText?[{kind:'send'}]:[];
+      if(locator.includes('composer-submit-button-color')&&locator.includes('Send prompt')&&opts.includeHidden===true) return composerText?[{kind:'send',attributes:{},getAttribute:n=>n==='aria-disabled'?'false':null}]:[];
       return [];
     },
     setVar(){}, getVar:n=>n==='!xrun_exitcode'?xrunExit:'',
