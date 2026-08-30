@@ -4,13 +4,13 @@ Independent parallel experiment. It does not use or mutate the main Relay v7 run
 
 ## Goal
 
-Minimize Ui.Vision to a browser sensor/actuator and make Codex the semantic orchestrator. The first gate proves the hardest boundary before production logic is built:
+Minimize Ui.Vision to a browser sensor/actuator and make Codex the semantic orchestrator:
 
 ```text
 completed ChatGPT response
 -> Ui.Vision observation
--> local PowerShell bridge
--> one Codex invocation
+-> local PowerShell transport
+-> one bounded Codex model turn
 -> strict nonce-bound structured result
 -> Ui.Vision validation
 ```
@@ -22,15 +22,15 @@ The test passes only when all are true:
 1. Exactly one configured-Project ChatGPT conversation tab is bound.
 2. ChatGPT is completed (no live `stop-button`).
 3. Stable latest user and following assistant message IDs are captured.
-4. Full assistant text crosses Ui.Vision -> local bridge and is locally SHA-256 hashed.
-5. Codex is invoked exactly once, ephemerally, in read-only sandbox mode.
-6. Codex reads a bounded 96-character normalized sample derived from the assistant response and reproduces it exactly.
+4. Full assistant text crosses Ui.Vision -> PowerShell and is locally SHA-256 hashed.
+5. Codex is invoked exactly once for the model turn, ephemerally, with `--sandbox read-only`.
+6. Codex receives only bounded metadata plus a 96-character normalized sample and reproduces it exactly without tools/files.
 7. Protocol, nonce, assistant ID, length, hash, sample and action all validate.
 8. The ChatGPT browser identity is unchanged after Codex returns.
 9. No ChatGPT Send, click, navigation, refresh, OCR, screenshot or Ui.Vision AI action occurs.
 10. PASS/FAIL evidence is exported and packaged.
 
-## Target environment reused from proven v7 qualification
+## Target environment
 
 - Windows 11 24H2 build 26100.9168
 - Chrome 152.0.7977.65
@@ -40,29 +40,33 @@ The test passes only when all are true:
 - Existing Ui.Vision launcher: `C:\Users\usr\Documents\Codex\ui.vision.html`
 - Ui.Vision macros: `C:\Users\usr\Desktop\uivision\macros`
 
-## Current Codex boundary and exact run order
+## Current Codex boundary
 
-The latest Windows direct preflight reached `codex exec` with `codex-cli 0.151.0` and returned exit code 1 with both stdout and stderr empty. This happened before Q15-B/Ui.Vision started, so it is not evidence of a browser-control failure.
+Windows target evidence on 2026-08-30 established that `codex-cli 0.151.0` can complete a foreground model-only `codex exec` turn with `sandbox: read-only` and exit 0. The previous Light hidden/headless child path returned exit 1 with empty stdout/stderr. Separate Windows sandbox smoke tests returned exit 1 for default/elevated/unelevated modes.
 
-The affected Light source previously passed the prompt as a positional argument from a child PowerShell process while leaving non-TTY stdin implicit. Current Codex `exec` can consume piped stdin as prompt input. The current Light source therefore makes stdin deterministic in both Codex call sites: it invokes `codex exec ... -` and pipes the finite prompt to stdin. The read-only sandbox, ephemeral mode, output schema, timeout, and no-retry rules remain unchanged.
+The current Q15-B candidate therefore stays on the proven model-only boundary:
 
-Current next step:
+- Codex is launched through a normal console-backed child PowerShell; `-WindowStyle Hidden` is forbidden.
+- Codex stdout/stderr remain attached to that console; the final strict response is read from `--output-last-message`.
+- Q15-B no longer asks Codex to read `event.json` or `assistant_probe.txt`. PowerShell supplies only the bounded fields/sample directly as untrusted prompt data.
+- Codex is explicitly instructed to use no tools/files.
+- `--sandbox read-only`, `--ephemeral`, strict `--output-schema`, timeouts, and no-blind-retry behavior remain.
+- `--ignore-user-config` isolates the Relay turn from unrelated user MCP/plugin configuration while normal Codex authentication remains available.
+- `model_reasoning_effort="low"` avoids the xhigh overhead observed in the diagnostic control turn.
 
-1. Run the current `TEST_CODEX_DIRECT.ps1` from `light/probe` (or the supplied launcher package).
-2. If it reports `CODEX_CREDITS_REQUIRED`, stop until Codex entitlement is available.
-3. If it reports `CODEX_DIRECT_FAIL`, preserve `CODEX_DIRECT_DIAGNOSTIC_*.txt`; do not start Q15-B or blindly repeat the same run.
-4. Continue only if it prints `CODEX_DIRECT_PASS` and exits 0.
-5. Then leave exactly one completed ChatGPT conversation tab from the configured Project open and run `RUN_Q15B_LIGHT.ps1` from the same current source set.
-6. Accept Q15-B only if the runner produces a PASS evidence ZIP.
+## Exact run order
 
-`TEST_CODEX_DIRECT.ps1` is browser-independent and read-only. It exists only to prove that the locally authenticated Codex CLI can complete one minimal structured execution before the browser round trip is attempted.
+1. Run the current `TEST_CODEX_DIRECT.ps1` (or the supplied launcher package).
+2. Continue only if it prints `CODEX_DIRECT_PASS` and exits 0.
+3. The launcher then runs `RUN_Q15B_LIGHT.ps1` automatically against exactly one completed configured-Project ChatGPT tab.
+4. Accept Q15-B only if the runner produces a PASS evidence ZIP and that ZIP is independently verified.
 
-## Q15-B runner
-
-Use the current `light/probe` files together. The runner stages the Light files into `C:\Users\usr\Documents\CodexLight`, invokes the Ui.Vision macro, and creates a PASS/FAIL evidence ZIP on the Desktop.
-
-The test does not submit anything to ChatGPT. A credit-limit failure remains a failed qualification attempt but is classified distinctly so it is not mistaken for a bridge defect.
+A short-lived PowerShell/Codex console window may appear during each Codex call in this qualification revision. No interaction with it is required.
 
 ## After PASS
 
-Only after target PASS should the production Light watcher be implemented. The production watcher can then add the native low-frequency Ui.Vision sleep/check loop and a small allowlisted action schema while leaving all semantic decisions to Codex.
+Only after target PASS should the production Light watcher/actuator be implemented. The production loop remains focused on:
+
+```text
+observe completed response -> Codex decision -> stage/send exactly one next prompt -> observe next completion
+```
