@@ -2,67 +2,57 @@
 
 Status: **locally verified source candidate; target Windows runtime evidence required**.
 
-## Current source hashes
+## Target evidence received 2026-08-30
 
-```text
-88d3b91439b8e90b5db5f72dab2f900fc3b6ac1ba54996342ab36bc3ba72a386  Q15B_LIGHT_PROBE.js
-6163e0a2b87e0797bc23ddf372ba977c5c867bc85ed9cdd885bb214cba5515df  RelayCodexLightBridge.ps1
-d8aae726a7995f24f5b4c60ce3fd1871452b3d308eb78398677b3d8b4309a08b  Q15B_LIGHT_OUTPUT.schema.json
-236154a40fc1b0634487a5fb13c2abf351108c38af5f44c4a374781a098f74dc  RUN_Q15B_LIGHT.ps1
-03c40c7189abd4c013edf6c800c491b393cbb839da78cda445dcc504e2790eb2  TEST_CODEX_DIRECT.ps1
-b5c2d722464b1b7c244203fcc189e2b13630605687c69ae700b31b4a20dde394  README.md
-d238a539867fa66e4f02c47e62b063bf2ade5a6f069f1d57b8f46ef6ca3142a8  DESIGN.md
-b83c657818075b8121d7846129b7c8a2e2cbe14319fff7b3151fa73c47c5b562  test_contract.mjs
-b7cdd33add064e56d89b57671d298d6ba3fc42d0bcdd819be719899175fbf748  simulate_probe.mjs
-```
+The Windows diagnostic established:
 
-The previous Q15-B ZIP hash is not asserted for this source revision because the source set changed. Target evidence must be produced from the current files.
+- OS: Windows build 26100; PowerShell 5.1.26100.9168.
+- Codex: `codex-cli 0.151.0` at the native Codex executable path.
+- Foreground model-only `codex exec` with `sandbox: read-only`: **PASS**, exit 0, returned `CODEX_FOREGROUND_OK`.
+- The foreground turn selected `gpt-5.6-sol`, xhigh reasoning, and consumed 17,602 tokens.
+- A Cloudflare MCP OAuth `AuthRequired` error appeared but was non-fatal to the model turn.
+- Direct Windows sandbox smoke tests returned exit 1 for default, elevated, and unelevated modes.
+- The previous hidden/headless Light direct preflight returned exit 1 with no stdout/stderr.
+- The later explicit-stdin hidden/headless preflight reproduced the same silent exit 1.
+- Q15-B / Ui.Vision had not started during those failed preflights.
 
-## Verification performed in this development environment
+These facts rule out Codex installation, account/model availability, and the explicit-stdin hypothesis as the cause of the preflight failure. They do **not** prove the Windows sandbox helper is usable for Codex tool execution.
 
-- `node --check Q15B_LIGHT_PROBE.js`: PASS
-- static Light contract tests: PASS
-- simulated successful Ui.Vision bridge response: PASS
-- simulated stale-nonce response: correctly rejected
-- simulated Codex credit exhaustion, including the alternate `reached your usage limit / increase your limits` wording: remains Q15-B FAIL and is recorded as `failure_class=CODEX_CREDITS_REQUIRED`
-- Ui.Vision 10.0.178 evidence-export regression: the old `uiv.exportToDownloads(file)` path fails against the qualified v10 API shape; corrected `uiv.files.exportToDownloads(file)` passes
-- direct Codex preflight diagnostics capture Codex version plus both stdout and stderr and write `CODEX_DIRECT_DIAGNOSTIC_*.txt` for unclassified nonzero exits
-- credit/usage-limit classification evaluates combined stdout/stderr rather than stderr alone
-- explicit-stdin regression: both Codex call sites require `codex exec ... -` plus finite prompt stdin and forbid the previous positional-prompt invocation
-- explicit-stdin regression: PASS after correction in both `TEST_CODEX_DIRECT.ps1` and `RelayCodexLightBridge.ps1`
-- strict JSON schema parse: PASS
-- no full assistant response persisted to disk by the bridge: enforced by test
-- no response-derived sample persisted in evidence CSV: enforced by test
-- no ChatGPT Send/click/navigation/refresh/OCR/Ui.Vision-AI path in the qualification macro: enforced by test
-- exactly one `XRunAndWait` bridge invocation: enforced by test
-- Codex qualification flags retained: `--ephemeral`, `--skip-git-repo-check`, `--sandbox read-only`, `--output-schema`
-- Q15-B Codex child process hard timeout: 600 seconds; process tree terminated on timeout; no automatic retry
-- direct Codex preflight timeout: 120 seconds; process tree terminated on timeout
+## Candidate correction
 
-## Latest target boundary
+This revision deliberately targets only the proven working boundary:
 
-On 2026-08-30 the corrected diagnostic preflight was run on the Windows target and reported:
+1. Remove `-WindowStyle Hidden` from the Codex child path. A normal console-backed child PowerShell launches Codex; stdout/stderr remain attached to that console.
+2. Keep bounded hard timeouts: 120 seconds for direct preflight and 600 seconds for Q15-B Codex.
+3. Read only the final schema-bound result from `--output-last-message`; do not capture Codex stdout/stderr through headless pipes.
+4. Keep `--ephemeral`, `--skip-git-repo-check`, `--sandbox read-only`, and `--output-schema`.
+5. Add `--ignore-user-config` so this isolated Relay turn does not load unrelated user MCP/plugin config; normal `CODEX_HOME` authentication remains in use.
+6. Force `model_reasoning_effort="low"` to avoid the xhigh overhead observed in the foreground diagnostic.
+7. Remove Codex local file/tool use from Q15-B. PowerShell computes the full-response length/hash and sends only nonce, assistant ID, length, SHA-256, and the bounded 96-character normalized sample directly as untrusted prompt data.
+8. Codex is explicitly instructed to use no tools/files and must return the same strict result schema.
+9. Prompt transport remains explicit finite stdin (`codex exec ... -`); the target evidence showed stdin itself was not the failing boundary.
 
-- `codex_version=codex-cli 0.151.0`
-- `exit_code=1`
-- stdout empty
-- stderr empty
-- Q15-B/Ui.Vision not started
+## Local verification
 
-Therefore the failure is localized before the Ui.Vision/browser qualification. The result does not prove a credit limit, authentication failure, Windows sandbox failure, or Light architecture defect because Codex emitted no diagnostic payload.
-
-A concrete transport defect was then identified in the Light source: both Codex call sites supplied a positional prompt while leaving inherited non-TTY stdin implicit. Current source changes only that boundary by using the explicit stdin sentinel (`codex exec ... -`) and piping a finite prompt to stdin. The read-only sandbox and all Q15-B acceptance semantics are unchanged.
-
-The explicit-stdin defect is proven in the previous Light source. **It is not yet proven to be the cause of the target exit-code-1 result.** Target rerun is required before accepting that diagnosis.
+- `node --check Q15B_LIGHT_PROBE.js`: PASS.
+- Light static contract suite: PASS.
+- Q15-B success simulation: PASS.
+- stale-nonce simulation: correctly rejected.
+- credit-limit simulation: remains deterministic Q15-B failure.
+- Ui.Vision v10 evidence export path remains `uiv.files.exportToDownloads(...)`.
+- no ChatGPT send/click/navigation/refresh/OCR/Ui.Vision-AI path in Q15-B.
+- exactly one `XRunAndWait` bridge invocation.
+- no full assistant response persisted to disk by the bridge.
+- no event/probe file is required by Codex.
+- no hidden Codex child launch remains.
+- no Codex stdout/stderr capture pipe remains; only stdin carries the prompt.
+- strict output is read from `--output-last-message`.
+- read-only sandbox remains configured.
 
 ## Remaining acceptance boundary
 
-1. Rerun the current `TEST_CODEX_DIRECT.ps1` (or the supplied launcher package) on the same Windows target.
-2. If it reports `CODEX_CREDITS_REQUIRED`, stop until Codex entitlement is available.
-3. If it reports another `CODEX_DIRECT_FAIL`, preserve the new `CODEX_DIRECT_DIAGNOSTIC_*.txt`; do not blindly repeat the same run and do not start Q15-B.
-4. If the explicit-stdin run still returns silent exit code 1, isolate the native Windows Codex boundary next (foreground control, then sandbox/version/config as evidence dictates) before changing architecture or weakening the sandbox.
-5. Continue only after `CODEX_DIRECT_PASS` with exit code 0.
-6. Then run `RUN_Q15B_LIGHT.ps1` against exactly one completed configured-Project ChatGPT conversation tab.
-7. Q15-B passes only when the runner produces a PASS evidence ZIP from that target machine.
+Run the current launcher once on the Windows target. If direct preflight passes, allow it to continue automatically into Q15-B. Q15-B becomes PASS only after independent verification of the generated target evidence ZIP.
+
+If the console-backed direct preflight still fails, do not modify Ui.Vision or weaken the sandbox; preserve that new result and diagnose the remaining launch boundary.
 
 Production watcher/actuator implementation remains gated on target Q15-B PASS.
