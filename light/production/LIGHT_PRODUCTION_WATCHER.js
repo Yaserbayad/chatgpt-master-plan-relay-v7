@@ -94,7 +94,9 @@ try {
     if(clean(editableText(composer)))throw new Error('COMPOSER_NOT_EMPTY: refusing to overwrite existing draft');
     uiv.clipboard.write(prompt); if(uiv.clipboard.read()!==prompt) throw new Error('STAGE_VERIFY_FAILED: prompt clipboard round-trip mismatch');
     uiv.browser.click(composer); uiv.browser.type('${KEY_CTRL+KEY_V}'); uiv.sleep(250);
-    const staged=first(COMPOSERS,2); if(!staged||editableText(staged).replace(/\r/g,'')!==prompt.replace(/\r/g,''))throw new Error('STAGE_VERIFY_FAILED: staged prompt does not match');
+    const staged=first(COMPOSERS,2); if(!staged)throw new Error('STAGE_VERIFY_FAILED: ChatGPT composer disappeared after paste');
+    uiv.browser.click(staged); uiv.browser.type('${KEY_CTRL+KEY_A}'); uiv.browser.type('${KEY_CTRL+KEY_C}'); uiv.sleep(100);
+    const copied=raw(uiv.clipboard.read()); if(copied.replace(/\r/g,'')!==prompt.replace(/\r/g,''))throw new Error('STAGE_VERIFY_FAILED: staged prompt copy-back does not match');
     uiv.clipboard.write(originalClipboard);
     assertSourceIdentity(boundIndex,source);
     const send=first(SENDS,2); if(!send)throw new Error('SEND_CONTROL_MISSING: semantic Send control not found');
