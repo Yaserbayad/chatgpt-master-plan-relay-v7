@@ -162,7 +162,7 @@ const rows = [[
 const stamp = new Date().toISOString().replace(/[:.]/g,'-');
 const file = `Q15B_light_${stamp}.csv`;
 uiv.csv.write(file, rows);
-uiv.exportToDownloads(file);
+uiv.files.exportToDownloads(file);
 
 if (result !== 'PASS') throw new Error(`LIGHT Q15-B FAIL: ${failureReason}; evidence=${file}`);
 uiv.log(`LIGHT Q15-B PASS: UI.Vision -> Codex -> UI.Vision round trip proven; assistant=${before.assistantId}; ${file}`, 'green');
