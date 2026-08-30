@@ -1,0 +1,24 @@
+{
+  "type": "object",
+  "properties": {
+    "protocol": {"type": "string", "enum": ["relay-light-probe-response-v1"]},
+    "nonce": {"type": "string", "minLength": 1, "maxLength": 160},
+    "assistant_message_id": {"type": "string", "minLength": 1, "maxLength": 200},
+    "assistant_text_length": {"type": "integer", "minimum": 1},
+    "assistant_text_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "assistant_probe": {"type": "string", "minLength": 1, "maxLength": 96},
+    "action": {"type": "string", "enum": ["LIGHT_PROBE_OK"]},
+    "note": {"type": "string", "maxLength": 120}
+  },
+  "required": [
+    "protocol",
+    "nonce",
+    "assistant_message_id",
+    "assistant_text_length",
+    "assistant_text_sha256",
+    "assistant_probe",
+    "action",
+    "note"
+  ],
+  "additionalProperties": false
+}
