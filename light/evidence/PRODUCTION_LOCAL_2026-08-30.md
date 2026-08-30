@@ -10,8 +10,12 @@ This record applies only to `light-version`. It does not alter or imply main-pro
 - Production attempt 1: safe pre-Send staging snapshot false negative.
 - Production attempt 2: safe pre-Send `SEND_CONTROL_MISSING`; led to a Q09 selector correction.
 - Production attempt 3: independently verified the Q09 selector correction was actually executed and still failed pre-Send with `SEND_CONTROL_MISSING`; this falsified the selector-only diagnosis.
+- Production attempt 4: runner preflight failed before Ui.Vision launch because the controlled macro staging directory was missing. No watcher evidence was produced.
 
-Third target evidence: `light/evidence/PRODUCTION_TARGET_FAIL_2026-08-30_140440.md`.
+Target evidence records:
+
+- `light/evidence/PRODUCTION_TARGET_FAIL_2026-08-30_140440.md`
+- `light/evidence/PRODUCTION_TARGET_PREFLIGHT_FAIL_2026-08-30_142107.md`
 
 ## Recovered target-qualified contract
 
@@ -26,47 +30,53 @@ It also established that only terminal U+00A0 markers may be normalized from ric
 
 The previous Light watcher omitted those requirements. The current candidate restores them before any material Send.
 
+## Runner preflight repair
+
+The target package runner previously required `C:\Users\usr\Desktop\uivision\macros` to exist before execution. That directory is a controlled staging location, not an external service dependency. The runner now creates it recursively with `[IO.Directory]::CreateDirectory($MacroDir)` and verifies it is a directory before copying the macro.
+
+The watcher, bridge and action schema are unchanged by this repair.
+
 ## Current source binding
 
 ```text
 d06dbdcfb341e443663736fcdc14274c0560b3c3  light/production/LIGHT_PRODUCTION_ACTION.schema.json
 eb8ff2a0367732f66207b4611cfe7336b9da0d16  light/production/LIGHT_PRODUCTION_WATCHER.js
-ea7878a8b9849d9aa2f1fbd822004d0bfb6fafb4  light/production/RUN_LIGHT_PRODUCTION_TARGET.ps1
+15bc7662948976fe06cbdd010566453049e69879  light/production/RUN_LIGHT_PRODUCTION_TARGET.ps1
 3fb41fe1ef6f4ac6f0ade600858d700c49d19aaf  light/production/RelayCodexLightProduction.ps1
-41a1ea86da47a56f14b22b093c79eb402c841d52  light/tests/test_production_contract.mjs
+8002197f4d5d504702fbe747f48fb7502abf2eca  light/tests/test_production_contract.mjs
 9864c04ee91e140637871811ded502c27ecc2639  light/tests/simulate_production_watcher.mjs
 ```
 
-Local SHA-256 values for changed/tested files:
+Local SHA-256 values for the runner/test repair:
 
 ```text
-16bcb6fbc5596fd2f5a8e6783665858c42887cd1f969e8eb048eba45d6b53e15  LIGHT_PRODUCTION_WATCHER.js
-5f4939c7e54b587d95884a65a5175c888e82166904744f89501eca98f2660320  simulate_production_watcher.mjs
-cf715852788c8e222499996bfe7325e6f743417614e70e3426447b8b270fdba5  test_production_contract.mjs
+93c6ec7739deec6ca196d264339d247bbba87622472b8f9e07e4309e6df3df7b  RUN_LIGHT_PRODUCTION_TARGET.ps1
+5517cf670a37e9e5f07c5763c5f8388f0c1ebe20b4a688b6b0a387321df63bc9  test_production_contract.mjs
 ```
 
-The watcher and both production test files were reread from GitHub after persistence and their Git blob SHAs exactly matched `git hash-object` on the locally tested files.
+The runner/test Git blob SHAs exactly match `git hash-object` on the locally tested files.
 
 ## Verification performed
 
-TDD first reproduced the old false-oracle behavior: with silent trusted paste/copy no-ops, the failed watcher bypassed staging verification and reached `SEND_CONTROL_MISSING`.
+TDD first reproduced the runner bug: the current runner failed the self-heal contract because it treated `$MacroDir` as a hard pre-existing-path prerequisite.
 
-After restoring the Q08 contract:
+After the repair:
 
 ```text
-node --check light/production/LIGHT_PRODUCTION_WATCHER.js
-PASS
-
-node light/tests/test_production_contract.mjs
+LIGHT RUNNER MACRODIR SELF-HEAL CONTRACT: PASS
 LIGHT PRODUCTION CONTRACT TESTS: PASS
+node --check light/production/LIGHT_PRODUCTION_WATCHER.js: PASS
+```
 
-node light/tests/simulate_production_watcher.mjs
+The previously persisted sentinel watcher simulation remains unchanged and GREEN:
+
+```text
 LIGHT PRODUCTION SENTINEL/SUBMIT-SURFACE SIMULATION: PASS
 ```
 
 ## Current staging and Send proof
 
-For `SEND_PROMPT` the watcher now requires, in order:
+For `SEND_PROMPT` the watcher requires, in order:
 
 1. source identity still current and ChatGPT not generating;
 2. exactly one visible `composer-submit-button-color` surface with `aria-label="Start Voice"`;
@@ -101,6 +111,7 @@ The model-generated prompt never enters `uiv.browser.type`; only constant truste
 - `SEND_AMBIGUOUS` is persisted before the click;
 - click failure / ambiguous confirmation do not retry;
 - duplicate handled source turns are rejected before Codex;
+- runner self-heals its Ui.Vision macro staging directory;
 - no OCR, screenshots, Ui.Vision AI, page-world eval, generic coordinates, fresh-chat, or Chrome-restart behavior.
 
 ## Remaining acceptance boundary
