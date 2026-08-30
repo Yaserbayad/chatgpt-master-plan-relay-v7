@@ -1,0 +1,14 @@
+{
+  "type": "object",
+  "properties": {
+    "protocol": {"type": "string", "enum": ["relay-light-production-action-v1"]},
+    "nonce": {"type": "string", "minLength": 1, "maxLength": 180},
+    "conversation_id": {"type": "string", "minLength": 1, "maxLength": 240},
+    "assistant_message_id": {"type": "string", "minLength": 1, "maxLength": 240},
+    "action": {"type": "string", "enum": ["SEND_PROMPT", "STOP", "HUMAN"]},
+    "prompt": {"type": "string", "maxLength": 12000},
+    "reason": {"type": "string", "maxLength": 500}
+  },
+  "required": ["protocol", "nonce", "conversation_id", "assistant_message_id", "action", "prompt", "reason"],
+  "additionalProperties": false
+}
