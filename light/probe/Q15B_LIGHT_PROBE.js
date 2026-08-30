@@ -32,6 +32,11 @@ function normalizeProbe(text) {
 function makeNonce() {
   return `LIGHT_${new Date().toISOString().replace(/[^0-9A-Za-z]/g,'')}_${Math.random().toString(36).slice(2,14)}`;
 }
+function classifyFailure(reason, response) {
+  const signal = `${clean(reason)} ${clean(response && response.note)}`.toLowerCase();
+  if (/workspace is out of credits|out of credits|usage limit reached|add credits to continue/.test(signal)) return 'CODEX_CREDITS_REQUIRED';
+  return 'OTHER';
+}
 function snapshot(boundIndex) {
   const selected = uiv.tabs.select(boundIndex);
   const url = clean(selected && selected.url);
@@ -142,13 +147,13 @@ try {
 
 const rows = [[
   'result','failure_reason','elapsed_ms','conversation_id','user_message_id','assistant_message_id',
-  'assistant_text_length','nonce','xrun_exit_code','bridge_action','assistant_text_sha256','assistant_probe_match',
+  'assistant_text_length','nonce','xrun_exit_code','bridge_action','failure_class','assistant_text_sha256','assistant_probe_match',
   'codex_version','codex_exit_code','codex_duration_ms','browser_identity_revalidated'
 ], [
   result,failureReason,Date.now()-startedAt,
   before ? before.conversationId : '', before ? before.userId : '', before ? before.assistantId : '',
   before ? before.assistantText.length : 0, nonce, xrunExit,
-  response ? clean(response.action) : '', response ? clean(response.assistant_text_sha256) : '',
+  response ? clean(response.action) : '', result === 'PASS' ? 'NONE' : classifyFailure(failureReason,response), response ? clean(response.assistant_text_sha256) : '',
   response && expectedProbe && response.assistant_probe === expectedProbe ? 'true' : 'false', response ? clean(response.codex_version) : '',
   response && response.codex_exit_code != null ? response.codex_exit_code : '',
   response && response.codex_duration_ms != null ? response.codex_duration_ms : '',
