@@ -1,0 +1,42 @@
+{
+  "type": "object",
+  "properties": {
+    "protocol": {
+      "type": "string",
+      "enum": [
+        "relay-codex-probe-response-v1"
+      ]
+    },
+    "nonce": {
+      "type": "string"
+    },
+    "assistant_message_id": {
+      "type": "string"
+    },
+    "assistant_text_length": {
+      "type": "integer"
+    },
+    "action": {
+      "type": "string",
+      "enum": [
+        "PROBE_OK"
+      ]
+    },
+    "note": {
+      "type": "string"
+    },
+    "assistant_text_sha256": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "protocol",
+    "nonce",
+    "assistant_message_id",
+    "assistant_text_length",
+    "assistant_text_sha256",
+    "action",
+    "note"
+  ],
+  "additionalProperties": false
+}
