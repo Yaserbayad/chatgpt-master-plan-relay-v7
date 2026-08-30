@@ -1,16 +1,16 @@
 # Light Master Qualification / Same-Chat Soak — Local Verification 2026-08-30
 
-Status: **LOCALLY VERIFIED MASTER CANDIDATE — REAL WINDOWS/CHROME TARGET RUN REQUIRED**.
+Status: **LOCALLY VERIFIED MASTER CANDIDATE AFTER Q08 LOCATOR-FOCUS CORRECTION — REAL WINDOWS/CHROME TARGET PASS REQUIRED**.
 
 This evidence applies only to the independent `light-version` project. It does not modify or imply main Relay/master-plan state.
 
-## Why Codex is eligible for this qualification
+## Codex prerequisite
 
-The prerequisite Codex execution primitive is already target-proven by `light/evidence/Q15B_2026-08-30.md`.
+The prerequisite Codex execution primitive remains target-proven by `light/evidence/Q15B_2026-08-30.md`.
 
 Q15-B independently verified on the real Windows/Chrome/Ui.Vision target that `codex-cli 0.151.0` can execute one console-backed, ephemeral, no-tool, read-only, structured, nonce-bound turn with exit 0, strict returned identity validation, and post-Codex browser identity revalidation.
 
-That proof is intentionally narrower than the new master qualification. It does **not** prove repeated normal-production semantic decisions. The master harness is designed to prove those decisions rather than assume them.
+That proof is intentionally narrower than the master qualification. It does not prove repeated normal-production semantic decisions; the seven-cycle harness is designed to prove those decisions rather than assume them.
 
 ## Master qualification design
 
@@ -33,61 +33,85 @@ The deterministic PowerShell supervisor is the test oracle. It never decides pro
 
 ## Qualification-only semantic safety guards
 
-`RelayCodexLightProduction.ps1` now accepts opt-in `master_qualification_mode` expectations:
+`RelayCodexLightProduction.ps1` accepts opt-in `master_qualification_mode` expectations for conversation ID, source user ID, source assistant ID, source assistant SHA-256, Codex action, and Codex prompt SHA-256.
 
-- expected conversation ID;
-- expected source user message ID;
-- expected source assistant message ID;
-- expected source assistant SHA-256;
-- expected Codex action;
-- expected Codex prompt SHA-256.
-
-During master qualification, source identity/hash expectations are checked before Codex execution. Codex action and prompt hash are checked after Codex execution but before an actionable bridge result is returned to Ui.Vision. A wrong semantic answer therefore fails before prompt staging or Send.
+During master qualification, source expectations are checked before Codex execution. Codex action and prompt hash are checked after Codex execution but before an actionable bridge result is returned to Ui.Vision. A wrong semantic answer therefore fails before prompt staging or Send.
 
 When `master_qualification_mode` is absent/false, normal production behavior is unchanged.
 
-## Exact implementation source binding
+## First master target run
 
-Implementation revision before this evidence record:
+Durable evidence: `light/evidence/MASTER_QUALIFICATION_TARGET_FAIL_2026-08-30_150220.md`
 
-`cdc87a55be2bd45dbb2b4052ac89ccf3544bf7ac`
+Uploaded bundle SHA-256:
 
-```text
-8328f06495b83c2f263b26e6e9f335d8df426aa5  light/production/LIGHT_PRODUCTION_WATCHER.js
-2490165233cc5904e3731fc6ac4279e7ef29f2ef  light/production/RelayCodexLightProduction.ps1
-d06dbdcfb341e443663736fcdc14274c0560b3c3  light/production/LIGHT_PRODUCTION_ACTION.schema.json
-09f513ce062387669c21c09d9f02dab6bb4009be  light/production/RUN_LIGHT_MASTER_QUALIFICATION.ps1
-dc45da6fc711e4d429f31d92041bb8fb766a124d  light/MASTER_QUALIFICATION_CONTRACT.md
-add4d4c45cf467a74240c058860ba05b88b0b03f  light/tests/test_production_contract.mjs
-f60d602a4ee27a8a4c87782dc8b9272237e8dd74  light/tests/simulate_production_watcher.mjs
-ea9d2c1b6d3c43f11c33607d6c3fd05f8038d544  light/tests/test_master_qualification_harness.mjs
-767447fc550346fd9a1ef503d427c84ca50e6335  light/tests/simulate_master_qualification.mjs
-b253cc94a20f3f124242ff8131c8486389e655d4  light/evidence/Q15B_2026-08-30.md
-```
+`099cd0dd8f753289ecd75aba58340da7b95d69d267bdf0ca91415dadd197b065`
 
-Local SHA-256 values for the changed/new source and tests:
+All internal manifest hashes verified successfully.
+
+Cycle 0 stopped safely with:
 
 ```text
-acf0461cc526044e45f105abfd6ad54ff5d9b3676dd81aff4944ceb38b4a9879  LIGHT_PRODUCTION_WATCHER.js
-81c4aebc94a168191e243ca78db241f4a24679a5bf77983c312affbd41df3404  RelayCodexLightProduction.ps1
-94a3d54c2454da5d808e5e571e30465ec2950006b0dbd505c8eff987f356953e  RUN_LIGHT_MASTER_QUALIFICATION.ps1
-fb282a6d51b0326123fac067ac7dcf64cf79864818b051940a3cfe4965db5547  MASTER_QUALIFICATION_CONTRACT.md
-32917fb758919e27f7101448dce240c111c7f14fefe940b20dba8e2dbc345525  test_production_contract.mjs
-9b1a07bccc3e7b55b51ed3b69a9f8933328fef6fa7d70ea2503c4dc4a4eef70a  simulate_production_watcher.mjs
-d39e00f3ba3722b757a79f057d6dc3968738d658cb4311f602c98fe3a25e1725  test_master_qualification_harness.mjs
-0ee153172aea09a3cd0e4c7914e401e4ee63e4aa257a434362b952fa98a344e9  simulate_master_qualification.mjs
+STAGE_VERIFY_FAILED: submit surface did not transition to Send prompt; found count=1, aria=Start Voice
 ```
 
-The Git blob IDs above were reread/persisted and exactly match `git hash-object` for the locally tested bytes.
+Target evidence proves:
 
-## TDD evidence
+```text
+bridge_action=SEND_PROMPT
+expected_prompt_sha256 == actual_prompt_sha256
+xrun_exit_code=0
+codex_exit_code=0
+browser_identity_revalidated=true
+baseline_submit_aria=Start Voice
+pasted_submit_aria=Start Voice
+send_click_count=0
+```
 
-RED before implementation:
+Therefore Codex, master sequencing, expected prompt hashing, and pre-action browser identity all passed cycle 0. The first unproven boundary was material composer focus / trusted paste.
 
-- the exact pre-change watcher failed the new requirement because `bridge_prompt_sha256` was absent;
-- the pre-change candidate had no `RUN_LIGHT_MASTER_QUALIFICATION.ps1`, so the master static contract could not pass.
+## Working/failing contract comparison
 
-GREEN after implementation:
+Failed master candidate:
+
+- resolved the rich-text composer through `uiv.findElements`;
+- passed the resulting finder snapshot object to `uiv.browser.click`;
+- target log shows Ui.Vision converting that snapshot click to coordinates on a `div`;
+- trusted Ctrl+V then produced no visible state change: `Start Voice -> Start Voice`.
+
+Already target-PASS Q08 path:
+
+- uses exact locator `css=[role="textbox"][contenteditable="true"][aria-label="Chat with ChatGPT"]`;
+- calls `uiv.browser.click(COMPOSER)` directly with the locator string;
+- target evidence proves trusted paste transitions `Start Voice -> Send prompt` and sentinel-protected Ctrl+C copies the editor contents.
+
+Root-cause hypothesis: finder-snapshot composer clicks can fail to retain the rich-editor focus required for trusted key input, while the direct locator-string click focuses the intended editor correctly.
+
+Status: **SUPPORTED, NOT TARGET-CONFIRMED** until a corrected target run passes this boundary.
+
+## TDD correction
+
+A regression simulation was changed first to model the target distinction:
+
+- locator-string composer click => focus retained;
+- finder-snapshot composer click => focus not retained;
+- trusted key input is a no-op when focus is not retained.
+
+RED against the exact pre-correction watcher reproduced the real target failure signature:
+
+```text
+STAGE_VERIFY_FAILED: submit surface did not transition to Send prompt; found count=1, aria=Start Voice
+```
+
+The smallest implementation change then restored the Q08 target-qualified contract:
+
+- replace the composer locator fallback array with the single exact Q08 composer locator;
+- require exactly one matching composer before paste and before copy-back;
+- call `uiv.browser.click(COMPOSER)` directly for both material focus operations;
+- remove snapshot-object composer focus;
+- keep the sentinel, NBSP normalization, identity revalidation, Send ambiguity fence, one-Send bound, Codex bridge, and master supervisor unchanged.
+
+GREEN after correction:
 
 ```text
 node light/tests/test_production_contract.mjs
@@ -103,32 +127,30 @@ node light/tests/simulate_master_qualification.mjs
 LIGHT MASTER QUALIFICATION ACCEPTANCE SIMULATION: PASS
 ```
 
-All relevant JavaScript syntax checks also passed.
+The persisted simulation bytes were reconstructed from GitHub and rerun; the full suite remained green.
 
-## Master adversarial acceptance coverage
+## Current source binding
 
-The master acceptance simulation proves the deterministic validator rejects each of these independently:
+```text
+58be604c2b7423437524f3f1e8bdb5ac333c62f8  light/production/LIGHT_PRODUCTION_WATCHER.js
+2490165233cc5904e3731fc6ac4279e7ef29f2ef  light/production/RelayCodexLightProduction.ps1
+d06dbdcfb341e443663736fcdc14274c0560b3c3  light/production/LIGHT_PRODUCTION_ACTION.schema.json
+09f513ce062387669c21c09d9f02dab6bb4009be  light/production/RUN_LIGHT_MASTER_QUALIFICATION.ps1
+d3b5b9b7ca4eacd0e3540df8bd5ddd7a1dbe7c84  light/MASTER_QUALIFICATION_CONTRACT.md
+f9a4f182062a2653b637ca443d6acf60526b89eb  light/PRODUCTION_CONTRACT.md
+6c197f87e0c3ac9ab2fdb5e50e7b5b19fc277559  light/tests/test_production_contract.mjs
+72f45a5fb129131c2c5ab8efd65247803ecceb98  light/tests/simulate_production_watcher.mjs
+ea9d2c1b6d3c43f11c33607d6c3fd05f8038d544  light/tests/test_master_qualification_harness.mjs
+767447fc550346fd9a1ef503d427c84ca50e6335  light/tests/simulate_master_qualification.mjs
+b253cc94a20f3f124242ff8131c8486389e655d4  light/evidence/Q15B_2026-08-30.md
+```
 
-1. conversation drift;
-2. user-message chain break;
-3. assistant-message chain break;
-4. nonce reuse;
-5. wrong expected source-assistant semantic state/hash;
-6. wrong Codex prompt/token hash;
-7. staging submit-surface transition failure;
-8. clipboard sentinel failure;
-9. double Send;
-10. early STOP;
-11. terminal SEND instead of STOP;
-12. terminal cycle incorrectly waiting for another completion.
-
-Existing production simulation remains green for generation gating, Q08 sentinel staging, terminal-NBSP normalization, stale identity, click failure, ambiguous submission, STOP/HUMAN, duplicate-turn rejection, one-Send bound, and no automatic retry.
-
-## Security / separation review
+## Safety / separation review
 
 - Codex output remains untrusted and schema/identity-bound.
 - Wrong master-qualification semantic output is blocked before Ui.Vision can stage/click it.
 - Model-generated prompt text never enters the trusted-key parser.
+- The change replaces snapshot-object focus with the previously target-qualified locator focus; it does not add any new browser capability.
 - PowerShell supervisor contains no Ui.Vision/browser click/type control.
 - No OpenAI API path was added.
 - No fresh-chat, Chrome restart, OCR, screenshot, Ui.Vision AI, page-world eval, or generic coordinate behavior was added.
@@ -136,12 +158,12 @@ Existing production simulation remains green for generation gating, Q08 sentinel
 
 ## Local execution limitation
 
-The local verification environment has Node.js but no Windows PowerShell runtime and no real target Chrome/Ui.Vision session. Therefore this evidence does **not** claim that `RUN_LIGHT_MASTER_QUALIFICATION.ps1` has executed successfully on Windows.
+The local verification environment has Node.js but no Windows PowerShell runtime and no real target Chrome/Ui.Vision session. Therefore this evidence does not claim the corrected locator-focus path is target-PASS.
 
 ## Remaining acceptance boundary
 
-Run the packaged master harness once on the target Windows/Chrome/Ui.Vision environment with exactly one completed configured-Project ChatGPT conversation and an empty composer.
+Run the corrected packaged master harness once on the target Windows/Chrome/Ui.Vision environment with exactly one completed configured-Project ChatGPT conversation and an empty composer.
 
 A genuine master PASS requires all seven target cycles to satisfy the exact contract and the returned evidence bundle to verify independently. Any first failure stops without retry and preserves partial evidence.
 
-After independently verified master PASS, the current same-chat production path plus bounded reliability soak are qualified. Fresh-chat/recovery remains the next separate major stage.
+If cycle 0 passes, the same run automatically continues through all five normal-production semantic Send cycles and the terminal STOP cycle. After independently verified master PASS, the current same-chat production path plus bounded reliability soak are qualified. Fresh-chat/recovery remains the next separate major stage.
