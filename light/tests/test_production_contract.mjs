@@ -9,6 +9,10 @@ for(const x of ['composer-submit-button-color','Start Voice','Send prompt','LIGH
 assert.ok(!watcher.includes('firstEnabled('),'must not use the failed selector-only Send discovery helper');
 assert.ok(!watcher.includes('all(l,timeout,true).filter(enabled)'),'must not click a match obtained only via includeHidden:true');
 assert.equal((watcher.match(/uiv\.browser\.type/g)||[]).length,3);
+assert.ok(watcher.includes("const COMPOSER = 'css=[role=\"textbox\"][contenteditable=\"true\"][aria-label=\"Chat with ChatGPT\"]';"),'watcher must use the Q08 target-qualified composer locator');
+assert.equal((watcher.match(/uiv\.browser\.click\(COMPOSER\)/g)||[]).length,2,'paste and copy-back must focus via the Q08 locator string');
+assert.ok(!watcher.includes('uiv.browser.click(composer)'),'must not focus composer through a finder snapshot');
+assert.ok(!watcher.includes('uiv.browser.click(staged)'),'must not refocus composer through a finder snapshot');
 assert.equal((watcher.match(/XRunAndWait/g)||[]).length,1);
 assert.ok(!watcher.includes('uiv.browser.type(prompt)'));
 for(const forbidden of ['uiv.page.','uiv.eval(','uiv.ocr.','uiv.ai.','uiv.shot.','uiv.desktop.','uiv.open(','XClick','XType','FRESH_CHAT'])assert.ok(!watcher.includes(forbidden),`watcher contains ${forbidden}`);
