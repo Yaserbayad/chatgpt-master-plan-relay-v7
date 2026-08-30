@@ -21,7 +21,7 @@
     "Q12": "PASS",
     "Q13": "PASS",
     "Q14": "PASS",
-    "Q15": "TODO",
+    "Q15": "WAITING",
     "Q16": "TODO"
   },
   "evidence": {
@@ -39,7 +39,7 @@
     "Q12": "qualification/Q12_FINAL_EVIDENCE.md",
     "Q13": "qualification/Q13_EVIDENCE.md",
     "Q14": "qualification/Q14_FINAL_EVIDENCE.md",
-    "Q15": "master-plan/Q15_LOW_RESOURCE_SCOPE_AMENDMENT_2026-08-30.md"
+    "Q15": "qualification/Q15_CODEX_USAGE_WAITING_2026-08-30.md"
   },
-  "note": "Qualification-time compact state only. Final production schema is intentionally deferred to C01. Human-authorized Q12 Phase-Q scope amendment: master-plan/Q12_SCOPE_AMENDMENT_2026-08-30.md; external Chrome crash/restart handling is optional and not required for current Q12 acceptance. Human-authorized Q15 Codex watcher amendment: master-plan/Q15_CODEX_WATCHER_AMENDMENT_2026-08-30.md. Newer human-authorized Q15-A amendment: master-plan/Q15_LOW_RESOURCE_SCOPE_AMENDMENT_2026-08-30.md; standalone PowerShell timing qualification is retired and must not be rerun; native UI.Vision sleep/check remains the implementation requirement with later regression proof. Q15 remains TODO solely because Q15-B read-only nonce-bound UI.Vision-to-Codex-to-UI.Vision bridge is still required before Q16."
+  "note": "Qualification-time compact state only. Final production schema is intentionally deferred to C01. Human-authorized Q12 Phase-Q scope amendment: master-plan/Q12_SCOPE_AMENDMENT_2026-08-30.md; external Chrome crash/restart handling is optional and not required for current Q12 acceptance. Human-authorized Q15 Codex watcher amendment: master-plan/Q15_CODEX_WATCHER_AMENDMENT_2026-08-30.md. Newer human-authorized Q15-A amendment: master-plan/Q15_LOW_RESOURCE_SCOPE_AMENDMENT_2026-08-30.md; standalone PowerShell timing qualification is retired and must not be rerun; native UI.Vision sleep/check remains the implementation requirement with later regression proof. Q15-B is WAITING on Codex usage allowance availability; deterministic resolution is a read-only Codex CLI invocation that no longer returns the usage-limit condition. Q16 remains TODO and ineligible until Q15 PASS."
 }
