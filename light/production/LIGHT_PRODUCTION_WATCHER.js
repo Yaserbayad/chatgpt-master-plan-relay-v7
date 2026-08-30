@@ -11,6 +11,7 @@ const COMPOSER = 'css=[role="textbox"][contenteditable="true"][aria-label="Chat 
 const SUBMIT_SURFACE = 'css=button[class*="composer-submit-button-color"]';
 const STATE_FILE = 'LIGHT_PRODUCTION_STATE.csv';
 const LIGHT_MAX_SENDS = 1;
+const INPUT_PRIME = 'x';
 const POLL_MS = 3000;
 const STABLE_MS = 1500;
 const MAX_COMPLETION_POLLS = 180;
@@ -79,7 +80,7 @@ function confirmSubmission(boundIndex,source,prompt){
 
 uiv.setVar('!TIMEOUT_MACRO',900);
 const boundIndex=tabBinding(); const originalClipboard=raw(uiv.clipboard.read()); const startedAt=Date.now();
-let source=null,response=null,nonce='',xrunExit='',result='FAIL',failureReason='',failureClass='NONE',sendClickCount=0,submissionConfirmed=false,nextCompletionObserved=false,browserIdentityRevalidated=false,newUserId='',nextAssistantId='',baselineSubmitAria='',pastedSubmitAria='',copySentinelReplaced=false,stagedCopyExact=false;
+let source=null,response=null,nonce='',xrunExit='',result='FAIL',failureReason='',failureClass='NONE',sendClickCount=0,submissionConfirmed=false,nextCompletionObserved=false,browserIdentityRevalidated=false,newUserId='',nextAssistantId='',baselineSubmitAria='',primerSubmitAria='',primerClearedAria='',pastedSubmitAria='',copySentinelReplaced=false,stagedCopyExact=false;
 try {
   source=waitStableCompleted(boundIndex);
   const prior=readState();
@@ -102,6 +103,13 @@ try {
     const baselineSurface=submitSurfaceSnapshot(); baselineSubmitAria=baselineSurface.aria;
     if(!isVoiceSurface(baselineSurface)) throw new Error(`COMPOSER_NOT_EMPTY: expected Start Voice baseline; found count=${baselineSurface.count}, aria=${baselineSurface.aria||'(empty)'}`);
     const composerCount=all(COMPOSER,2,false).length; if(composerCount!==1)throw new Error(`STAGE_VERIFY_FAILED: expected exactly one target composer; found ${composerCount}`);
+    // Q08 target evidence proved fresh Ctrl+V can silently no-op until the rich editor has accepted ordinary trusted input once.
+    uiv.browser.click(COMPOSER); uiv.browser.type(INPUT_PRIME); uiv.sleep(250);
+    const primerSurface=submitSurfaceSnapshot(); primerSubmitAria=primerSurface.aria;
+    if(!isSendSurface(primerSurface)) throw new Error(`INPUT_PRIME_FAILED: submit surface did not transition to Send prompt after constant primer; found count=${primerSurface.count}, aria=${primerSurface.aria||'(empty)'}`);
+    uiv.browser.click(COMPOSER); uiv.browser.type('${KEY_CTRL+KEY_A}'); uiv.browser.type('${KEY_BACKSPACE}'); uiv.sleep(250);
+    const primerClearedSurface=submitSurfaceSnapshot(); primerClearedAria=primerClearedSurface.aria;
+    if(!isVoiceSurface(primerClearedSurface)) throw new Error(`INPUT_PRIME_CLEAR_FAILED: submit surface did not return to Start Voice after clearing primer; found count=${primerClearedSurface.count}, aria=${primerClearedSurface.aria||'(empty)'}`);
     uiv.clipboard.write(prompt); if(normalize(uiv.clipboard.read())!==normalize(prompt)) throw new Error('STAGE_VERIFY_FAILED: prompt clipboard round-trip mismatch');
     uiv.browser.click(COMPOSER); uiv.browser.type('${KEY_CTRL+KEY_V}'); uiv.sleep(500);
     const pastedSurface=submitSurfaceSnapshot(); pastedSubmitAria=pastedSurface.aria;
@@ -130,9 +138,9 @@ try {
 finally { uiv.clipboard.write(originalClipboard); }
 
 const rows=[[
-  'result','failure_reason','failure_class','elapsed_ms','conversation_id','source_user_message_id','source_assistant_message_id','nonce','xrun_exit_code','bridge_action','bridge_prompt_sha256','codex_version','codex_exit_code','codex_duration_ms','assistant_text_sha256','browser_identity_revalidated','baseline_submit_aria','pasted_submit_aria','copy_sentinel_replaced','staged_copy_exact','send_click_count','submission_confirmed','new_user_message_id','next_completion_observed','next_assistant_message_id'
+  'result','failure_reason','failure_class','elapsed_ms','conversation_id','source_user_message_id','source_assistant_message_id','nonce','xrun_exit_code','bridge_action','bridge_prompt_sha256','codex_version','codex_exit_code','codex_duration_ms','assistant_text_sha256','browser_identity_revalidated','baseline_submit_aria','primer_submit_aria','primer_cleared_aria','pasted_submit_aria','copy_sentinel_replaced','staged_copy_exact','send_click_count','submission_confirmed','new_user_message_id','next_completion_observed','next_assistant_message_id'
 ],[
-  result,failureReason,failureClass,Date.now()-startedAt,source?source.conversationId:'',source&&source.user?source.user.id:'',source&&source.assistant?source.assistant.id:'',nonce,xrunExit,response?clean(response.action):'',response?clean(response.prompt_sha256):'',response?clean(response.codex_version):'',response&&response.codex_exit_code!=null?response.codex_exit_code:'',response&&response.codex_duration_ms!=null?response.codex_duration_ms:'',response?clean(response.assistant_text_sha256):'',browserIdentityRevalidated?'true':'false',baselineSubmitAria,pastedSubmitAria,copySentinelReplaced?'true':'false',stagedCopyExact?'true':'false',sendClickCount,submissionConfirmed?'true':'false',newUserId,nextCompletionObserved?'true':'false',nextAssistantId
+  result,failureReason,failureClass,Date.now()-startedAt,source?source.conversationId:'',source&&source.user?source.user.id:'',source&&source.assistant?source.assistant.id:'',nonce,xrunExit,response?clean(response.action):'',response?clean(response.prompt_sha256):'',response?clean(response.codex_version):'',response&&response.codex_exit_code!=null?response.codex_exit_code:'',response&&response.codex_duration_ms!=null?response.codex_duration_ms:'',response?clean(response.assistant_text_sha256):'',browserIdentityRevalidated?'true':'false',baselineSubmitAria,primerSubmitAria,primerClearedAria,pastedSubmitAria,copySentinelReplaced?'true':'false',stagedCopyExact?'true':'false',sendClickCount,submissionConfirmed?'true':'false',newUserId,nextCompletionObserved?'true':'false',nextAssistantId
 ]];
 const stamp=new Date().toISOString().replace(/[:.]/g,'-'); const file=`LIGHT_PRODUCTION_target_${stamp}.csv`; uiv.csv.write(file,rows); uiv.files.exportToDownloads(file);
 if(result!=='PASS')throw new Error(`LIGHT PRODUCTION TARGET FAIL: ${failureReason}; evidence=${file}`);
