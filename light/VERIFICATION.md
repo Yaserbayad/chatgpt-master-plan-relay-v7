@@ -21,22 +21,24 @@ Durable evidence includes:
 - `light/evidence/PRODUCTION_TARGET_FAIL_2026-08-30_123922.md`
 - `light/evidence/PRODUCTION_TARGET_FAIL_2026-08-30_140440.md`
 - `light/evidence/PRODUCTION_TARGET_PREFLIGHT_FAIL_2026-08-30_142107.md`
+- `light/evidence/MASTER_QUALIFICATION_TARGET_FAIL_2026-08-30_150220.md`
 
-The prior target attempts established these reusable corrections:
+The target attempts established these reusable corrections:
 
 1. finder snapshots are not authoritative staged-text proof;
 2. the Q09 selector-only diagnosis was falsified by target evidence;
-3. the target-proven Q08 contract is required: `Start Voice -> Send prompt`, unique copy sentinel before Ctrl+C, sentinel replacement, exact copied text with only terminal-NBSP normalization;
-4. the target runner must create its own macro staging directory rather than require it to pre-exist;
-5. no failed/ambiguous material Send is automatically retried.
+3. the target-proven Q08 staging contract is required: `Start Voice -> Send prompt`, unique copy sentinel before Ctrl+C, sentinel replacement, exact copied text with only terminal-NBSP normalization;
+4. material composer focus must use the exact Q08 target-qualified locator string directly with `uiv.browser.click`; finder snapshot objects are not valid composer focus targets for trusted key input;
+5. the target runner must create its own macro staging directory rather than require it to pre-exist;
+6. no failed/ambiguous material Send is automatically retried.
 
-The current production watcher preserves the Q08 sentinel/submit-surface contract, strict identity/nonce binding, one-Send maximum, pre-click `SEND_AMBIGUOUS`, exact submission confirmation, and following stable-completion requirement.
+The current production watcher preserves the Q08 locator-focus + sentinel/submit-surface contract, strict identity/nonce binding, one-Send maximum, pre-click `SEND_AMBIGUOUS`, exact submission confirmation, and following stable-completion requirement.
 
 ## Master qualification / same-chat soak
 
-Status: **LOCALLY VERIFIED MASTER CANDIDATE — ONE REAL TARGET RUN REQUIRED**.
+Status: **LOCALLY VERIFIED MASTER CANDIDATE AFTER LOCATOR-FOCUS CORRECTION — REAL TARGET PASS REQUIRED**.
 
-Preferred next qualification path:
+Preferred qualification path:
 
 `light/production/RUN_LIGHT_MASTER_QUALIFICATION.ps1`
 
@@ -48,11 +50,62 @@ Local evidence:
 
 `light/evidence/MASTER_QUALIFICATION_LOCAL_2026-08-30.md`
 
-The master harness replaces the normal sequence of one-off target test followed by a separate soak. It performs one bounded seven-cycle run:
+### First master target run — cycle 0 failure
+
+Uploaded evidence: `LIGHT_MASTER_QUALIFICATION_evidence_20260830_150220.zip`
+
+Outer ZIP SHA-256:
+
+`099cd0dd8f753289ecd75aba58340da7b95d69d267bdf0ca91415dadd197b065`
+
+The bundle was independently hash-verified and byte-bound to the first master candidate. Cycle 0 proved:
+
+```text
+bridge_action=SEND_PROMPT
+expected_prompt_sha256=c19dc42abcc044e25ef1982d35da9c0e7101406ff5495c78f4a05e500cf00999
+actual_prompt_sha256=c19dc42abcc044e25ef1982d35da9c0e7101406ff5495c78f4a05e500cf00999
+xrun_exit_code=0
+codex_exit_code=0
+browser_identity_revalidated=true
+baseline_submit_aria=Start Voice
+pasted_submit_aria=Start Voice
+send_click_count=0
+```
+
+The exact failure was:
+
+```text
+STAGE_VERIFY_FAILED: submit surface did not transition to Send prompt; found count=1, aria=Start Voice
+```
+
+The Ui.Vision log shows the failing watcher resolved the composer to a finder snapshot, passed that snapshot to `uiv.browser.click`, and Ui.Vision converted it into a coordinate click on a `div` immediately before `${KEY_CTRL+KEY_V}`. No material Send occurred.
+
+The previously target-PASS Q08 input diagnostic uses the same exact composer locator string directly with `uiv.browser.click(COMPOSER)` and proved the required `Start Voice -> Send prompt` transition plus sentinel-protected copy-back on the target generation.
+
+Root-cause hypothesis: snapshot-object composer clicks can fail to retain the rich-editor focus required by trusted key input, while direct locator-string clicks focus the intended editor correctly.
+
+Status: **SUPPORTED, NOT TARGET-CONFIRMED** until a corrected target run passes this boundary.
+
+### Current correction
+
+The watcher now:
+
+- defines only the exact Q08 target-qualified composer locator:
+  `css=[role="textbox"][contenteditable="true"][aria-label="Chat with ChatGPT"]`;
+- requires exactly one matching composer before paste and before copy-back;
+- calls `uiv.browser.click(COMPOSER)` directly for both material focus operations;
+- never passes a finder snapshot object as the composer focus target;
+- retains all existing sentinel, identity, Codex, one-Send, ambiguity, submission-confirmation, and master-harness semantics.
+
+The regression simulation now models the real target distinction: snapshot-object clicks lose editor focus; direct locator-string clicks establish focus. The exact pre-correction watcher fails that simulation with the target signature `Start Voice -> Start Voice`; the corrected watcher passes.
+
+## Seven-cycle master design
+
+The master harness still performs one bounded seven-cycle run:
 
 - cycle 0: deterministic forced seed `SEND_PROMPT` to prove the complete target mechanical path and establish a controlled handshake;
-- cycles 1-5: **normal production mode**; Codex must independently choose `SEND_PROMPT` and return exactly `LIGHT_SOAK_01` through `LIGHT_SOAK_05` from the preceding ChatGPT assistant state;
-- cycle 6: **normal production mode**; Codex must choose `STOP` when the assistant explicitly declares the objective complete.
+- cycles 1-5: normal production mode; Codex must independently choose `SEND_PROMPT` and return exactly `LIGHT_SOAK_01` through `LIGHT_SOAK_05` from the preceding ChatGPT assistant state;
+- cycle 6: normal production mode; Codex must choose `STOP` when the assistant explicitly declares the objective complete.
 
 Total successful run:
 
@@ -63,22 +116,7 @@ Total successful run:
 
 PowerShell remains a deterministic supervisor/test oracle only. It does not decide semantics and does not perform ChatGPT browser actions.
 
-### Master safety and proof rules
-
-Every SEND cycle requires:
-
-- same conversation and exact user/assistant ID chain;
-- unique nonce;
-- expected source assistant SHA-256;
-- bridge/Codex exit 0;
-- exact expected Codex action and prompt SHA-256;
-- browser identity revalidated;
-- `Start Voice -> Send prompt` transition;
-- nonce-bound copy sentinel replaced;
-- exact staged copy;
-- exactly one Send click;
-- exact new-user-message confirmation;
-- following stable assistant completion.
+Every SEND cycle requires the exact source chain, unique nonce, expected assistant SHA-256, exact Codex action/prompt hash, browser identity revalidation, Q08 locator-based focus, `Start Voice -> Send prompt`, sentinel replacement, exact staged copy, exactly one Send, exact user-message confirmation, and following stable assistant completion.
 
 The terminal cycle requires `STOP`, empty prompt hash, zero Send clicks, no submission and no next-completion wait.
 
@@ -86,21 +124,22 @@ Qualification-only bridge guards validate expected source identity/hash before C
 
 The master harness stops at the first failure and never retries a failed or ambiguous material action. Partial evidence is preserved.
 
-### Current master source binding
+## Current master source binding
 
 ```text
-8328f06495b83c2f263b26e6e9f335d8df426aa5  light/production/LIGHT_PRODUCTION_WATCHER.js
+58be604c2b7423437524f3f1e8bdb5ac333c62f8  light/production/LIGHT_PRODUCTION_WATCHER.js
 2490165233cc5904e3731fc6ac4279e7ef29f2ef  light/production/RelayCodexLightProduction.ps1
 d06dbdcfb341e443663736fcdc14274c0560b3c3  light/production/LIGHT_PRODUCTION_ACTION.schema.json
 09f513ce062387669c21c09d9f02dab6bb4009be  light/production/RUN_LIGHT_MASTER_QUALIFICATION.ps1
-dc45da6fc711e4d429f31d92041bb8fb766a124d  light/MASTER_QUALIFICATION_CONTRACT.md
-add4d4c45cf467a74240c058860ba05b88b0b03f  light/tests/test_production_contract.mjs
-f60d602a4ee27a8a4c87782dc8b9272237e8dd74  light/tests/simulate_production_watcher.mjs
+d3b5b9b7ca4eacd0e3540df8bd5ddd7a1dbe7c84  light/MASTER_QUALIFICATION_CONTRACT.md
+f9a4f182062a2653b637ca443d6acf60526b89eb  light/PRODUCTION_CONTRACT.md
+6c197f87e0c3ac9ab2fdb5e50e7b5b19fc277559  light/tests/test_production_contract.mjs
+72f45a5fb129131c2c5ab8efd65247803ecceb98  light/tests/simulate_production_watcher.mjs
 ea9d2c1b6d3c43f11c33607d6c3fd05f8038d544  light/tests/test_master_qualification_harness.mjs
 767447fc550346fd9a1ef503d427c84ca50e6335  light/tests/simulate_master_qualification.mjs
 ```
 
-### Fresh local verification
+## Fresh local verification
 
 ```text
 node light/tests/test_production_contract.mjs
@@ -116,14 +155,14 @@ node light/tests/simulate_master_qualification.mjs
 LIGHT MASTER QUALIFICATION ACCEPTANCE SIMULATION: PASS
 ```
 
-The master adversarial simulation independently rejects conversation drift, user/assistant chain breaks, nonce reuse, wrong source assistant state, wrong Codex prompt hash, staging transition failure, sentinel failure, double Send, early STOP, terminal SEND and terminal completion wait.
-
 The local execution environment has no Windows PowerShell/real Chrome+Ui.Vision target, so no target PASS is claimed from these local results.
 
 ## Remaining acceptance boundary
 
-Run the packaged master qualification once against exactly one completed configured-Project ChatGPT conversation with an empty composer showing `Start Voice`. Do not interact with ChatGPT during the run.
+Run the corrected packaged master qualification once against exactly one completed configured-Project ChatGPT conversation with an empty composer showing `Start Voice`. Do not interact with ChatGPT during the run.
 
-A genuine master PASS requires all seven target cycles and the returned evidence ZIP to verify independently. After that PASS, the current same-chat production path **and bounded reliability soak** are qualified. Fresh-chat/recovery remains the next separate major stage.
+A genuine master PASS requires all seven target cycles and the returned evidence ZIP to verify independently. If cycle 0 now passes, the same run automatically proceeds through the semantic soak and terminal STOP. Any failure stops without retry and must be diagnosed from its evidence.
+
+After independently verified master PASS, the current same-chat production path **and bounded reliability soak** are qualified. Fresh-chat/recovery remains the next separate major stage.
 
 The older one-off production target runner remains available only as a focused diagnostic fallback; the master harness is the preferred qualification path.
