@@ -165,7 +165,7 @@ try {
       expected_source_assistant_sha256 = [string]$Cycle.expected_source_assistant_sha256; actual_source_assistant_sha256 = [string]$Row.assistant_text_sha256;
       conversation_id = [string]$Row.conversation_id; source_user_message_id = [string]$Row.source_user_message_id; source_assistant_message_id = [string]$Row.source_assistant_message_id; nonce = [string]$Row.nonce;
       codex_version = [string]$Row.codex_version; codex_duration_ms = [string]$Row.codex_duration_ms;
-      baseline_submit_aria = [string]$Row.baseline_submit_aria; pasted_submit_aria = [string]$Row.pasted_submit_aria; copy_sentinel_replaced = [string]$Row.copy_sentinel_replaced; staged_copy_exact = [string]$Row.staged_copy_exact;
+      baseline_submit_aria = [string]$Row.baseline_submit_aria; primer_submit_aria = [string]$Row.primer_submit_aria; primer_cleared_aria = [string]$Row.primer_cleared_aria; pasted_submit_aria = [string]$Row.pasted_submit_aria; copy_sentinel_replaced = [string]$Row.copy_sentinel_replaced; staged_copy_exact = [string]$Row.staged_copy_exact;
       send_click_count = [string]$Row.send_click_count; submission_confirmed = [string]$Row.submission_confirmed; new_user_message_id = [string]$Row.new_user_message_id; next_completion_observed = [string]$Row.next_completion_observed; next_assistant_message_id = [string]$Row.next_assistant_message_id;
       validator = 'PENDING'
     }
@@ -199,6 +199,8 @@ try {
     if ($Cycle.material_send) {
       Equal ([string]$Row.failure_class) 'NONE' ("cycle {0} failure class" -f $CycleTag)
       Equal ([string]$Row.baseline_submit_aria) 'Start Voice' ("cycle {0} baseline submit surface" -f $CycleTag)
+      Equal ([string]$Row.primer_submit_aria) 'Send prompt' ("cycle {0} primer submit surface" -f $CycleTag)
+      Equal ([string]$Row.primer_cleared_aria) 'Start Voice' ("cycle {0} primer cleared surface" -f $CycleTag)
       Equal ([string]$Row.pasted_submit_aria) 'Send prompt' ("cycle {0} pasted submit surface" -f $CycleTag)
       Equal ([string]$Row.copy_sentinel_replaced) 'true' ("cycle {0} copy sentinel" -f $CycleTag)
       Equal ([string]$Row.staged_copy_exact) 'true' ("cycle {0} staged copy" -f $CycleTag)
@@ -214,6 +216,8 @@ try {
     } else {
       Equal ([string]$Row.failure_class) 'STOP_REQUESTED' ("cycle {0} STOP class" -f $CycleTag)
       Equal ([string]$Row.baseline_submit_aria) '' ("cycle {0} STOP baseline surface must be untouched" -f $CycleTag)
+      Equal ([string]$Row.primer_submit_aria) '' ("cycle {0} STOP primer surface must be untouched" -f $CycleTag)
+      Equal ([string]$Row.primer_cleared_aria) '' ("cycle {0} STOP primer clear surface must be untouched" -f $CycleTag)
       Equal ([string]$Row.pasted_submit_aria) '' ("cycle {0} STOP paste surface must be untouched" -f $CycleTag)
       Equal ([string]$Row.copy_sentinel_replaced) 'false' ("cycle {0} STOP sentinel must be untouched" -f $CycleTag)
       Equal ([string]$Row.staged_copy_exact) 'false' ("cycle {0} STOP staged copy must be false" -f $CycleTag)
