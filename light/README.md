@@ -42,14 +42,16 @@ The test passes only when all are true:
 
 ## Current blocker and exact run order
 
-Successful Codex model execution is an external prerequisite for the remaining target qualification. Credit exhaustion is recorded as Q15-B FAIL/not-PASS with `failure_class=CODEX_CREDITS_REQUIRED`; it is not treated as an IPC or architecture failure.
+Successful Codex model execution remains an external prerequisite for target Q15-B. The latest Windows direct preflight returned `codex exec` exit code 1 before any Ui.Vision/browser qualification started. The previous preflight version inspected only stderr on failure, so that attempt did not preserve enough information to classify the cause. The corrected direct preflight now reports the Codex version, captures both stdout and stderr, classifies credit/usage-limit wording from either stream, and writes `CODEX_DIRECT_DIAGNOSTIC_*.txt` for any unclassified nonzero exit.
 
-When Codex execution becomes available:
+Current next step:
 
-1. Run `TEST_CODEX_DIRECT.ps1` from the current `light/probe` source. Continue only if it prints `CODEX_DIRECT_PASS` and exits 0.
-2. Leave exactly one completed ChatGPT conversation tab from the configured Project open.
-3. Run `RUN_Q15B_LIGHT.ps1` from the same current source set.
-4. Accept Q15-B only if the runner produces a PASS evidence ZIP.
+1. Run the corrected `TEST_CODEX_DIRECT.ps1` from the current `light/probe` source.
+2. If it reports `CODEX_CREDITS_REQUIRED`, stop until Codex entitlement is available.
+3. If it reports `CODEX_DIRECT_FAIL`, preserve the printed diagnostic file and diagnose that exact Codex boundary; do not start Q15-B.
+4. Continue only if it prints `CODEX_DIRECT_PASS` and exits 0.
+5. Then leave exactly one completed ChatGPT conversation tab from the configured Project open and run `RUN_Q15B_LIGHT.ps1` from the same current source set.
+6. Accept Q15-B only if the runner produces a PASS evidence ZIP.
 
 `TEST_CODEX_DIRECT.ps1` is browser-independent and read-only. It exists only to prove that the locally authenticated Codex CLI can complete one minimal structured execution before the browser round trip is attempted.
 
