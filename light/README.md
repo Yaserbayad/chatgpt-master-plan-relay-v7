@@ -2,71 +2,88 @@
 
 Independent parallel experiment. It does not use or mutate the main Relay v7 runtime state.
 
-## Goal
+## Architecture
 
-Minimize Ui.Vision to a browser sensor/actuator and make Codex the semantic orchestrator:
+```text
+ChatGPT Web
+-> Ui.Vision minimal watcher/actuator
+-> local PowerShell transport
+-> one bounded Codex semantic turn
+-> strict nonce/identity-bound structured action
+-> Ui.Vision mechanical actuator
+```
+
+Responsibility remains deliberately split:
+
+- **Codex:** semantic interpretation, next-action selection, prompt generation, and later recovery/fresh-chat/human decisions.
+- **Ui.Vision:** browser observation plus exact allowlisted mechanical input only.
+- **PowerShell:** IPC, hashing, process/timeout handling, schema/identity validation only.
+
+Chrome-only. No OpenAI API billing. No Chrome restart/crash recovery scope.
+
+## Q15-B bridge gate — VERIFIED PASS
+
+Q15-B was target-qualified on 2026-08-30 with Windows 11 build 26100.9168, Chrome 152.0.7977.65, Ui.Vision 10.0.178, Desktop Automation/XModules 2.0.12, and `codex-cli 0.151.0`.
+
+Independent evidence verification is recorded in:
+
+`light/evidence/Q15B_2026-08-30.md`
+
+The accepted Q15-B proves the read-only round trip:
 
 ```text
 completed ChatGPT response
 -> Ui.Vision observation
--> local PowerShell transport
--> one bounded Codex model turn
--> strict nonce-bound structured result
--> Ui.Vision validation
+-> PowerShell
+-> one console-backed no-tool Codex turn
+-> strict structured result
+-> Ui.Vision validation/revalidation
 ```
 
-## Light Q15-B acceptance
+Production implementation is therefore ungated by Q15-B.
 
-The test passes only when all are true:
+## First production increment
 
-1. Exactly one configured-Project ChatGPT conversation tab is bound.
-2. ChatGPT is completed (no live `stop-button`).
-3. Stable latest user and following assistant message IDs are captured.
-4. Full assistant text crosses Ui.Vision -> PowerShell and is locally SHA-256 hashed.
-5. Codex is invoked exactly once for the model turn, ephemerally, with `--sandbox read-only`.
-6. Codex receives only bounded metadata plus a 96-character normalized sample and reproduces it exactly without tools/files.
-7. Protocol, nonce, assistant ID, length, hash, sample and action all validate.
-8. The ChatGPT browser identity is unchanged after Codex returns.
-9. No ChatGPT Send, click, navigation, refresh, OCR, screenshot or Ui.Vision AI action occurs.
-10. PASS/FAIL evidence is exported and packaged.
+The frozen contract is `light/PRODUCTION_CONTRACT.md`.
 
-## Target environment
-
-- Windows 11 24H2 build 26100.9168
-- Chrome 152.0.7977.65
-- Ui.Vision 10.0.178
-- Desktop Automation/XModules v2 2.0.12
-- Project token `g-p-6a9323b61110819182dba0224678aa8b`
-- Existing Ui.Vision launcher: `C:\Users\usr\Documents\Codex\ui.vision.html`
-- Ui.Vision macros: `C:\Users\usr\Desktop\uivision\macros`
-
-## Current Codex boundary
-
-Windows target evidence on 2026-08-30 established that `codex-cli 0.151.0` can complete a foreground model-only `codex exec` turn with `sandbox: read-only` and exit 0. The previous Light hidden/headless child path returned exit 1 with empty stdout/stderr. Separate Windows sandbox smoke tests returned exit 1 for default/elevated/unelevated modes.
-
-The current Q15-B candidate therefore stays on the proven model-only boundary:
-
-- Codex is launched through a normal console-backed child PowerShell; `-WindowStyle Hidden` is forbidden.
-- Codex stdout/stderr remain attached to that console; the final strict response is read from `--output-last-message`.
-- Q15-B no longer asks Codex to read `event.json` or `assistant_probe.txt`. PowerShell supplies only the bounded fields/sample directly as untrusted prompt data.
-- Codex is explicitly instructed to use no tools/files.
-- `--sandbox read-only`, `--ephemeral`, strict `--output-schema`, timeouts, and no-blind-retry behavior remain.
-- `--ignore-user-config` isolates the Relay turn from unrelated user MCP/plugin configuration while normal Codex authentication remains available.
-- `model_reasoning_effort="low"` avoids the xhigh overhead observed in the diagnostic control turn.
-
-## Exact run order
-
-1. Run the current `TEST_CODEX_DIRECT.ps1` (or the supplied launcher package).
-2. Continue only if it prints `CODEX_DIRECT_PASS` and exits 0.
-3. The launcher then runs `RUN_Q15B_LIGHT.ps1` automatically against exactly one completed configured-Project ChatGPT tab.
-4. Accept Q15-B only if the runner produces a PASS evidence ZIP and that ZIP is independently verified.
-
-A short-lived PowerShell/Codex console window may appear during each Codex call in this qualification revision. No interaction with it is required.
-
-## After PASS
-
-Only after target PASS should the production Light watcher/actuator be implemented. The production loop remains focused on:
+The current first-increment candidate implements the smallest same-chat loop:
 
 ```text
-observe completed response -> Codex decision -> stage/send exactly one next prompt -> observe next completion
+observe new stable completed assistant turn
+-> one Codex decision
+-> SEND_PROMPT | STOP | HUMAN
+-> exact pre-action browser identity revalidation
+-> for SEND_PROMPT, stage and send at most one message
+-> confirm the new user message
+-> observe the following completed assistant turn
 ```
+
+Important safety/mechanical properties:
+
+- low-frequency polling and two-snapshot completion stability;
+- no dispatch while ChatGPT is generating;
+- durable dedupe for handled/ambiguous source turns;
+- strict nonce/conversation/message binding;
+- model-generated prompt text never enters the trusted-key parser: it is clipboard-staged and pasted with only the constant `${KEY_CTRL+KEY_V}` trusted key chord;
+- exact staged-text verification before Send;
+- `SEND_AMBIGUOUS` is persisted before the one material Send click, preventing automatic duplicate submission after a crash/ambiguous result;
+- no automatic Send retry;
+- no OCR, screenshots, Ui.Vision AI, page-world eval, generic coordinate workflow, or fresh-chat behavior in this increment.
+
+Local static and simulation verification is recorded in:
+
+`light/evidence/PRODUCTION_LOCAL_2026-08-30.md`
+
+## Current target boundary
+
+The production watcher/actuator is **locally verified but not yet target-PASS**.
+
+`light/production/RUN_LIGHT_PRODUCTION_TARGET.ps1` performs a bounded real-browser qualification. It may send exactly one fixed safe message:
+
+```text
+Reply exactly LIGHT_PRODUCTION_TARGET_OK.
+```
+
+PASS requires target evidence proving one Send click, exact submission confirmation, and observation of the following stable completed assistant turn. Any ambiguous material submission stops without retry.
+
+After independent verification of a production target PASS, the next stage is a bounded same-chat reliability/soak test. Fresh-chat/recovery behavior remains deferred until that soak passes.
