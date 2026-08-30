@@ -127,8 +127,8 @@ $PromptPath = __PROMPT__
 $StdoutPath = __STDOUT__
 $StderrPath = __STDERR__
 $Prompt = Get-Content -LiteralPath $PromptPath -Raw
-$Args = @('exec','--ephemeral','--skip-git-repo-check','--sandbox','read-only','-C',$WorkDir,'--output-schema',$SchemaPath,$Prompt)
-$Output = & $CodexPath @Args 2> $StderrPath
+$Args = @('exec','--ephemeral','--skip-git-repo-check','--sandbox','read-only','-C',$WorkDir,'--output-schema',$SchemaPath,'-')
+$Output = $Prompt | & $CodexPath @Args 2> $StderrPath
 $Code = if ($null -eq $LASTEXITCODE) { 0 } else { [int]$LASTEXITCODE }
 $Output | Out-File -LiteralPath $StdoutPath -Encoding utf8
 exit $Code
