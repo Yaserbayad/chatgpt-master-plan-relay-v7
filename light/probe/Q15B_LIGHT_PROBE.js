@@ -34,7 +34,7 @@ function makeNonce() {
 }
 function classifyFailure(reason, response) {
   const signal = `${clean(reason)} ${clean(response && response.note)}`.toLowerCase();
-  if (/workspace is out of credits|out of credits|usage limit reached|add credits to continue/.test(signal)) return 'CODEX_CREDITS_REQUIRED';
+  if (/workspace is out of credits|out of credits|usage limit reached|reached your usage limit|add credits to continue|increase your limits to continue/.test(signal)) return 'CODEX_CREDITS_REQUIRED';
   return 'OTHER';
 }
 function snapshot(boundIndex) {
