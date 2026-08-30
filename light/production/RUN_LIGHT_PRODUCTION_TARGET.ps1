@@ -48,7 +48,7 @@ try {
   [IO.File]::WriteAllText($ConfigTarget,($Config|ConvertTo-Json -Compress),(New-Object Text.UTF8Encoding($false)))
   Remove-Item -LiteralPath $LogPath -Force -ErrorAction SilentlyContinue
 
-  $LauncherUri='file:///'+($Launcher -replace '\','/'); $LogUrl=$LogPath -replace '\','/'
+  $LauncherUri='file:///'+($Launcher -replace '\\','/'); $LogUrl=$LogPath -replace '\\','/'
   $LaunchUrl="${LauncherUri}?direct=1&macro=${MacroName}&storage=xfile&savelog=${LogUrl}"
   Write-Host 'Starting bounded Light production target qualification.'
   Write-Host "Exactly one configured-Project ChatGPT conversation tab must be open. This run may send exactly one safe prompt: ${TargetPrompt}"
