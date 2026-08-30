@@ -60,24 +60,40 @@ Codex owns the semantic choice among the allowlisted actions. PowerShell only sc
 - Require a completed assistant following the latest user turn and require two stable identical completed snapshots before dispatch.
 - Persist only minimal mechanical dedupe state in Ui.Vision CSV storage: source assistant ID plus `SENT_CONFIRMED` or `SEND_AMBIGUOUS` status.
 - Never dispatch the same completed assistant ID twice after confirmed or ambiguous material submission.
-- Reacquire DOM snapshots immediately before every material action; never reuse stale finder snapshots across the Codex wait.
-- Material composer focus must use the exact target-qualified locator string `css=[role="textbox"][contenteditable="true"][aria-label="Chat with ChatGPT"]` directly with `uiv.browser.click`; finder snapshot objects must not be used as composer focus targets for trusted key input.
+- Reacquire browser/DOM state before material actions; never rely on old message snapshots across the Codex wait.
+- Use the exact target-qualified rich-editor composer locator `css=[role="textbox"][contenteditable="true"][aria-label="Chat with ChatGPT"]` and require exactly one match before trusted composer input.
+- Treat the final Q08 input qualification as **sequence-qualified**: the target-proven path is ordinary trusted input -> clear -> clipboard paste -> sentinel-protected copy-back. Do not generalize it into a fresh direct-paste contract.
 
 ## Material SEND_PROMPT rules
 
 1. Validate returned protocol, nonce, conversation ID, assistant ID and action.
 2. Revalidate the bound conversation/user/assistant identity, texts, and no-generation state.
-3. Require the target-qualified rich-text composer locator to resolve to exactly one visible composer and require the empty `Start Voice` submit-surface baseline.
-4. Put the untrusted/model-generated prompt into the Ui.Vision clipboard; never pass prompt text itself to `uiv.browser.type` because trusted type interprets `${KEY_...}` sequences as keystrokes.
-5. Focus the rich-text composer by calling `uiv.browser.click(COMPOSER)` with the exact Q08 target-qualified locator string, then use only the constant trusted paste chord `${KEY_CTRL+KEY_V}` through `uiv.browser.type`. Do not pass a finder snapshot object to `uiv.browser.click` for composer focus.
-6. Require the visible submit surface to transition `Start Voice -> Send prompt`; then seed a unique nonce-bound clipboard sentinel, require the same composer locator to resolve uniquely again, refocus via `uiv.browser.click(COMPOSER)`, and use only `${KEY_CTRL+KEY_A}` plus `${KEY_CTRL+KEY_C}`. Ctrl+C must replace the sentinel and copied text must equal the intended prompt after CR normalization and terminal-NBSP-only normalization. Restore the original clipboard.
-7. Revalidate the exact source conversation/user/assistant identity and texts again.
-8. Reacquire one visible enabled `composer-submit-button-color` surface whose `aria-label` is exactly `Send prompt`, and enforce the one-Send bound before any click.
-9. Persist `SEND_AMBIGUOUS` for the source assistant **before** the material Send click. This is a conservative crash fence: a process loss after the click cannot make the source turn eligible for an automatic duplicate Send.
-10. Perform exactly one trusted Send click.
-11. Confirm submission by observing a new user message whose text equals the staged prompt.
-12. If confirmation is not obtained within the bounded window, retain `SEND_AMBIGUOUS`, stop, and require human inspection; no automatic retry.
-13. Only after positive submission confirmation upgrade state to `SENT_CONFIRMED` and observe the following completed assistant turn.
+3. Require exactly one target rich-text composer and require the empty submit surface to be exactly `Start Voice`.
+4. Prime the rich editor with one fixed local ordinary trusted input only: click the exact composer locator, call `uiv.browser.type(INPUT_PRIME)` where `INPUT_PRIME` is the constant ASCII string `x`, then require the submit surface to transition to enabled `Send prompt`. This primer is local mechanical data, never user/browser/model data.
+5. Clear the primer using only fixed trusted input: refocus the same composer locator, send `${KEY_CTRL+KEY_A}` then `${KEY_BACKSPACE}`, and require the submit surface to return to `Start Voice` before any model prompt is staged.
+6. Put the untrusted/model-generated prompt into the Ui.Vision clipboard; never pass the prompt itself to `uiv.browser.type`. Verify the clipboard round-trip, refocus the exact composer locator, and use only the fixed trusted paste chord `${KEY_CTRL+KEY_V}`.
+7. Require the visible submit surface to transition `Start Voice -> Send prompt`; then seed a unique nonce-bound clipboard sentinel, require the composer to resolve uniquely again, refocus the exact composer locator, and use only `${KEY_CTRL+KEY_A}` plus `${KEY_CTRL+KEY_C}`. Ctrl+C must replace the sentinel and copied text must equal the intended prompt after CR normalization and terminal-NBSP-only normalization. Restore the original clipboard.
+8. Revalidate the exact source conversation/user/assistant identity and texts again.
+9. Reacquire one visible enabled `composer-submit-button-color` surface whose `aria-label` is exactly `Send prompt`, and enforce the one-Send bound before any click.
+10. Persist `SEND_AMBIGUOUS` for the source assistant **before** the material Send click. A process loss after the click cannot make the source turn eligible for an automatic duplicate Send.
+11. Perform exactly one trusted Send click.
+12. Confirm submission by observing a new user message whose text equals the staged prompt.
+13. If confirmation is not obtained within the bounded window, retain `SEND_AMBIGUOUS`, stop, and require human inspection; no automatic retry.
+14. Only after positive submission confirmation upgrade state to `SENT_CONFIRMED` and observe the following completed assistant turn.
+
+The observable staging sequence for every material Send is therefore:
+
+```text
+Start Voice
+-> constant trusted `x`
+-> Send prompt
+-> Ctrl+A / Backspace
+-> Start Voice
+-> clipboard Ctrl+V
+-> Send prompt
+-> sentinel-protected exact copy-back
+-> one bounded Send
+```
 
 ## Failure classes
 
@@ -92,6 +108,8 @@ At minimum:
 - `INVALID_ACTION`
 - `STALE_IDENTITY`
 - `COMPOSER_NOT_EMPTY`
+- `INPUT_PRIME_FAILED`
+- `INPUT_PRIME_CLEAR_FAILED`
 - `STAGE_VERIFY_FAILED`
 - `SEND_CONTROL_MISSING`
 - `SEND_AMBIGUOUS_NO_RETRY`
@@ -115,24 +133,17 @@ light/tests/simulate_production_watcher.mjs
 
 ## Commands
 
-Static contract verification:
-
 ```text
 node light/tests/test_production_contract.mjs
-```
-
-Watcher simulation:
-
-```text
 node light/tests/simulate_production_watcher.mjs
 ```
 
-Target execution is only through the packaged `RUN_LIGHT_PRODUCTION_TARGET.ps1` after local verification passes.
+Target execution is only through a packaged runner after local verification passes.
 
 ## Testing strategy
 
-- Static tests guard forbidden APIs, action schema, one bridge call per source turn, no hidden Codex launch, no material retry path, identity validation, persistent dedupe, exact trusted-input tiers, and locator-string composer focus.
-- Node simulation models the observed target distinction between locator-string focus and finder-snapshot focus, plus generation gating, dedupe, stale-result rejection, Q08 sentinel staging, one-click Send, crash/ambiguous-Send no-retry and STOP/HUMAN behavior without touching a real browser.
+- Static tests guard forbidden APIs, action schema, one bridge call per source turn, no material retry path, identity validation, persistent dedupe, the fixed `x` primer, fixed trusted key chords, and the rule that untrusted/model prompt text never enters `uiv.browser.type`.
+- Node simulation models the target-observed fresh-paste failure: Ctrl+V can silently no-op until ordinary trusted input has activated the rich editor. It requires `x -> clear -> paste`, then preserves generation gating, dedupe, stale-result rejection, Q08 sentinel staging, one-click Send, crash/ambiguous-Send no-retry and STOP/HUMAN coverage.
 - Real-browser target evidence is required before claiming production watcher PASS.
 
 ## Boundaries
@@ -143,7 +154,8 @@ Always:
 - treat browser text and Codex output as untrusted data;
 - reacquire browser identity before material action;
 - preserve strict nonce/conversation/message binding;
-- use the target-qualified composer locator string directly for trusted focus/input, not finder snapshot objects;
+- use only fixed local ordinary trusted primer text plus fixed key chords in `uiv.browser.type`;
+- keep model-generated prompt text clipboard-only;
 - fence ambiguous material submission before the Send click and stop rather than retry;
 - keep all source/tests/evidence under `light/` on `light-version`.
 
@@ -164,11 +176,12 @@ Local implementation is ready for target qualification only when:
 2. simulation proves exactly one bridge event per new completed assistant turn;
 3. simulation proves no dispatch during generation;
 4. stale/mismatched returned identity is rejected before material action;
-5. SEND_PROMPT uses the exact Q08 target-qualified locator string for composer focus, clipboard staging plus a constant trusted paste chord, sentinel-protected exact staged text verification, and clicks Send exactly once in the success simulation;
-6. simulation proves snapshot-object composer focus cannot satisfy the production success path when focus is not retained;
-7. ambiguous or failed Send simulation performs no retry and retains the pre-click `SEND_AMBIGUOUS` fence;
-8. STOP/HUMAN simulations perform no material browser action;
-9. no forbidden Ui.Vision automation tier is present;
-10. the target runner packages PASS/FAIL evidence and does not claim PASS without runtime evidence.
+5. simulation proves a fresh Ctrl+V path can fail while the primed sequence succeeds;
+6. primer failure and primer-clear failure both stop before clipboard prompt staging or Send;
+7. SEND_PROMPT proves `Start Voice -> Send prompt -> Start Voice -> Send prompt`, sentinel replacement, exact staged text, and exactly one Send in the success simulation;
+8. ambiguous or failed Send simulation performs no retry and retains the pre-click `SEND_AMBIGUOUS` fence;
+9. STOP/HUMAN simulations perform no material browser action;
+10. no forbidden Ui.Vision automation tier is present;
+11. the target runner packages PASS/FAIL evidence and does not claim PASS without runtime evidence.
 
 Target production PASS remains a separate real-browser acceptance boundary.
