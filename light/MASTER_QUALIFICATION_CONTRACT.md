@@ -48,8 +48,10 @@ Each cycle must also prove the full target browser path:
 - unique nonce;
 - bridge and Codex exit 0;
 - browser identity revalidated;
+- exact Q08 target-qualified composer locator resolves uniquely;
+- material composer focus is performed by passing that locator string directly to `uiv.browser.click`, never a finder snapshot object;
 - `Start Voice -> Send prompt` transition after trusted paste;
-- nonce-bound copy sentinel replaced by Ctrl+C;
+- nonce-bound copy sentinel replaced by Ctrl+C after refocusing through the same locator string;
 - exact staged copy with only terminal NBSP normalization;
 - exactly one Send click;
 - exact new-user-message confirmation;
@@ -98,6 +100,14 @@ For every cycle after cycle 0:
 - nonce is non-empty and unique across all seven cycles.
 
 For cycles 0-5, the bridge prompt SHA-256 must equal the exact expected prompt SHA-256. For cycle 6 it must be empty.
+
+## Material input invariant recovered from target failure
+
+The master harness inherits the frozen production material-input contract. The exact composer locator is:
+
+`css=[role="textbox"][contenteditable="true"][aria-label="Chat with ChatGPT"]`
+
+Before paste and before copy-back it must resolve to exactly one visible composer. Trusted focus must use `uiv.browser.click(COMPOSER)` with that locator string directly. Finder snapshots may be used for observation but must not be passed as material composer focus targets. This preserves the Q08 target-PASS focus/input path and prevents the cycle-0 `Start Voice -> Start Voice` failure observed when a finder snapshot was converted into a coordinate click on a `div`.
 
 ## Failure policy
 
