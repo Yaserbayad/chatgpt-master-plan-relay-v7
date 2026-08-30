@@ -5,7 +5,7 @@ const bridge=fs.readFileSync(path.join(prod,'RelayCodexLightProduction.ps1'),'ut
 const schema=JSON.parse(fs.readFileSync(path.join(prod,'LIGHT_PRODUCTION_ACTION.schema.json'),'utf8'));
 const runner=fs.readFileSync(path.join(prod,'RUN_LIGHT_PRODUCTION_TARGET.ps1'),'utf8');
 assert.equal(schema.additionalProperties,false);assert.deepEqual(schema.properties.action.enum,['SEND_PROMPT','STOP','HUMAN']);
-for(const x of ['composer-submit-button-color','Start Voice','Send prompt','LIGHT_COPY_SENTINEL_','copy-back did not replace sentinel','normalizeEditorClipboard','\\u00A0+$','baseline_submit_aria','pasted_submit_aria','copy_sentinel_replaced','staged_copy_exact','SEND_AMBIGUOUS','SEND_AMBIGUOUS_NO_RETRY','LIGHT_MAX_SENDS = 1','${KEY_CTRL+KEY_V}','${KEY_CTRL+KEY_A}','${KEY_CTRL+KEY_C}'])assert.ok(watcher.includes(x),`watcher missing ${x}`);
+for(const x of ['composer-submit-button-color','Start Voice','Send prompt','LIGHT_COPY_SENTINEL_','copy-back did not replace sentinel','normalizeEditorClipboard','\\u00A0+$','baseline_submit_aria','pasted_submit_aria','copy_sentinel_replaced','staged_copy_exact','bridge_prompt_sha256','SEND_AMBIGUOUS','SEND_AMBIGUOUS_NO_RETRY','LIGHT_MAX_SENDS = 1','${KEY_CTRL+KEY_V}','${KEY_CTRL+KEY_A}','${KEY_CTRL+KEY_C}'])assert.ok(watcher.includes(x),`watcher missing ${x}`);
 assert.ok(!watcher.includes('firstEnabled('),'must not use the failed selector-only Send discovery helper');
 assert.ok(!watcher.includes('all(l,timeout,true).filter(enabled)'),'must not click a match obtained only via includeHidden:true');
 assert.equal((watcher.match(/uiv\.browser\.type/g)||[]).length,3);
