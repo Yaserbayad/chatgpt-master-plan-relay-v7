@@ -13,5 +13,6 @@ assert.equal((watcher.match(/XRunAndWait/g)||[]).length,1);
 assert.ok(!watcher.includes('uiv.browser.type(prompt)'));
 for(const forbidden of ['uiv.page.','uiv.eval(','uiv.ocr.','uiv.ai.','uiv.shot.','uiv.desktop.','uiv.open(','XClick','XType','FRESH_CHAT'])assert.ok(!watcher.includes(forbidden),`watcher contains ${forbidden}`);
 for(const x of ["'--ephemeral'","'--ignore-user-config'","'--sandbox'","'read-only'","'--output-schema'","'--output-last-message'",'Do not use tools','SEND_PROMPT','STOP','HUMAN'])assert.ok(bridge.includes(x),`bridge missing ${x}`);
-for(const x of ['LIGHT_PRODUCTION_WATCHER.js','Reply exactly LIGHT_PRODUCTION_TARGET_OK.','LIGHT_PRODUCTION_evidence_','PASS','FAIL'])assert.ok(runner.includes(x),`runner missing ${x}`);
+for(const x of ['LIGHT_PRODUCTION_WATCHER.js','Reply exactly LIGHT_PRODUCTION_TARGET_OK.','LIGHT_PRODUCTION_evidence_','PASS','FAIL','[IO.Directory]::CreateDirectory($MacroDir)','Test-Path -LiteralPath $MacroDir -PathType Container'])assert.ok(runner.includes(x),`runner missing ${x}`);
+assert.ok(!runner.includes('@($Chrome,$Launcher,$MacroDir,$WatcherSource,$BridgeSource,$SchemaSource)'),'macro staging directory must not be a hard pre-existing-path prerequisite');
 console.log('LIGHT PRODUCTION CONTRACT TESTS: PASS');
