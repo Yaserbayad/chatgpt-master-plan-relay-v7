@@ -62,7 +62,7 @@ function runCase(mode) {
       });
     },
     csv: { write: (name,rows) => csv.set(name,rows) },
-    exportToDownloads() {},
+    files: { exportToDownloads() {} },
     log: (...args) => logs.push(args)
   };
   let error = null;
